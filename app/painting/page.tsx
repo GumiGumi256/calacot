@@ -25,7 +25,7 @@ export default function Painting() {
       </div>
       <PaintingProcess />
        {/* Call to Action Section */}
-      <section className="relative w-full py-10  md:py-40 overflow-hidden">
+      <section className="relative w-full  md:py-40 overflow-hidden">
         {/* Next.js Image as background */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -39,7 +39,7 @@ export default function Painting() {
     
 
         {/* Content */}
-        <div className="relative z-20 max-w-4xl ml-24 md:ml-auto text-center text-brand-black px-6 md:px-12 pb-10 md:pb-20">
+        <div className="relative z-20 max-w-4xl ml-16 md:ml-auto text-center text-brand-black px-4 md:px-12 pb-10 md:pb-20">
           <h2 className="text-2xl md:text-5xl lg:text-6xl font-light tracking-tight">
             Transform Your Space with <br />
             <span className="font-semibold">Professional Painting</span>

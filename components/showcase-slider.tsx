@@ -247,7 +247,7 @@ export default function StackedScrollSlider() {
   return (
     <section
       ref={container}
-      className="relative overflow-hidden px-4 py-20 md:px-8 lg:px-12"
+      className="relative overflow-hidden px-4  md:px-8 lg:px-12"
     >
       <div className="mx-auto flex h-screen max-w-7xl items-center justify-between gap-8">
         {/* LEFT NUMBERS */}

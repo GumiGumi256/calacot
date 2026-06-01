@@ -26,64 +26,64 @@ export default function ConstructionProcessSection() {
     // =================================================
     // MOBILE: slide-in one by one (NO STACKING ISSUE)
     // =================================================
-   if (isMobile) {
-  const cards = gsap.utils.toArray<HTMLElement>(".process-card");
+if (isMobile) {
+  const mobileCards = gsap.utils.toArray<HTMLElement>(".process-card");
 
-  const pairs: HTMLElement[][] = [];
-
-  for (let i = 0; i < cards.length; i += 2) {
-    pairs.push([cards[i], cards[i + 1]].filter(Boolean));
-  }
-
-  // initial state
-  gsap.set(cards, {
-    x: 120,
+  // Initial state: all hidden
+  gsap.set(mobileCards, {
     opacity: 0,
-    scale: 0.98,
+    x: 120,
   });
 
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: sectionRef.current,
       start: "top top",
-      end: `+=${pairs.length * window.innerHeight}`,
-      scrub: 0.5,
+      end: `+=${mobileCards.length * window.innerHeight * 1.2}`,
+      scrub: 0.8,
       pin: true,
+      anticipatePin: 1,
     },
   });
 
-  pairs.forEach((pair, i) => {
-    const start = i * 0.9;
+  // Animate each card one at a time
+  mobileCards.forEach((card, i) => {
+    const step = i * 2;
 
-    // ENTER pair
+    // ENTER
     tl.to(
-      pair,
+      card,
       {
-        x: 0,
         opacity: 1,
+        x: 0,
         scale: 1,
-        duration: 0.6,
+        duration: 0.5,
         ease: "power3.out",
-        stagger: 0.05,
       },
-      start
-    )
+      step
+    );
 
-      // HOLD then EXIT slightly
-      .to(
-        pair,
+    // HOLD
+    tl.to({}, { duration: 0.6 }, step + 0.5);
+
+    // EXIT (skip exit on last card so it stays visible)
+    if (i < mobileCards.length - 1) {
+      tl.to(
+        card,
         {
-          x: -80,
           opacity: 0,
+          x: -120,
           scale: 0.98,
           duration: 0.5,
           ease: "power3.in",
         },
-        start + 0.6
+        step + 1.1
       );
+    }
   });
-}
 
+  return;
+}
     // =================================================
     // DESKTOP: paired left/right animation system
     // =================================================
@@ -149,7 +149,7 @@ export default function ConstructionProcessSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-dvh overflow-hidden bg-black text-white"
+      className="relative min-h-dvh overflow-hidden bg-black text-white"
     >
       {/* Background */}
       <div className="absolute inset-0">
@@ -181,18 +181,30 @@ export default function ConstructionProcessSection() {
         </div>
 
         {/* Cards */}
-        <div className="relative mt-10 flex flex-col gap-10 md:block">
+<div className="relative mt-10 h-[500px] md:block">
           {STEPS.map((step, i) => {
             const isLeft = i % 2 === 0;
 
             return (
-              <Card
-                key={step.number}
-                className={`process-card w-[300px] border border-white/10 bg-white/[0.08] p-5 text-white shadow-2xl backdrop-blur-2xl
-  md:absolute
-  ${isLeft ? "md:left-[12%]" : "md:right-[12%]"}
-`}
-              >
+             <Card
+  key={step.number}
+  className={`
+    process-card
+    w-full max-w-[320px]
+    border border-white/10
+    bg-white/[0.08]
+    p-5
+    text-white
+    shadow-2xl
+    backdrop-blur-2xl
+
+    absolute left-1/2 top-0 -translate-x-1/2
+
+    md:w-[300px]
+    md:translate-x-0
+    ${isLeft ? "md:left-[12%]" : "md:left-auto md:right-[12%]"}
+  `}
+>
                 <div className="text-6xl font-light leading-none text-white/90">
                   {step.number}
                 </div>
