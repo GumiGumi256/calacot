@@ -1,0 +1,686 @@
+[
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 10
+              },
+              {
+                "flag": "max",
+                "constraint": 120
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "rows": 4,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 50
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "price",
+        "type": "number",
+        "title": "Price (UGX)"
+      },
+      {
+        "options": {
+          "list": [
+            "sale",
+            "rent"
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "sale",
+                  "rent"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "listingType",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            "house",
+            "apartment",
+            "land",
+            "commercial"
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "house",
+                  "apartment",
+                  "land",
+                  "commercial"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "propertyType",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "bedrooms",
+        "type": "number"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "bathrooms",
+        "type": "number"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "area",
+        "type": "number",
+        "title": "Area (sqm)"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "fields": [
+          {
+            "name": "address",
+            "type": "string"
+          },
+          {
+            "name": "district",
+            "type": "string"
+          },
+          {
+            "name": "city",
+            "type": "string"
+          },
+          {
+            "name": "coordinates",
+            "type": "geopoint"
+          }
+        ],
+        "name": "location",
+        "type": "object"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 5
+              },
+              {
+                "flag": "max",
+                "constraint": 10
+              }
+            ],
+            "level": "error",
+            "message": "You must upload between 5 and 10 images"
+          }
+        ],
+        "of": [
+          {
+            "options": {
+              "hotspot": true
+            },
+            "type": "image"
+          }
+        ],
+        "name": "images",
+        "type": "array"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "featuredImage",
+        "type": "image"
+      },
+      {
+        "options": {
+          "list": [
+            "parking",
+            "security",
+            "wifi",
+            "swimming pool",
+            "garden",
+            "furnished"
+          ]
+        },
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "amenities",
+        "type": "array"
+      },
+      {
+        "options": {
+          "list": [
+            "available",
+            "sold",
+            "rented"
+          ]
+        },
+        "initialValue": "available",
+        "name": "status",
+        "type": "string"
+      },
+      {
+        "initialValue": false,
+        "name": "isFeatured",
+        "type": "boolean",
+        "title": "Featured Listing"
+      },
+      {
+        "name": "publishedAt",
+        "type": "datetime"
+      }
+    ],
+    "name": "property",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string",
+        "title": "Design Name"
+      },
+      {
+        "options": {
+          "source": "title"
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 50
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "min",
+                    "constraint": 0
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "structural",
+            "type": "number",
+            "title": "Structural Design Price"
+          },
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "min",
+                    "constraint": 0
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "mechanical",
+            "type": "number",
+            "title": "Mechanical Design Price"
+          },
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "min",
+                    "constraint": 0
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "electrical",
+            "type": "number",
+            "title": "Electrical Design Price"
+          }
+        ],
+        "name": "pricing",
+        "type": "object",
+        "title": "Pricing (UGX)"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Structural",
+              "value": "structural"
+            },
+            {
+              "title": "Mechanical",
+              "value": "mechanical"
+            },
+            {
+              "title": "Electrical",
+              "value": "electrical"
+            }
+          ],
+          "layout": "radio"
+        },
+        "initialValue": "structural",
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "structural",
+                  "mechanical",
+                  "electrical"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "defaultScope",
+        "type": "string",
+        "title": "Default Design Scope"
+      },
+      {
+        "options": {
+          "list": [
+            "modern",
+            "luxury",
+            "minimalist",
+            "commercial"
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "modern",
+                  "luxury",
+                  "minimalist",
+                  "commercial"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "name": "bedrooms",
+        "type": "number"
+      },
+      {
+        "name": "bathrooms",
+        "type": "number"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Bungalow",
+              "value": "bungalow"
+            },
+            {
+              "title": "Duplex",
+              "value": "duplex"
+            },
+            {
+              "title": "Flat / Apartment",
+              "value": "flat"
+            },
+            {
+              "title": "Townhouse",
+              "value": "townhouse"
+            },
+            {
+              "title": "Villa",
+              "value": "villa"
+            },
+            {
+              "title": "Commercial",
+              "value": "commercial"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "bungalow",
+                  "duplex",
+                  "flat",
+                  "townhouse",
+                  "villa",
+                  "commercial"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "designType",
+        "type": "string"
+      },
+      {
+        "name": "floors",
+        "type": "number",
+        "title": "Number of Floors"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "totalArea",
+        "type": "number",
+        "title": "Total Area (sqm)"
+      },
+      {
+        "description": "e.g. 50x100 ft, 100x100 ft",
+        "name": "plotSize",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 5
+              },
+              {
+                "flag": "max",
+                "constraint": 10
+              }
+            ],
+            "level": "error",
+            "message": "You must upload between 5 and 10 images"
+          }
+        ],
+        "of": [
+          {
+            "options": {
+              "hotspot": true
+            },
+            "type": "image"
+          }
+        ],
+        "name": "images",
+        "type": "array",
+        "title": "Design Images"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "featuredImage",
+        "type": "image"
+      },
+      {
+        "description": "PDF plans, CAD files, etc.",
+        "of": [
+          {
+            "type": "file"
+          }
+        ],
+        "name": "files",
+        "type": "array",
+        "title": "Downloadable Files"
+      },
+      {
+        "initialValue": false,
+        "name": "isFeatured",
+        "type": "boolean",
+        "title": "Featured Design"
+      },
+      {
+        "name": "publishedAt",
+        "type": "datetime"
+      }
+    ],
+    "name": "design",
+    "type": "document",
+    "title": "Architectural Design"
+  }
+]
