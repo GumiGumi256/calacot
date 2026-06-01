@@ -7,11 +7,11 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { Card } from "@/components/ui/card";
 import { STEPS } from "@/constants";
-import Lenis from "lenis";
+
 
 gsap.registerPlugin(ScrollTrigger);
 
-const lenis = new Lenis();
+
 
 export default function ConstructionProcessSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -19,10 +19,7 @@ export default function ConstructionProcessSection() {
   useGSAP(() => {
     const cards = gsap.utils.toArray<HTMLElement>(".process-card");
 
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
-    });
-    gsap.ticker.lagSmoothing(0);
+ 
 
     const isMobile = window.innerWidth < 768;
 

@@ -6,7 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { SHOWCASE_SLIDES } from "@/constants";
-import Lenis from "lenis";
+
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,19 +20,9 @@ export default function StackedScrollSlider() {
 
   useGSAP(
     () => {
-      // -----------------------------
-      // LENIS SMOOTH SCROLL SETUP
-      // -----------------------------
-      const lenis = new Lenis({
-        autoRaf: false,
-      });
+ 
 
-      const ticker = (time: number) => {
-        lenis.raf(time * 1000);
-      };
-      gsap.ticker.add(ticker);
-      gsap.ticker.lagSmoothing(0);
-
+  
       // -----------------------------
       // INITIAL CARD STATES
       // -----------------------------
