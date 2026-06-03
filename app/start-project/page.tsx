@@ -1,4 +1,4 @@
-import StartProjectForm from "@/components/start-project/start-project-form";
+import StartProjectForm from "@/components/forms/start-project-form";
 
 export default async function StartProjectPage({
   searchParams,
