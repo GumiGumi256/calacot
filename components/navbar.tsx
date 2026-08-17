@@ -210,7 +210,7 @@ useGSAP(() => {
           />
 
           <Image
-            src="/calacot-logo-vertical-yellow.svg"
+            src="/calacot-logo-vertical-black.svg"
             width={140}
             height={60}
             alt="Calacot Logo"
