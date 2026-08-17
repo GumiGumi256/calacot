@@ -110,7 +110,7 @@ export default function EstatesSection() {
               <span className="h-px w-12 bg-border" />
 
               <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                Calacot Estates
+                Calacot Estates 
               </span>
             </div>
           </div>
