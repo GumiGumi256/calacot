@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { Inter, Plus_Jakarta_Sans, Montserrat, Outfit } from "next/font/google";
+import { Plus_Jakarta_Sans, Outfit, Geist } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import Footer from "@/components/footer";
+import { Toaster } from "@/components/ui/toast"
 
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const outfitHeading = Outfit({
   subsets: ["latin"],
   variable: "--font-heading",
 });
-
-const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-sans" });
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -34,14 +34,12 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(
-        "h-full",
-        "antialiased",
-        "",
-        plusJakartaSans.variable,
-        "font-sans",
-        montserrat.variable,
-        outfitHeading.variable,
-      )}
+              "h-full",
+              "antialiased",
+              "",
+              plusJakartaSans.variable,
+              outfitHeading.variable,
+            "font-sans", geist.variable)}
     >
       <body className="min-h-full flex flex-col bg-brand-white dark:bg-brand-black">
         <ThemeProvider
@@ -53,6 +51,7 @@ export default function RootLayout({
           <Navbar />
           {children}
           <Footer />
+        <Toaster />
         </ThemeProvider>
       </body>
     </html>
