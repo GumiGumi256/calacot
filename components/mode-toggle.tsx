@@ -16,7 +16,7 @@ export function ModeToggle() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger>
         <button
           aria-label="Toggle theme"
           className="group relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 hover:scale-105 active:scale-95 sm:h-auto sm:w-auto sm:gap-2 sm:px-4 sm:py-2 bg-brand-black border border-brand-white/20 dark:bg-brand-white"
