@@ -5,9 +5,9 @@ import Navbar from "@/components/navbar";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import Footer from "@/components/footer";
-import { Toaster } from "@/components/ui/toast"
+import { Toaster } from "@/components/ui/toast";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const outfitHeading = Outfit({
   subsets: ["latin"],
@@ -34,12 +34,14 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(
-              "h-full",
-              "antialiased",
-              "",
-              plusJakartaSans.variable,
-              outfitHeading.variable,
-            "font-sans", geist.variable)}
+        "h-full",
+        "antialiased",
+        "",
+        plusJakartaSans.variable,
+        outfitHeading.variable,
+        "font-sans",
+        geist.variable,
+      )}
     >
       <body className="min-h-full flex flex-col bg-brand-white dark:bg-brand-black">
         <ThemeProvider
@@ -48,10 +50,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
+          {/* <Navbar /> */}
           {children}
           <Footer />
-        <Toaster />
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

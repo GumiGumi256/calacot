@@ -6,42 +6,48 @@ import { ArrowUpRight } from "lucide-react";
 
 export default function HeroSection() {
   return (
-    <section className="relative w-full pt-24 pb-16 px-6 md:px-12 lg:px-20 overflow-hidden">
-      {/* Top Text Layout matching reference UI */}
-      <div className="max-w-400 mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-12">
-        {/* Left Heading */}
+    <section className="relative isolate overflow-hidden px-5 pb-8 pt-24 sm:px-8 md:px-12 lg:px-20 lg:pb-14">
+      {/* Hero content */}
+      <div className="relative z-10 mx-auto grid max-w-[1600px] grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-8">
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-light tracking-tight leading-[1.05]">
-            We Make <br />
+          <h1 className="font-heading text-[clamp(3rem,14vw,5rem)] font-light leading-[0.95] tracking-[-0.05em] lg:text-8xl lg:leading-[1.02]">
+            We Make
+            <br />
             Possibilities Real.
           </h1>
         </div>
 
-        {/* Right Description */}
-        <div className="lg:col-span-4 lg:pt-4 flex flex-col justify-between h-full">
-          <p className="text-sm md:text-base  leading-relaxed max-w-sm">
-            We create the environments where people live, businesses grow, and ideas become reality. From architecture and construction to real estate and technology, we bring ambitious possibilities to life.
+        <div className="flex flex-col lg:col-span-4 lg:pt-3">
+          <p className="max-w-md text-sm leading-relaxed text-foreground/75 md:text-base">
+            We create the environments where people live, businesses grow, and
+            ideas become reality. From architecture and construction to real
+            estate and technology, we bring ambitious possibilities to life.
           </p>
-          <div className="mt-6">
-            <Link
-              href="/start-project"
-              className="inline-flex items-center gap-2 text-sm font-medium text-brand-black dark:text-brand-primary underline underline-offset-8 hover:text-neutral-600 transition"
-            >
-               Bring an Idea to Life <ArrowUpRight className="w-4 h-4" />
-            </Link>
-          </div>
+
+          <Link
+            href="/start-project"
+            className="mt-5 inline-flex w-fit items-center gap-2 border-b border-current pb-1 text-sm font-medium transition-opacity hover:opacity-60 lg:mt-8"
+          >
+            Bring an Idea to Life
+            <ArrowUpRight className="size-4" aria-hidden="true" />
+          </Link>
         </div>
       </div>
 
-      {/* Bottom Image Showcase */}
-      <div className="max-w-400 mx-auto">
-        <div className="relative w-full h-[500px] md:h-[650px] lg:h-[750px] rounded-3xl overflow-hidden">
+      {/* Villa */}
+      <div className="relative z-20 mx-auto -mt-1 max-w-[1600px] sm:-mt-8 lg:-mt-16">
+        {/*
+          The image intentionally extends beyond the viewport on small screens.
+          This gives the villa more presence without distorting it.
+        */}
+        <div className="relative left-1/2 aspect-[1.84/1] w-[145vw] max-w-none -translate-x-1/2 sm:w-[115vw] md:w-full">
           <Image
-            src="/modern-villa.png"
-            alt="Calacot modern architectural villa"
+            src="/villa-1.png"
+            alt="Modern luxury villa designed and built by Calacot"
             fill
             priority
-            className="object-cover object-center"
+            sizes="(max-width: 639px) 145vw, (max-width: 767px) 115vw, 100vw"
+            className="object-contain object-center"
           />
         </div>
       </div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CheckCircle2Icon, CalendarIcon, BriefcaseIcon, ArrowRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 type PageProps = {
   searchParams: Promise<{ type?: string; service?: string }>;
@@ -71,14 +72,30 @@ export default async function ThankYouPage({ searchParams }: PageProps) {
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-          <Button size="lg">
-            <Link href="/">Back to Home</Link>
+          <Button size="lg" >
+            <Link href="/" className="flex items-center justify-center gap-2">
+            Back to Home
+            <Image 
+            src='/icons/home.svg'
+            alt="Chevron Right"
+            width={16}
+            height={16}
+            
+            />
+            
+            </Link>
           </Button>
 
           {!isScheduledCall && (
             <Button variant="outline" size="lg">
-              <Link href={`/schedule-call${service ? `?service=${service}` : ""}`}>
-                Schedule a Call Now <ArrowRightIcon className="ml-2 h-4 w-4" />
+              <Link href={`/schedule-call${service ? `?service=${service}` : ""}`} className="flex items-center justify-center gap-2">
+                Schedule a Call Now <Image 
+                src='/icons/chevron-right.svg'
+                alt="Chevron Right"
+                width={16}
+                height={16}
+                className="invert"
+                />
               </Link>
             </Button>
           )}

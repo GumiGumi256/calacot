@@ -247,10 +247,32 @@ export default function StackedScrollSlider() {
   );
 
   return (
+    <>
+    <div className="mx-auto max-w-[1600px] px-5 pb-14 pt-24 sm:px-8 md:px-12 md:pb-20 md:pt-32 lg:px-20">
+  <p className="mb-5 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+    Our direction
+  </p>
+
+  <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
+    <h2 className="max-w-4xl font-heading text-5xl font-light leading-[0.95] tracking-tight sm:text-6xl md:text-7xl lg:col-span-8 lg:text-8xl">
+      What we are here
+      <br />
+      <span className="text-muted-foreground">to create.</span>
+    </h2>
+
+    <p className="max-w-md text-base leading-relaxed text-muted-foreground md:text-lg lg:col-span-4">
+      Calacot was built around a clear ambition: to create thoughtful places,
+      valuable opportunities and useful systems that move people and
+      businesses forward.
+    </p>
+  </div>
+</div>
+   
     <section
       ref={container}
       className="relative overflow-hidden px-4 md:px-8 lg:px-12 text-foreground"
     >
+      
       <div className="mx-auto flex h-screen max-w-7xl items-center justify-between gap-8">
         {/* LEFT NUMBERS */}
         <div className="hidden lg:flex">
@@ -333,5 +355,6 @@ export default function StackedScrollSlider() {
         </div>
       </div>
     </section>
+     </>
   );
 }
