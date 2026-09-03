@@ -109,7 +109,7 @@ export function SolutionsOverview() {
           <div className="lg:col-span-7">
             <Accordion
               type="single"
-              defaultValue="operations"
+              defaultValue={["operations"]}
               collapsible
               className="border-t border-border"
             >
