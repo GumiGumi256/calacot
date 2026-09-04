@@ -1,173 +1,149 @@
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { ArrowUpRight, Cpu, Layers, Layout, LineChart } from "lucide-react";
 
 const solutions = [
   {
     value: "operations",
-    title: "Business operating systems",
+    title: "Business Operating Systems",
     description:
-      "Connect the people, processes and information involved in running the business through one structured system.",
+      "Connect people, workflows, and core operational data through a unified central platform.",
+    icon: Layers,
     capabilities: [
-      "Customer and lead management",
-      "Projects and workflows",
-      "Inventory and assets",
-      "Staff and permissions",
-      "Payments and finance",
-      "Management reporting",
+      "Customer & Lead Management",
+      "Project & Workflow Tracking",
+      "Inventory & Asset Control",
+      "Staff & Role Permissions",
+      "Payments & Financial Routing",
+      "Executive Analytics",
     ],
   },
   {
     value: "customer-platforms",
-    title: "Customer platforms",
+    title: "Customer Platforms",
     description:
-      "Create useful digital experiences through which customers can discover, buy, book, communicate and manage their relationship with your business.",
+      "Digital customer experiences designed for seamless discovery, booking, and transactional growth.",
+    icon: Layout,
     capabilities: [
-      "Web applications",
-      "Mobile applications",
-      "Customer portals",
-      "Booking systems",
-      "Marketplaces",
-      "E-commerce platforms",
+      "Web & Mobile Applications",
+      "Customer Self-Service Portals",
+      "Automated Booking Systems",
+      "Multi-Vendor Marketplaces",
+      "E-Commerce Architectures",
+      "Custom Client Dashboards",
     ],
   },
   {
     value: "automation",
-    title: "Automation and AI",
+    title: "Automation & AI Workflows",
     description:
-      "Reduce repetitive work and improve response times by automating communication, decisions and routine operational processes.",
+      "Eliminate manual overhead by automating routine communication, approvals, and data extraction.",
+    icon: Cpu,
     capabilities: [
-      "AI customer support",
-      "Lead qualification",
-      "WhatsApp automation",
-      "Approvals and reminders",
-      "Document generation",
-      "Internal AI assistants",
+      "AI Customer Support Agents",
+      "Automated Lead Qualification",
+      "WhatsApp & Telephony Automation",
+      "Approval & Reminder Pipelines",
+      "Dynamic Document Generation",
+      "Internal AI Knowledge Bots",
     ],
   },
   {
     value: "intelligence",
-    title: "Data and management intelligence",
+    title: "Data & Executive Intelligence",
     description:
-      "Turn everyday business activity into clear information that helps management understand performance and act sooner.",
+      "Transform disparate operational data into real-time metrics and proactive forecasting.",
+    icon: LineChart,
     capabilities: [
-      "Executive dashboards",
-      "Operational reports",
-      "Performance monitoring",
-      "Automated alerts",
-      "Business forecasting",
-      "Cross-department visibility",
+      "Executive Command Dashboards",
+      "Automated Operational Reports",
+      "Real-time System Monitoring",
+      "Anomaly Detection Alerts",
+      "Predictive Growth Forecasting",
+      "Cross-Department Metrics",
     ],
   },
 ];
 
 export function SolutionsOverview() {
   return (
-    <section className="bg-background text-foreground">
-      <div className="mx-auto w-full max-w-[90rem] px-5 py-20 sm:px-8 sm:py-24 lg:px-12 lg:py-28">
-        <div className="grid gap-14 border-t border-border pt-6 lg:grid-cols-12 lg:gap-12">
-          {/* Introduction */}
-          <div className="lg:col-span-5">
-            <div className="flex items-center gap-3">
-              <span className="h-px w-8 bg-brand-primary" />
-
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                What we build
-              </span>
-            </div>
-
-            <h2 className="mt-8 max-w-xl text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.045em] sm:text-5xl lg:text-6xl">
-              Technology built around the operation.
-            </h2>
-
-            <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
-              We combine product design, software engineering, automation and
-              business understanding to create systems that solve meaningful
-              operational problems.
+    <section className="bg-background text-foreground py-24 px-6 md:px-12 lg:px-16">
+      <div className="mx-auto max-w-7xl">
+        {/* Header Section */}
+        <header className="mb-16 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-7">
+            <p className="mb-3 text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+              What We Build
             </p>
-
+            <h2 className="font-heading text-4xl font-normal leading-tight sm:text-5xl md:text-6xl">
+              Technology built around <br />
+              <span className="text-muted-foreground">the core operation.</span>
+            </h2>
+          </div>
+          <div className="lg:col-span-5 flex flex-col items-start lg:items-end justify-between gap-6">
+            <p className="text-base text-muted-foreground leading-relaxed">
+              We combine product design, software engineering, and operational understanding to build systems that scale cleanly.
+            </p>
             <Link
               href="/tech/solutions"
-              className="group mt-9 inline-flex items-center gap-2 border-b border-foreground pb-1 text-sm font-semibold transition-colors hover:border-brand-primary hover:text-brand-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+              className="inline-flex items-center gap-2 text-sm font-medium underline underline-offset-4 transition-colors hover:text-muted-foreground"
             >
-              Explore all solutions
-
-              <ArrowUpRight
-                aria-hidden="true"
-                className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              />
+              Explore All Solutions
+              <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
+        </header>
 
-          {/* Solutions accordion */}
-          <div className="lg:col-span-7">
-            <Accordion
-              type="single"
-              defaultValue="operations"
-              collapsible
-              className="border-t border-border"
-            >
-              {solutions.map((solution) => (
-                <AccordionItem
-                  key={solution.value}
-                  value={solution.value}
-                  className="border-b border-border"
-                >
-                  <AccordionTrigger className="group py-6 text-left hover:no-underline sm:py-8 [&>svg]:size-5 [&>svg]:text-muted-foreground [&>svg]:transition-colors [&[data-state=open]>svg]:text-brand-primary">
-                    <span className="flex items-center gap-4 sm:gap-6">
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-border transition-colors duration-300 group-data-[state=open]:border-brand-primary">
-                        <span className="size-1.5 rounded-full bg-muted-foreground transition-all duration-300 group-data-[state=open]:scale-125 group-data-[state=open]:bg-brand-primary" />
-                      </span>
+        {/* Bento Grid layout */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {solutions.map((solution) => {
+            const Icon = solution.icon;
 
-                      <span className="text-xl font-medium tracking-[-0.025em] sm:text-2xl">
-                        {solution.title}
-                      </span>
-                    </span>
-                  </AccordionTrigger>
+            return (
+              <div
+                key={solution.value}
+                className="group relative flex flex-col justify-between rounded-xl border border-border bg-card p-8 transition-all duration-300 hover:border-foreground/30 hover:shadow-sm"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-foreground">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <Link
+                      href={`/tech/start-a-project?solution=${solution.value}`}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground"
+                    >
+                      Discuss
+                      <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </Link>
+                  </div>
 
-                  <AccordionContent className="pb-8 pl-9 sm:pb-10 sm:pl-11">
-                    <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-                      {solution.description}
+                  <h3 className="mt-6 text-xl font-medium tracking-tight">
+                    {solution.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                    {solution.description}
+                  </p>
+
+                  <div className="mt-8 border-t border-border/60 pt-6">
+                    <p className="mb-4 text-xs font-semibold tracking-wider uppercase text-muted-foreground">
+                      Capabilities
                     </p>
-
-                    <div className="mt-7 grid gap-x-8 gap-y-3 border-t border-border pt-6 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                       {solution.capabilities.map((capability) => (
                         <div
                           key={capability}
-                          className="flex items-center gap-3 text-sm text-foreground/80"
+                          className="flex items-center gap-2 text-xs text-foreground/80"
                         >
-                          <span
-                            aria-hidden="true"
-                            className="size-1 rounded-full bg-brand-primary"
-                          />
-
+                          <span className="h-1 w-1 rounded-full bg-primary" />
                           {capability}
                         </div>
                       ))}
                     </div>
-
-                    <Link
-                      href={`/tech/start-a-project?solution=${solution.value}`}
-                      className="group mt-8 inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-brand-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
-                    >
-                      Discuss this solution
-
-                      <ArrowUpRight
-                        aria-hidden="true"
-                        className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                      />
-                    </Link>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
