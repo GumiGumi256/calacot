@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
 
 import {
@@ -40,14 +40,9 @@ export function TechNavbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMenuOpen(false);
-  }, [pathname]);
-
   return (
     <header className="fixed inset-x-0 top-0 z-50">
-      {/* Keeps the logo and navigation visible over the hero video */}
+      {/* Soft gradient to keep navigation visible over hero video */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-brand-black/90 via-brand-black/45 to-transparent"
@@ -59,7 +54,7 @@ export function TechNavbar() {
       >
         <TechLogo />
 
-        {/* Desktop navigation */}
+        {/* Desktop Navigation */}
         <div className="absolute left-1/2 hidden -translate-x-1/2 lg:block">
           <div className="flex items-center rounded-full border border-white/20 bg-black/25 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_8px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl">
             {navigation.map((item) => {
@@ -92,7 +87,8 @@ export function TechNavbar() {
           </div>
         </div>
 
-        <div className="relative z-10 flex items-center gap-2">
+        {/* Actions & Mobile Menu */}
+        <div className="relative z-10 flex items-center gap-3">
           <Link
             href="/tech/start-a-project"
             className="group relative hidden min-h-11 items-center justify-center overflow-hidden rounded-full border border-white/25 bg-black/60 px-6 text-sm font-semibold text-white shadow-[0_0_20px_rgba(48,126,255,0.38),-8px_0_22px_rgba(255,174,37,0.22)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/45 sm:inline-flex"
@@ -101,12 +97,14 @@ export function TechNavbar() {
               aria-hidden="true"
               className="absolute inset-0 bg-[linear-gradient(100deg,rgba(255,201,25,0.16),transparent_40%,rgba(53,134,255,0.22))] opacity-70 transition-opacity duration-300 group-hover:opacity-100"
             />
-
             <span className="relative">Discuss your business</span>
           </Link>
 
+          <ModeToggle />
+
+          {/* Mobile Sheet Navigation */}
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-            <SheetTrigger >
+            <SheetTrigger>
               <button
                 type="button"
                 aria-label="Open navigation"
@@ -135,7 +133,7 @@ export function TechNavbar() {
                 <div className="flex items-center justify-between">
                   <TechLogo />
 
-                  <SheetClose >
+                  <SheetClose>
                     <button
                       type="button"
                       aria-label="Close navigation"
@@ -165,9 +163,10 @@ export function TechNavbar() {
                       pathname.startsWith(`${item.href}/`);
 
                     return (
-                      <SheetClose key={item.name} >
+                      <SheetClose key={item.name}>
                         <Link
                           href={item.href}
+                          onClick={() => setMenuOpen(false)}
                           aria-current={active ? "page" : undefined}
                           className="group flex min-h-20 items-center justify-between border-b border-white/10 py-5"
                         >
@@ -198,13 +197,13 @@ export function TechNavbar() {
                 </div>
 
                 <div className="mt-auto space-y-4">
-                  <SheetClose >
+                  <SheetClose>
                     <Link
                       href="/tech/start-a-project"
+                      onClick={() => setMenuOpen(false)}
                       className="group inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-6 text-sm font-semibold text-brand-black transition-colors hover:bg-brand-primary/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary"
                     >
                       Discuss your business
-
                       <ArrowRight
                         aria-hidden="true"
                         className="size-4 transition-transform duration-300 group-hover:translate-x-1"
@@ -221,7 +220,6 @@ export function TechNavbar() {
             </SheetContent>
           </Sheet>
         </div>
-        <ModeToggle />
       </nav>
     </header>
   );
@@ -234,7 +232,7 @@ function TechLogo() {
       aria-label="Calacot Tech home"
       className="group relative z-10 inline-flex items-center gap-3"
     >
-      <span className="relative flex h-12 w-[152px] items-center 5 px-3  transition-colors duration-300  sm:w-[170px]">
+      <span className="relative flex h-12 w-[152px] items-center px-3 transition-colors duration-300 sm:w-[170px]">
         <Image
           src="/calacot-logo-vertical-white.svg"
           width={170}
@@ -244,8 +242,6 @@ function TechLogo() {
           className="h-auto w-full object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]"
         />
       </span>
-
-     
     </Link>
   );
 }
