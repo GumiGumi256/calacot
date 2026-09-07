@@ -1,5 +1,7 @@
 "use server";
 
+import { queueEnquiryEmails } from "@/lib/email/queue";
+
 import { db } from "@/database/db"; 
 import { leads } from "@/database/schema";
 import { scheduleCallSchema, type ScheduleCallFormData } from "@/lib/validations/schedule-call";
@@ -24,6 +26,8 @@ export async function createScheduledCallLead(data: ScheduleCallFormData) {
         status: "new",
       })
       .returning();
+
+    queueEnquiryEmails({ id: insertedLead.id, kind: "call", email: insertedLead.email, details: insertedLead });
 
     return { success: true, data: insertedLead };
   } catch (error) {

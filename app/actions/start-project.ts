@@ -1,6 +1,8 @@
 // actions/start-project.ts
 "use server";
 
+import { queueEnquiryEmails } from "@/lib/email/queue";
+
 import { db } from "@/database/db"; 
 import { leads } from "@/database/schema"; 
 import { startProjectSchema, type StartProjectFormData } from "@/lib/validations/project";
@@ -24,6 +26,8 @@ export async function createProjectLead(data: StartProjectFormData) {
         status: "new",
       })
       .returning();
+
+    queueEnquiryEmails({ id: insertedLead.id, kind: "project", email: insertedLead.email, details: insertedLead });
 
     return { success: true, data: insertedLead };
   } catch (error) {

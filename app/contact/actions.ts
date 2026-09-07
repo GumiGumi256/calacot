@@ -1,5 +1,7 @@
 "use server";
 
+import { queueEnquiryEmails } from "@/lib/email/queue";
+
 import { eq } from "drizzle-orm";
 import { realEstateEnquiries } from "@/database/schema"; 
 
@@ -13,6 +15,9 @@ export async function submitEstateEnquiry(input: unknown): Promise<SubmitEnquiry
       const rows = await db.insert(realEstateEnquiries).values(record)
         .onConflictDoNothing({ target: realEstateEnquiries.id })
         .returning({ id: realEstateEnquiries.id });
+      if (rows.length === 1) {
+        queueEnquiryEmails({ id: record.id, kind: "estate", email: record.email, details: { ...record } });
+      }
       return rows.length === 1;
     },
     async findHash(id) {

@@ -1,5 +1,7 @@
 "use server";
 
+import { queueEnquiryEmails } from "@/lib/email/queue";
+
 import { db } from "@/database/db"; 
 import { propertyLeads } from "@/database/schema"; 
 import {
@@ -23,7 +25,7 @@ export async function submitPropertyLead(
   const values = result.data;
 
   try {
-    await db.insert(propertyLeads).values({
+    const [saved] = await db.insert(propertyLeads).values({
       submissionType: values.submissionType,
       propertyType: values.propertyType,
       location: values.location,
@@ -32,8 +34,9 @@ export async function submitPropertyLead(
       fullName: values.fullName,
       phone: values.phone.replace(/[\s()-]/g, ""),
       email: values.email || null,
-    });
+    }).returning();
 
+    queueEnquiryEmails({ id: saved.id, kind: "property", email: saved.email, details: saved });
     return { success: true };
   } catch {
     console.error("Failed to save property lead.");

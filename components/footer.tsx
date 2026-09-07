@@ -18,7 +18,7 @@ const SOCIAL_LINKS = [
   },
   {
     name: "YouTube",
-    href: "https://youtube.com/calacotug",
+    href: "https://youtube.com/@Calacot",
     icon: "/youtube.svg",
   },
   {

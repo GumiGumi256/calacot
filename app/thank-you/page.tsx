@@ -17,14 +17,14 @@ export default async function ThankYouPage({ searchParams }: PageProps) {
 
   const content = isScheduledCall
     ? {
-        title: "Call Scheduled Successfully!",
-        subtitle: "We've reserved your time block and logged your details.",
-        badge: "Consultation Booked",
+        title: "Call Request Received!",
+        subtitle: "We've received your preferred time and contact details.",
+        badge: "Consultation Requested",
         Icon: CalendarIcon,
         nextSteps: [
-          "Check your inbox for a confirmation email with calendar details.",
+          "Our team will review your preferred date and time.",
           "Prepare any specific questions or existing reference materials for our discussion.",
-          "Our team will reach out at your chosen time.",
+          "We will contact you to confirm availability before your call.",
         ],
       }
     : {
@@ -33,7 +33,7 @@ export default async function ThankYouPage({ searchParams }: PageProps) {
         badge: "Request Submitted",
         Icon: BriefcaseIcon,
         nextSteps: [
-          "Our project lead will review your scope, budget, and timeline within 24 hours.",
+          "Our project lead will review your scope, budget, and timeline.",
           "We'll reach out via email or phone to confirm details and provide next steps.",
           "If urgent, feel free to schedule an immediate call with our team.",
         ],
