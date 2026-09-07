@@ -14,6 +14,7 @@ const audiences = {
     supporting:
       "Share your property details and your expectations. We’ll review your submission and discuss the next steps with you.",
     cta: "Submit your property",
+    href:'/list-property?type=individual'
   },
   developers: {
     label: "For developers",
@@ -23,6 +24,7 @@ const audiences = {
     supporting:
       "Tell us about your development, available units and sales objectives. We’ll review the details and discuss how we could work together.",
     cta: "Submit your development",
+    href:'/list-property?type=development'
   },
 };
 type Audience = keyof typeof audiences;
@@ -51,7 +53,7 @@ export default function OwnersAndDevelopers() {
             </div>
 
             {/* Upper caption */}
-            <div className="absolute left-0 top-8 max-w-[15rem] rounded-md bg-brand-white px-5 py-4 shadow-sm dark:bg-brand-black/20 backdrop-blur-3xl sm:top-10">
+            <div className="absolute left-0 top-8 max-w-[18rem] rounded-md bg-brand-white/40 px-3 py-2 shadow-sm dark:bg-brand-black/20 backdrop-blur-3xl sm:top-10">
               <p className="text-sm font-semibold tracking-tight">
                 List with Calacot Estates
               </p>
@@ -62,7 +64,7 @@ export default function OwnersAndDevelopers() {
             </div>
 
             {/* Lower caption */}
-            <div className="absolute bottom-0 right-3 max-w-[15rem] rounded-md bg-brand-white px-5 py-4 shadow-sm dark:bg-brand-black/20 backdrop-blur-3xl sm:right-7">
+            <div className="absolute bottom-0 right-3 max-w-[18rem] rounded-md bg-brand-white/40 px-3 py-2 shadow-sm dark:bg-brand-black/20 backdrop-blur-3xl sm:right-7">
               <p className="text-sm font-semibold tracking-tight">
                 Discuss sales representation
               </p>
@@ -116,7 +118,7 @@ export default function OwnersAndDevelopers() {
               </p>
 
               <Link
-                href="/contact?intent=sell-property"
+                href={content.href}
                 className="group mt-6 inline-flex min-h-12 items-center justify-center gap-3 rounded-md bg-brand-primary px-5 py-3 text-sm font-semibold text-brand-black transition-colors hover:bg-brand-primary/85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary"
               >
                 {content.cta}

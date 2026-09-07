@@ -30,6 +30,7 @@ import PropertyHeroSearch from '@/components/real-estate/property-hero-search';
 import RealEstateApproach from '@/components/real-estate/real-estate-approach';
 import Link from 'next/link';
 import OwnersAndDevelopers from '@/components/real-estate/owners-and-developers';
+import PropertyJourney from '@/components/real-estate/property-journey';
 
 export default function CalacotEstatesHomepage() {
 
@@ -136,36 +137,12 @@ export default function CalacotEstatesHomepage() {
 
 <OwnersAndDevelopers />
 
-      {/* ==================== 9. LIFESTYLE SECTION ==================== */}
-      <section className="max-w-7xl mx-auto px-6 md:px-12 mb-32">
-        <div className="mb-12">
-          <span className="text-xs uppercase tracking-widest text-brand-primary font-semibold">The Calacot Way</span>
-          <h2 className="text-3xl md:text-5xl font-serif text-brand-black dark:text-brand-white mt-1">More Than Property. A Way of Living.</h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { title: "Waterfront Sanctuaries", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80", tag: "Munyonyo & Entebbe" },
-            { title: "Urban Sky Mansions", img: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80", tag: "Nakasero Skyline" },
-            { title: "Gated Eco-Residences", img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", tag: "Naguru Green Hills" }
-          ].map((item, idx) => (
-            <div key={idx} className="relative h-[420px] rounded-2xl overflow-hidden group">
-              <img src={item.img} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent"></div>
-              <div className="absolute bottom-8 left-8 right-8">
-                <span className="text-[10px] text-amber-400 uppercase tracking-widest font-semibold">{item.tag}</span>
-                <h3 className="text-2xl font-serif text-white mt-1">{item.title}</h3>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
+<PropertyJourney />
    
 
   
      {/* ==================== 12. INSIGHTS & MARKET INTELLIGENCE ==================== */}
-      <section id="insights" className="max-w-7xl mx-auto px-6 md:px-12 mb-32">
+      {/* <section id="insights" className="max-w-7xl mx-auto px-6 md:px-12 mb-32">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
           <div>
             
@@ -210,26 +187,44 @@ export default function CalacotEstatesHomepage() {
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* ==================== 13. FINAL CALL TO ACTION ==================== */}
-      <section className=" text-brand-black dark:text-brand-white py-24 px-6 md:px-12 text-center relative overflow-hidden">
+     <section className="bg-brand-white px-6 py-16 text-brand-black dark:bg-brand-black dark:text-brand-white md:px-12 md:py-20">
+      <div className="mx-auto max-w-3xl text-center">
+        <h2 className="font-serif text-4xl leading-[1.08] tracking-[-0.035em] md:text-5xl lg:text-6xl">
+          Your next chapter
+          <br />
+          starts with a conversation.
+        </h2>
 
-        <div className="max-w-3xl mx-auto relative z-10">
-          <h2 className="text-3xl md:text-6xl font-serif leading-tight">Your Next Prime Investment Begins Here.</h2>
-          <p className="text-brand-white text-sm md:text-base mt-6 max-w-xl mx-auto font-light">
-            Connect with our dedicated advisors to receive custom property dossiers and off-market opportunities tailored to your objectives.
-          </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <a href="#search" className="px-8 py-4 bg-amber-500 text-stone-950 font-medium text-xs uppercase tracking-widest hover:bg-amber-400 transition-colors rounded shadow-xl">
-              Explore Properties
-            </a>
-            <a href="#concierge" className="px-8 py-4 border border-stone-700 text-white font-medium text-xs uppercase tracking-widest hover:border-white transition-colors rounded">
-              Talk to an Advisor
-            </a>
-          </div>
+        <p className="mx-auto mt-5 max-w-lg text-sm leading-7 text-brand-black/65 dark:text-brand-white/65 md:text-base">
+          Tell us where you’d like to be and what matters to you.
+          Let’s discuss the property you have in mind.
+        </p>
+
+        <div className="mt-7 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-7">
+          <Link
+            href="/contact?intent=buy-home"
+            className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-md bg-brand-primary px-6 py-3 text-sm font-semibold text-brand-black transition-colors hover:bg-brand-primary/85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary"
+          >
+            Discuss your property search
+
+            <ArrowUpRight
+              aria-hidden="true"
+              className="size-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none"
+            />
+          </Link>
+
+          <Link
+            href="/list-property?type=individual"
+            className="inline-flex  min-h-12 items-center justify-center text-sm font-medium text-brand-black/70 transition-colors hover:text-brand-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary dark:text-brand-white/70 dark:hover:text-brand-white"
+          >
+            Have a property to sell?
+          </Link>
         </div>
-      </section>
+      </div>
+    </section>
 
       
     </div>

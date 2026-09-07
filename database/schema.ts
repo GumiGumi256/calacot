@@ -65,3 +65,32 @@ export const realEstateEnquiries = pgTable("real_estate_enquiries", {
   check("estate_enquiries_relationship_check", sql`${table.relationship} is null or ${table.relationship} in ('owner', 'representative')`),
   check("estate_enquiries_seller_check", sql`${table.intent} <> 'sell-property' or ${table.relationship} is not null`),
 ]);
+
+
+export const propertyLeads = pgTable("property_leads", {
+  id: uuid("id").defaultRandom().primaryKey(),
+
+  submissionType: text("submission_type", {
+    enum: ["individual", "development"],
+  }).notNull(),
+
+  propertyType: text("property_type").notNull(),
+  location: text("location").notNull(),
+  details: text("details"),
+
+  fullName: text("full_name").notNull(),
+  phone: text("phone").notNull(),
+  email: text("email"),
+
+  status: text("status", {
+    enum: ["new", "contacted", "closed"],
+  })
+    .default("new")
+    .notNull(),
+
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
+});

@@ -15,6 +15,13 @@
       "when": 1788774906806,
       "tag": "0001_quick_roxanne_simpson",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788791817457,
+      "tag": "0002_rare_maverick",
+      "breakpoints": true
     }
   ]
 }

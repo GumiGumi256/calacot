@@ -36,7 +36,11 @@ const money = z.string().trim().max(18, "Use a smaller amount.").refine(
 
 function minorUnits(value: string): bigint {
   const [whole, fraction = ""] = value.split(".");
-  return BigInt(whole) * 100n + BigInt(fraction.padEnd(2, "0"));
+
+  return (
+    BigInt(whole) * BigInt(100) +
+    BigInt(fraction.padEnd(2, "0"))
+  );
 }
 
 export const enquirySchema = z.object({
