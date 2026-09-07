@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { CheckCircle2Icon, CalendarIcon, BriefcaseIcon, ArrowRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,8 @@ import Image from "next/image";
 type PageProps = {
   searchParams: Promise<{ type?: string; service?: string }>;
 };
+
+export const metadata = pageMetadata("/thank-you");
 
 export default async function ThankYouPage({ searchParams }: PageProps) {
   const { type, service } = await searchParams;

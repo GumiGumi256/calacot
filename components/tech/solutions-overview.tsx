@@ -66,7 +66,7 @@ const solutions = [
 
 export function SolutionsOverview() {
   return (
-    <section className="bg-background text-foreground py-24 px-6 md:px-12 lg:px-16">
+    <section id="solutions" className="bg-background text-foreground py-24 px-6 md:px-12 lg:px-16">
       <div className="mx-auto max-w-7xl">
         {/* Header Section */}
         <header className="mb-16 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">
@@ -84,7 +84,7 @@ export function SolutionsOverview() {
               We combine product design, software engineering, and operational understanding to build systems that scale cleanly.
             </p>
             <Link
-              href="/tech/solutions"
+              href="/start-project?service=software-development"
               className="inline-flex items-center gap-2 text-sm font-medium underline underline-offset-4 transition-colors hover:text-muted-foreground"
             >
               Explore All Solutions

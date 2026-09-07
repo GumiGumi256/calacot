@@ -39,21 +39,21 @@ export default function OwnersAndDevelopers() {
       className="bg-brand-white text-brand-black dark:bg-brand-black dark:text-brand-white"
     >
       <div className="mx-auto max-w-6xl px-6 py-14 md:px-10 md:py-16">
-        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="grid items-center gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:gap-8 lg:grid-cols-2 lg:gap-16">
           {/* Image composition */}
-          <div className="relative mx-auto w-full max-w-md pb-7 pl-6 pt-3 sm:pl-10">
-            <div className="relative aspect-[4/4.3] overflow-hidden rounded-md bg-[#eee9df] dark:bg-[#292620]">
+          <div className="relative mx-auto w-full max-w-md pb-7 pl-6 pt-3 sm:pl-10 md:max-lg:pl-4">
+            <div className="relative aspect-[4/4.3] overflow-hidden rounded-md bg-[#eee9df] dark:bg-[#292620] md:max-lg:aspect-[3/4]">
               <Image
                 src="/urbanhouse.jpg"
                 alt=""
                 fill
-                sizes="(max-width: 1024px) 90vw, 408px"
+                sizes="(min-width: 1152px) 408px, (min-width: 1024px) calc((100vw - 144px) / 2 - 40px), (min-width: 768px) calc((100vw - 112px) * 0.45 - 16px), (min-width: 640px) 408px, (min-width: 496px) 424px, calc(100vw - 72px)"
                 className="object-cover object-center"
               />
             </div>
 
             {/* Upper caption */}
-            <div className="absolute left-0 top-8 max-w-[18rem] rounded-md bg-brand-white/40 px-3 py-2 shadow-sm dark:bg-brand-black/20 backdrop-blur-3xl sm:top-10">
+            <div className="absolute left-0 top-8 max-w-[18rem] rounded-md bg-brand-white/40 px-3 py-2 shadow-sm dark:bg-brand-black/20 backdrop-blur-3xl sm:top-10 md:max-lg:max-w-[calc(100%-1rem)]">
               <p className="text-sm font-semibold tracking-tight">
                 List with Calacot Estates
               </p>
@@ -64,7 +64,7 @@ export default function OwnersAndDevelopers() {
             </div>
 
             {/* Lower caption */}
-            <div className="absolute bottom-0 right-3 max-w-[18rem] rounded-md bg-brand-white/40 px-3 py-2 shadow-sm dark:bg-brand-black/20 backdrop-blur-3xl sm:right-7">
+            <div className="absolute bottom-0 right-3 max-w-[18rem] rounded-md bg-brand-white/40 px-3 py-2 shadow-sm dark:bg-brand-black/20 backdrop-blur-3xl sm:right-7 md:max-lg:right-0 md:max-lg:max-w-[calc(100%-1rem)]">
               <p className="text-sm font-semibold tracking-tight">
                 Discuss sales representation
               </p>
@@ -105,15 +105,15 @@ export default function OwnersAndDevelopers() {
             </div>
 
             <div id="property-audience-content">
-              <h2 className="mt-6 max-w-[19ch] text-3xl font-semibold leading-[1.12] tracking-[-0.04em] md:text-4xl lg:text-[2.65rem]">
+              <h2 className="mt-6 max-w-[19ch] text-3xl font-semibold leading-[1.12] tracking-[-0.04em] md:text-[2rem] lg:text-[2.65rem]">
                 {content.title}
               </h2>
 
-              <p className="mt-5 max-w-md text-sm leading-7 text-brand-black/65 dark:text-brand-white/65 md:text-base">
+              <p className="mt-5 max-w-md text-sm leading-7 text-brand-black/65 dark:text-brand-white/65 md:max-lg:leading-6 lg:text-base">
                 {content.description}
               </p>
 
-              <p className="mt-3 max-w-md text-sm leading-7 text-brand-black/65 dark:text-brand-white/65 md:text-base">
+              <p className="mt-3 max-w-md text-sm leading-7 text-brand-black/65 dark:text-brand-white/65 md:max-lg:leading-6 lg:text-base">
                 {content.supporting}
               </p>
 

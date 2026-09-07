@@ -1,13 +1,8 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { Suspense } from "react";
 
 import { PropertyLeadForm } from "@/components/real-estate/property-lead-form";
 
-export const metadata: Metadata = {
-  title: "List your property | Calacot Estates",
-  description:
-    "Introduce your property or development to Calacot Estates and discuss listing and sales representation in Uganda.",
-};
 
 type PageProps = {
   searchParams: Promise<{
@@ -26,6 +21,8 @@ async function PropertyForm({ searchParams }: PageProps) {
     />
   );
 }
+
+export const metadata = pageMetadata("/list-property");
 
 export default function ListPropertyPage(props: PageProps) {
   return (

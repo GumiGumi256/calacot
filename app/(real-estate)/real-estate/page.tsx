@@ -1,3 +1,5 @@
+import { ServiceStructuredData } from "@/components/seo/structured-data";
+import { pageMetadata } from "@/lib/seo";
 
 import {
   Search,
@@ -32,6 +34,8 @@ import Link from 'next/link';
 import OwnersAndDevelopers from '@/components/real-estate/owners-and-developers';
 import PropertyJourney from '@/components/real-estate/property-journey';
 
+export const metadata = pageMetadata("/real-estate");
+
 export default function CalacotEstatesHomepage() {
 
 
@@ -39,6 +43,7 @@ export default function CalacotEstatesHomepage() {
 
   return (
     <div className="min-h-screen  ">
+      <ServiceStructuredData path="/real-estate" />
       
    
 

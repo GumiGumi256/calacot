@@ -38,8 +38,8 @@ export default function RealEstateApproach() {
       <div className="mx-auto max-w-6xl px-6 py-16 md:px-10 md:py-20">
         <div className="grid gap-10 lg:grid-cols-[380px_minmax(0,1fr)] lg:items-stretch lg:gap-14 xl:gap-16">
           {/* Left feature panel */}
-          <div className="relative flex w-full flex-col overflow-hidden rounded-xl border border-brand-black/10 bg-brand-white/10 dark:border-brand-white/10 dark:bg-brand-black/8 h-[500px]">
-            <div className="p-7 pb-0 md:p-8 md:pb-0">
+          <div className="relative flex w-full flex-col overflow-hidden rounded-xl border border-brand-black/10 bg-brand-white/10 dark:border-brand-white/10 dark:bg-brand-black/8 h-[500px] md:max-lg:grid md:max-lg:h-auto md:max-lg:grid-cols-2 md:max-lg:items-center">
+            <div className="p-7 pb-0 md:p-8 md:pb-0 md:max-lg:pb-8">
               <h2 className="max-w-[17ch] text-2xl font-bold leading-[1.12] tracking-tight md:text-[2rem] lg:text-[2.25rem]">
                 A considered way to find your next home.
               </h2>
@@ -56,15 +56,15 @@ export default function RealEstateApproach() {
               </Link>
             </div>
 
-            {/* Wider image extends beyond the panel's right edge */}
-            <div className="relative mt-6 h-85 shrink-0 overflow-hidden md:h-90">
-              <div className="absolute inset-y-0 left-0 w-[118%]">
+            {/* Fit the full house beside the copy on tablets. */}
+            <div className="relative mt-6 h-85 shrink-0 overflow-hidden md:h-90 md:max-lg:mt-0 md:max-lg:h-auto md:max-lg:aspect-square">
+              <div className="absolute inset-y-0 left-0 w-[118%] md:max-lg:w-full">
                 <Image
                   src="/simple-house.png"
                   alt=""
                   fill
-                  sizes="(max-width: 1023px) 118vw, 450px"
-                  className="object-cover object-bottom-left"
+                  sizes="(min-width: 1024px) 450px, (min-width: 768px) calc((100vw - 80px) / 2), calc((100vw - 48px) * 1.18)"
+                  className="object-cover object-bottom-left md:max-lg:object-contain md:max-lg:object-center"
                 />
               </div>
             </div>

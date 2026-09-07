@@ -20,7 +20,7 @@ export default function HeroSection() {
         <div className="flex flex-col lg:col-span-4 lg:pt-3">
           <p className="max-w-md text-sm leading-relaxed text-foreground/75 md:text-base">
             We create the environments where people live, businesses grow, and
-            ideas become reality. From architecture and construction to real
+            ideas become reality in Uganda. From architecture and construction to real
             estate and technology, we bring ambitious possibilities to life.
           </p>
 

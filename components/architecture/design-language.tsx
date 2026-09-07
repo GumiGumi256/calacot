@@ -10,23 +10,23 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const panels = [
   {
-    title: "Visual Clarity",
+    title: "Form & Function",
     description:
-      "Every line, shadow, and reflection rendered with architectural precision. The language of space translated through meticulous digital craftsmanship.",
+      "Simple building forms, clear circulation, and well-proportioned rooms. We explore how entrances, living areas, and private spaces connect to support everyday use.",
     image:
       "/concept-1.jpg",
   },
   {
-    title: "Atmospheric Depth",
+    title: "Light & Materials",
     description:
-      "Light behaves naturally. Materials breathe authentically. Each composition captures the quiet dialogue between structure and environment.",
+      "Window placement, shading, and material choices shape the character of a building. Our visualizations show how daylight meets concrete, timber, glass, and other finishes.",
     image:
       "/concept-2.jpg",
   },
   {
-    title: "Narrative Resolution",
+    title: "Inside & Outside",
     description:
-      "Beyond documentation — storytelling through spatial sequence. From concept to completion, we articulate design intent with unwavering fidelity.",
+      "Terraces, courtyards, and gardens extend living space beyond the walls. We explore how openings and views connect a building to its site while maintaining privacy.",
     image:
       "/concept-3.jpg",
   },
@@ -119,16 +119,18 @@ export default function DesignLanguageSection() {
       className="relative"
     >
       {/* Intro */}
-      <div className="mx-auto max-w-7xl px-6 py-10 md:py-32">
+      <div className="mx-auto max-w-7xl px-6 py-10 md:py-32 md:max-lg:px-10 md:max-lg:py-20">
         <div className="max-w-4xl">
-          <h2 className="text-4xl font-light uppercase title-2 md:text-7xl w-full">
-            Where vision meets <br />
-            visual articulation.
+          <h2 className="text-4xl font-light uppercase title-2 md:text-7xl w-full md:max-lg:text-5xl">
+            Modern architecture.<br />
+            Designed for daily life.
           </h2>
 
           <p className="mt-10 max-w-lg text-sm leading-relaxed text-p md:text-base">
-            Calacot translates architectural ambition into compelling visual narrative. 
-            Each frame upholds the rigor of design while evoking the atmosphere of place.
+            Calacot visualizes modern buildings with attention to how they work:
+            the arrangement of rooms, access to daylight, material finishes,
+            and connections to outdoor space. See how design decisions come
+            together before construction begins.
           </p>
         </div>
       </div>
@@ -138,38 +140,39 @@ export default function DesignLanguageSection() {
         {panels.map((panel, index) => (
           <div
             key={index}
-            className="design-panel relative h-screen overflow-hidden"
+            className="design-panel relative h-screen overflow-hidden max-lg:flex max-lg:h-auto max-lg:flex-col max-lg:bg-brand-black"
           >
             {/* Background */}
-            <div className="panel-image absolute inset-0 w-full">
+            <div className="absolute inset-0 overflow-hidden max-lg:relative max-lg:inset-auto max-lg:aspect-[4/3] max-lg:w-full max-lg:shrink-0 md:max-lg:aspect-video">
+              <div className="panel-image absolute inset-0 w-full">
               <Image
                 src={panel.image}
                 alt={panel.title}
                 fill
-                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+                sizes="100vw"
                 priority={index === 0}
                 className="object-cover"
               />
+              </div>
+              {/* Keep the smaller-screen images clear, fading only their lower edge. */}
+              <div className="absolute inset-0 bg-brand-black/5 dark:bg-brand-black/45 max-lg:hidden" />
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/10 to-transparent max-lg:top-auto max-lg:h-20 max-lg:via-brand-black/20" />
             </div>
 
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-brand-black/5 dark:bg-brand-black/45" />
-            <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/10 to-transparent" />
-
             {/* Content */}
-            <div className="panel-content relative flex h-full items-end">
-              <div className="mx-auto flex w-full max-w-7xl flex-col justify-between gap-10 px-6 pb-16 md:flex-row md:items-end md:pb-24">
+            <div className="panel-content relative flex h-full items-end max-lg:h-auto">
+              <div className="mx-auto flex w-full max-w-7xl flex-col justify-between gap-6 px-6 pb-10 pt-6 lg:gap-10 lg:pt-0 lg:pb-24 lg:flex-row lg:items-end md:max-lg:px-10 md:max-lg:pb-12">
                 <div>
                   <p className="mb-4 text-xs uppercase tracking-[0.35em] text-brand-white/50">
                     0{index + 1}
                   </p>
 
-                  <h3 className="text-5xl font-light uppercase leading-[0.9] tracking-[-0.05em] md:text-8xl text-brand-white">
+                  <h3 className="text-4xl font-light uppercase leading-tight tracking-[-0.05em] sm:text-5xl lg:text-8xl lg:leading-[0.9] text-brand-white">
                     {panel.title}
                   </h3>
                 </div>
 
-                <p className="max-w-md text-sm leading-relaxed text-white/70 md:text-base">
+                <p className="max-w-md text-sm leading-relaxed text-white/70 md:text-base md:max-lg:max-w-2xl">
                   {panel.description}
                 </p>
               </div>

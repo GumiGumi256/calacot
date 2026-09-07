@@ -54,7 +54,7 @@ export default function ArchHero() {
 
             {/* HEADLINE */}
             <h1 className="text-brand-white mb-6 max-w-6xl title  font-light">
-             Architecture shaped by clarity, proportion, and purpose
+             Architectural design in Uganda, shaped by purpose
              
             </h1>
 

@@ -1,3 +1,5 @@
+import { ServiceStructuredData } from "@/components/seo/structured-data";
+import { pageMetadata } from "@/lib/seo";
 import ExperienceSection from "@/components/painting/painting-experience";
 import PaintingHero from "@/components/painting/painting-hero";
 import PaintingProcess from "@/components/painting/painting-process";
@@ -6,17 +8,20 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
+export const metadata = pageMetadata("/painting");
+
 export default function Painting() {
   return (
-    <main>
+    <div>
+      <ServiceStructuredData path="/painting" />
       <PaintingHero />
       <ExperienceSection />
       <PaintingServices />
-      <div className="space-y-10 px-12 md:px-16 pt-8 md:pt-14  flex flex-col md:flex-row md:justify-between w-full items-center gap-8 md:gap-20 mb-12">
-        <h2 className="sub-title leading-tight whitespace-nowrap  capitalize font-light">
-          Your Trusted partner for <br /> Exceptional Painting
+      < div className="grid w-full items-center gap-8 px-12 pt-8 mb-12 sm:px-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:px-10 md:pt-14 lg:px-16 lg:gap-20">
+        <h2 className="sub-title min-w-0 leading-tight capitalize font-light md:max-lg:text-4xl">
+          Your Trusted partner for <br className="md:max-lg:hidden" /> Exceptional Painting
         </h2>
-        <p className="text-p leading-relaxed pt-1 text-left  max-w-[520px]">
+        <p className="text-p min-w-0 max-w-[520px] pt-1 text-left leading-relaxed">
           Choosing the right painting company is crucial for achieving the
           desired transformation of your space. At Calacot, we are committed to
           delivering results through our expertise, attention to
@@ -52,12 +57,12 @@ export default function Painting() {
             <Link href="/start-project?service=painting" className="bg-brand-black hover:bg-brand-black/90 text-white font-medium px-8 py-3 rounded-full transition-all duration-300 shadow-lg">
               Start A Project
             </Link>
-            <Link href="/get-quote" className="bg-brand-white/10 backdrop-blur-sm hover:bg-white/20 text-brand-black font-medium px-8 py-3 rounded-full border border-white/30 transition-all duration-300">
+            <Link href="/start-project?service=painting" className="bg-brand-white/10 backdrop-blur-sm hover:bg-white/20 text-brand-black font-medium px-8 py-3 rounded-full border border-white/30 transition-all duration-300">
               Get A Quote
             </Link>
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

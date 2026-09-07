@@ -80,7 +80,7 @@ export function InteriorsHero() {
             data-hero-copy
             className="mx-auto mt-5 max-w-5xl text-balance text-[clamp(2.75rem,6vw,5.75rem)] font-semibold leading-[0.94] tracking-[-0.055em]"
           >
-            Interiors designed around how you live.
+            Interior design in Uganda, around how you live.
           </h1>
 
           <p

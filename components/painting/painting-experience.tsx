@@ -2,54 +2,54 @@ import Image from "next/image";
 
 export default function ExperienceSection() {
   return (
-    <section className=" px-12 md:px-16 pt-14 pb-8 md:pb-16 overflow-hidden">
+    <section className=" px-12 sm:px-8 md:px-10 lg:px-16 pt-14 pb-8 md:pb-16 overflow-hidden">
       {/* Header row */}
-      <div className="flex flex-col md:flex-row md:justify-between w-full items-center gap-8 md:gap-20 mb-12">
-        <h2 className="sub-title leading-tight whitespace-nowrap  capitalize text-center md:text-left">
+      <div className="flex flex-col md:flex-row md:justify-between w-full items-center gap-8 lg:gap-20 mb-12">
+        <h2 className="sub-title leading-tight whitespace-nowrap capitalize text-center md:text-left md:max-lg:text-4xl md:shrink-0">
           Experience<br />You can Trust
         </h2>
-        <p className="text-p leading-relaxed pt-1 text-center w-full md:max-w-[520px]">
+        <p className="text-p leading-relaxed pt-1 text-center w-full md:max-w-[520px] md:max-lg:text-left">
           At Calacot, painting is more than a service —{" "}
           it&apos;s a craft. We are a team of dedicated professionals
           committed to transforming homes.
         </p>
       </div>
 
-      {/* Desktop layout */}
-      <div className="hidden sm:flex justify-between items-start gap-6 min-h-[480px]">
+      {/* Staggered gallery with balanced tablet columns. */}
+      <div className="hidden sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)] lg:flex justify-between items-start gap-4 lg:gap-6 sm:min-h-[320px] md:min-h-[360px] lg:min-h-[480px]">
         {/* Left group: first (small) + center (large) */}
-        <div className="flex gap-6 w-3/4 self-end">
+        <div className="contents lg:flex lg:gap-6 lg:w-3/4 lg:self-end">
           {/* First image – smaller, same size as last */}
-          <div className="relative w-1/4 aspect-square h-[300px] self-end">
+          <div className="relative w-full lg:w-1/4 aspect-square h-[220px] md:h-[260px] lg:h-[300px] self-end">
             <Image
               src="/painting-1.jpg"
               alt="Painter applying yellow paint with brush"
               fill
               className="object-cover rounded-2xl aspect-square"
-              sizes="(max-width: 768px) 100vw, 20vw"
+              sizes="(min-width: 1024px) 20vw, (min-width: 768px) calc((100vw - 112px) / 4), calc((100vw - 96px) / 4)"
             />
           </div>
 
           {/* Center image – larger */}
-          <div className="relative w-3/4 aspect-[4/3]">
+          <div className="relative w-full lg:w-3/4 aspect-[4/3] sm:max-lg:h-[320px] md:max-lg:h-[360px] self-end">
             <Image
               src="/painting-2.jpg"
               alt="Painter using roller with blue paint"
               fill
               className="object-cover rounded-2xl"
-              sizes="(max-width: 768px) 100vw, 55vw"
+              sizes="(min-width: 1024px) 55vw, (min-width: 768px) calc((100vw - 112px) / 2), calc((100vw - 96px) / 2)"
             />
           </div>
         </div>
 
         {/* Last image – smaller, same size as first, top-right corner */}
-        <div className="relative w-1/4 h-[300px] aspect-square self-start">
+        <div className="relative w-full lg:w-1/4 h-[220px] md:h-[260px] lg:h-[300px] aspect-square self-start">
           <Image
             src="/painting-3.jpg"
             alt="Smiling professional painter"
             fill
             className="object-cover rounded-2xl"
-            sizes="(max-width: 768px) 100vw, 20vw"
+            sizes="(min-width: 1024px) 20vw, (min-width: 768px) calc((100vw - 112px) / 4), calc((100vw - 96px) / 4)"
           />
         </div>
       </div>

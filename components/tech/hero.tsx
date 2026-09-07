@@ -63,7 +63,7 @@ export default function TechHero() {
         <div className="flex flex-1 items-center justify-center py-12">
           <div className="mx-auto max-w-5xl text-center">
             <h1 className="text-balance text-[clamp(2.75rem,7vw,7rem)] font-heading font-semibold leading-[0.92] tracking-[-0.055em] text-brand-white">
-              Complex operations.
+              Software development in Uganda.
               <span className="mt-2 block text-brand-primary">
                 Made beautifully simple.
               </span>
@@ -71,13 +71,13 @@ export default function TechHero() {
 
             <p className="mx-auto mt-7 max-w-2xl text-pretty text-base leading-7 text-white/70 sm:text-lg sm:leading-8">
               Calacot Tech designs intelligent digital products that help
-              African businesses operate efficiently, serve customers better
+              businesses in Uganda and across Africa operate efficiently, serve customers better
               and scale with greater control.
             </p>
 
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
-                href="/tech/start-a-project"
+                href="/start-project?service=software-development"
                 className="group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-6 py-3 text-sm font-semibold text-brand-black transition duration-300 hover:-translate-y-0.5 hover:bg-brand-primary/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary sm:w-auto"
               >
                 Discuss your business
@@ -98,7 +98,7 @@ export default function TechHero() {
               </Link>
 
               <Link
-                href="#products"
+                href="#solutions"
                 className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-white/20 bg-white/[0.06] px-6 py-3 text-sm font-medium text-white backdrop-blur-md transition duration-300 hover:border-white/35 hover:bg-white/[0.1] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:w-auto"
               >
                 Explore what we&apos;re building

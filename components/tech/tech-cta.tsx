@@ -82,7 +82,7 @@ export function TechCta() {
           </p>
 
           <Link
-            href="/start-project?service=technology"
+            href="/start-project?service=software-development"
             className="group mt-9 inline-flex min-h-13 items-center justify-center gap-3 rounded-full bg-brand-primary px-7 py-3.5 text-sm font-semibold text-brand-black shadow-[0_10px_35px_rgba(255,201,25,0.2)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_40px_rgba(255,201,25,0.3)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary sm:mt-10"
           >
             Discuss your business

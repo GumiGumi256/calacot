@@ -1,4 +1,7 @@
+import { pageMetadata } from "@/lib/seo";
 import ScheduleCallForm from "@/components/forms/schedule-call-form";
+
+export const metadata = pageMetadata("/schedule-call");
 
 export default async function ScheduleCallPage({
   searchParams,

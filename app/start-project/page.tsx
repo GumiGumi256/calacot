@@ -1,4 +1,7 @@
+import { pageMetadata } from "@/lib/seo";
 import StartProjectForm from "@/components/forms/start-project-form";
+
+export const metadata = pageMetadata("/start-project");
 
 export default async function StartProjectPage({
   searchParams,

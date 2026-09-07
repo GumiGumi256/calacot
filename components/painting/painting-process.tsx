@@ -245,9 +245,9 @@ export default function PaintingProcess() {
       </div>
 
       {/* ================= MOBILE ================= */}
-      <div className="flex flex-col gap-5 lg:hidden px-4">
+      <div className="flex flex-col gap-5 lg:hidden px-4 md:max-lg:grid md:max-lg:grid-cols-2 md:max-lg:gap-6 md:max-lg:px-10">
         {/* Main Hero Card */}
-        <div className="relative w-full h-[320px] rounded-[2rem] overflow-hidden">
+        <div className="relative w-full h-[320px] rounded-[2rem] overflow-hidden md:max-lg:col-span-2 md:max-lg:h-[300px]">
           <Image
             src="/concept-5.jpg"
             alt="Painting Process"
@@ -257,7 +257,7 @@ export default function PaintingProcess() {
 
           <div className="absolute inset-0 bg-black/30 z-10" />
 
-          <div className="relative z-20 flex flex-col justify-between h-full p-6">
+          <div className="relative z-20 flex flex-col justify-between h-full p-6 md:max-lg:flex-row md:max-lg:items-end md:max-lg:gap-8 md:max-lg:p-8">
             <Image
               src="/calacot-logo-vertical-white.svg"
               alt="Calacot Logo"
@@ -267,7 +267,7 @@ export default function PaintingProcess() {
             />
 
             <h2 className="text-[3.5rem] leading-[0.9] tracking-tight font-light text-white">
-              Design
+              Painting
               <br />
               Process
             </h2>
@@ -278,14 +278,14 @@ export default function PaintingProcess() {
         {PAINTING_PROCESS.map((item, index) => (
           <div
             key={index}
-            className="w-full min-h-[260px] rounded-[2rem] border dark:border-brand-white/10 border-brand-black/10 dark:bg-brand-black/70 bg-brand-white/70 p-6 flex flex-col justify-between"
+            className="w-full min-h-[260px] rounded-[2rem] border dark:border-brand-white/10 border-brand-black/10 dark:bg-brand-black/70 bg-brand-white/70 p-6 flex flex-col justify-between md:max-lg:min-w-0 md:max-lg:min-h-[300px] md:max-lg:gap-8 md:max-lg:p-7"
           >
             <p className="text-[3.5rem] leading-none font-light dark:text-brand-white text-brand-black">
               {item.number}
             </p>
 
             <div className="space-y-3">
-              <h3 className="text-3xl font-light tracking-tight dark:text-brand-white text-brand-black">
+              <h3 className="text-3xl font-light tracking-tight dark:text-brand-white text-brand-black md:max-lg:text-2xl md:max-lg:leading-tight">
                 {item.title}
               </h3>
 

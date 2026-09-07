@@ -1,14 +1,10 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { EstateEnquiryForm } from "@/components/real-estate/enquiry-form";
 import { parseIntent } from "@/lib/enquiry-schema";
 
-export const metadata: Metadata = {
-  title: "Your property enquiry | Calacot Estates",
-  description: "Discuss your property search, land requirements or property sale with Calacot Estates in Uganda.",
-};
 
 type ContactPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -39,6 +35,8 @@ async function EnquiryContent({ searchParams }: ContactPageProps) {
 function FormFallback() {
   return <div role="status" className="py-12 text-sm text-brand-black/65 dark:text-brand-white/65">Preparing your enquiry form…</div>;
 }
+
+export const metadata = pageMetadata("/contact");
 
 export default function ContactPage(props: ContactPageProps) {
   return (

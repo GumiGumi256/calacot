@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import ConstructionProcessSection from "@/components/construction-process-section";
 import { CustomButton } from "@/components/custom-button";
 import EstatesSection from "@/components/estates-section";
@@ -5,12 +6,14 @@ import HeroSection from "@/components/hero-section";
 import PossibilitySection from "@/components/possibility-section";
 import ShowcaseSlider from "@/components/showcase-slider";
 import WorldViewSection from "@/components/world-view-section";
-import { getFeaturedDesigns } from "@/lib/queries/design";
+
+
+export const metadata = pageMetadata("/");
 
 export default async function Home() {
-  const featuredDesigns = await getFeaturedDesigns();
+
   return (
-    <main>
+    <div>
       <HeroSection />
 
       <WorldViewSection />
@@ -18,6 +21,6 @@ export default async function Home() {
       <ShowcaseSlider />
 <EstatesSection />
       {/* <ConstructionProcessSection /> */}
-    </main>
+    </div>
   );
 }
