@@ -5,20 +5,20 @@ import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: {
-    default: "Calacot Tech",
-    template: "%s | Calacot Tech",
+    default: "Calacot Estates",
+    template: "%s | Calacot Estates",
   },
   description:
-    "Calacot Tech designs intelligent digital systems that help African businesses operate efficiently and scale with greater control.",
+    "Calacot Estates is your gateway to finding the perfect home in Uganda, dedicated to making your real estate journey seamless and enjoyable.",
 };
 
-type TechLayoutProps = {
+type RealEstateLayoutProps = {
   children: ReactNode;
 };
 
-export default function TechLayout({ children }: TechLayoutProps) {
+export default function RealEstateLayout({ children }: RealEstateLayoutProps) {
   return (
-    <div className="min-h-svh bg-brand-black text-brand-white">
+    <div className="min-h-svh dark:bg-brand-black bg-brand-white">
      
 
       <main id="tech-content">

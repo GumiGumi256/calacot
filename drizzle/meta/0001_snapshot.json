@@ -1,0 +1,307 @@
+{
+  "id": "81d1d80a-cee0-4e82-86fa-5c92b8ffa616",
+  "prevId": "a1caa8cc-b9d0-436c-a190-acfa017a82d7",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.leads": {
+      "name": "leads",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "full_name": {
+          "name": "full_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "service": {
+          "name": "service",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "preferred_date": {
+          "name": "preferred_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "preferred_time": {
+          "name": "preferred_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "project_location": {
+          "name": "project_location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "estimated_budget": {
+          "name": "estimated_budget",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timeline": {
+          "name": "timeline",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "project_overview": {
+          "name": "project_overview",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'new'"
+        },
+        "admin_notes": {
+          "name": "admin_notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.real_estate_enquiries": {
+      "name": "real_estate_enquiries",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "payload_hash": {
+          "name": "payload_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "intent": {
+          "name": "intent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_type": {
+          "name": "property_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timeline": {
+          "name": "timeline",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "budget_min": {
+          "name": "budget_min",
+          "type": "numeric(17, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "budget_max": {
+          "name": "budget_max",
+          "type": "numeric(17, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "asking_price": {
+          "name": "asking_price",
+          "type": "numeric(17, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "relationship": {
+          "name": "relationship",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "full_name": {
+          "name": "full_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_method": {
+          "name": "contact_method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'new'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "estate_enquiries_status_created_idx": {
+          "name": "estate_enquiries_status_created_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "estate_enquiries_intent_check": {
+          "name": "estate_enquiries_intent_check",
+          "value": "\"real_estate_enquiries\".\"intent\" in ('buy-home', 'buy-land', 'sell-property')"
+        },
+        "estate_enquiries_currency_check": {
+          "name": "estate_enquiries_currency_check",
+          "value": "\"real_estate_enquiries\".\"currency\" in ('UGX', 'USD')"
+        },
+        "estate_enquiries_contact_check": {
+          "name": "estate_enquiries_contact_check",
+          "value": "\"real_estate_enquiries\".\"contact_method\" in ('email', 'phone', 'whatsapp')"
+        },
+        "estate_enquiries_status_check": {
+          "name": "estate_enquiries_status_check",
+          "value": "\"real_estate_enquiries\".\"status\" in ('new', 'contacted', 'closed')"
+        },
+        "estate_enquiries_budget_check": {
+          "name": "estate_enquiries_budget_check",
+          "value": "(\"real_estate_enquiries\".\"budget_min\" is null or \"real_estate_enquiries\".\"budget_min\" > 0) and (\"real_estate_enquiries\".\"budget_max\" is null or \"real_estate_enquiries\".\"budget_max\" > 0) and (\"real_estate_enquiries\".\"budget_min\" is null or \"real_estate_enquiries\".\"budget_max\" is null or \"real_estate_enquiries\".\"budget_max\" >= \"real_estate_enquiries\".\"budget_min\")"
+        },
+        "estate_enquiries_price_check": {
+          "name": "estate_enquiries_price_check",
+          "value": "\"real_estate_enquiries\".\"asking_price\" is null or \"real_estate_enquiries\".\"asking_price\" > 0"
+        },
+        "estate_enquiries_reachable_check": {
+          "name": "estate_enquiries_reachable_check",
+          "value": "(\"real_estate_enquiries\".\"contact_method\" = 'email' and nullif(\"real_estate_enquiries\".\"email\", '') is not null) or (\"real_estate_enquiries\".\"contact_method\" in ('phone', 'whatsapp') and nullif(\"real_estate_enquiries\".\"phone\", '') is not null)"
+        },
+        "estate_enquiries_relationship_check": {
+          "name": "estate_enquiries_relationship_check",
+          "value": "\"real_estate_enquiries\".\"relationship\" is null or \"real_estate_enquiries\".\"relationship\" in ('owner', 'representative')"
+        },
+        "estate_enquiries_seller_check": {
+          "name": "estate_enquiries_seller_check",
+          "value": "\"real_estate_enquiries\".\"intent\" <> 'sell-property' or \"real_estate_enquiries\".\"relationship\" is not null"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

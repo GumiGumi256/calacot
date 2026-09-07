@@ -109,7 +109,7 @@ export function SolutionsOverview() {
                       <Icon className="h-5 w-5" />
                     </div>
                     <Link
-                      href={`/tech/start-a-project?solution=${solution.value}`}
+                      href={`/start-project?service=tech-${solution.value}`}
                       className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground"
                     >
                       Discuss

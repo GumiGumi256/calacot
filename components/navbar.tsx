@@ -246,7 +246,7 @@ useGSAP(() => {
             className="group relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 hover:scale-105 active:scale-95 sm:h-auto sm:w-auto sm:gap-2 sm:px-4 sm:py-2 bg-primary text-brand-black"
             
           >
-            <span className="hidden text-sm font-semibold tracking-wide sm:block">
+            <span className="hidden text-sm font-semibold tracking-wide sm:block text-brand-white dark:text-brand-black">
               {isOpen ? "Close" : "Menu"}
             </span>
 

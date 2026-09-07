@@ -21,7 +21,7 @@ export default function RealEstateHero() {
             <h1 className="text-5xl leading-[0.95] font-light tracking-tight text-brand-black dark:text-brand-white sm:text-7xl lg:text-[82px]">
               Find a place you
               <br />
-              will call home
+              will call <span className="text-brand-primary">home</span>
             </h1>
 
             <Link
@@ -35,8 +35,9 @@ export default function RealEstateHero() {
           {/* Right */}
           <div className="hidden lg:block max-w-xs mt-12">
             <p className="text-sm leading-6 text-neutral-600 dark:text-brand-white/80">
-              With us you will find not just accommodation, but a place where
-              your new life begins, full of coziness and possibilities.
+              A considered approach to real estate in Uganda. For those who
+              value thoughtful architecture, a distinctive setting and a place
+              that reflects how they want to live.
             </p>
           </div>
         </div>

@@ -162,10 +162,10 @@ export function BusinessTransformation() {
             </div>
 
             <Link
-              href="/tech/solutions"
+              href="/start-project?service=technology"
               className="relative mt-12 inline-flex w-fit items-center gap-2 border-b border-brand-black pb-1 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-black"
             >
-              Explore our solutions
+              Start your Project
 
               <ArrowUpRight
                 aria-hidden="true"

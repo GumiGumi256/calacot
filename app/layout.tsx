@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Footer from "@/components/footer";
 import { Toaster } from "@/components/ui/toast";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+// const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const outfitHeading = Outfit({
   subsets: ["latin"],
@@ -15,8 +15,9 @@ const outfitHeading = Outfit({
 });
 
 const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta-sans",
+ 
   subsets: ["latin"],
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
@@ -40,7 +41,7 @@ export default function RootLayout({
         plusJakartaSans.variable,
         outfitHeading.variable,
         "font-sans",
-        geist.variable,
+        // geist.variable,
       )}
     >
       <body className="min-h-full flex flex-col bg-brand-white dark:bg-brand-black">
