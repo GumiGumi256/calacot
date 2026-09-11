@@ -65,6 +65,7 @@ export default function ArchHero() {
 
             {/* CTA */}
             <div className="flex flex-col sm:flex-row gap-4">
+              <Link href="/architecture/designs">
               <CustomButton
                 size="lg"
                 icon={<ArrowRight />}
@@ -72,6 +73,7 @@ export default function ArchHero() {
               >
                 Buy Designs
               </CustomButton>
+              </Link>
 <Link href="/start-project?service=architecture">
 
               <CustomButton

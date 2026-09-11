@@ -33,6 +33,7 @@ import { toast } from "../ui/toast";
 
 interface StartProjectFormProps {
   initialService?: string;
+  initialOverview?: string;
   onSubmit?: (data: StartProjectFormData) => void;
   onScheduleCall?: () => void;
 }
@@ -50,6 +51,7 @@ const phoneSchema = z
 
 export default function StartProjectForm({
   initialService,
+  initialOverview,
   onSubmit,
   onScheduleCall,
 }: StartProjectFormProps) {
@@ -75,7 +77,7 @@ export default function StartProjectForm({
       projectLocation: "",
       estimatedBudget: "",
       timeline: "",
-      projectOverview: "",
+      projectOverview: initialOverview || "",
     },
     mode: "onChange",
   });
