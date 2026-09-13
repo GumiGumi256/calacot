@@ -10,7 +10,7 @@ export default function RealEstateHero() {
         {/* Left Column: Text & Primary CTA */}
         <div className="relative z-20 flex flex-col justify-center px-6 pb-12 pt-16 sm:px-10 md:w-[52%] md:py-16 md:pl-10 md:pr-4 lg:w-[50%] lg:py-20 lg:pl-12 lg:pr-8 xl:pl-16">
           <h1 className="mt-4 text-balance text-[clamp(2.25rem,5vw,3.5rem)] font-semibold leading-[1.05] tracking-[-0.04em] lg:text-[clamp(3.25rem,4.8vw,4.75rem)]">
-            Real estate in Uganda. <br />
+            Your next chapter. <br />
             Find a place to{" "}
             <span className="text-brand-primary">
               live.
@@ -18,9 +18,9 @@ export default function RealEstateHero() {
           </h1>
 
           <p className="mt-5 max-w-lg text-sm leading-relaxed text-brand-black/65 dark:text-brand-white/65 sm:text-base sm:leading-7 lg:mt-6 lg:leading-8">
-            A considered approach to real estate in Uganda. For those who
-            value thoughtful architecture, a distinctive setting and a place
-            that reflects how they want to live.
+            Find a home or land in Uganda that fits the life you have in mind.
+            Calacot Estates helps you explore properties and consider your
+            options through property discovery and advisory services.
           </p>
 
           <div className="mt-8">

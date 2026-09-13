@@ -5,7 +5,7 @@ export default function ExperienceSection() {
     <section className=" px-12 sm:px-8 md:px-10 lg:px-16 pt-14 pb-8 md:pb-16 overflow-hidden">
       {/* Header row */}
       <div className="flex flex-col md:flex-row md:justify-between w-full items-center gap-8 lg:gap-20 mb-12">
-        <h2 className="sub-title leading-tight whitespace-nowrap capitalize text-center md:text-left md:max-lg:text-4xl md:shrink-0">
+        <h2 className="whitespace-nowrap capitalize text-center md:text-left md:shrink-0 section-heading">
           Experience<br />You can Trust
         </h2>
         <p className="text-p leading-relaxed pt-1 text-center w-full md:max-w-[520px] md:max-lg:text-left">

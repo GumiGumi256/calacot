@@ -248,13 +248,13 @@ export default function StackedScrollSlider() {
 
   return (
     <>
-    <div className="mx-auto max-w-[1600px] px-5 pb-14 pt-24 sm:px-8 md:px-12 md:pb-20 md:pt-32 lg:px-20">
+    <div className="pb-14 pt-24 md:pb-20 md:pt-32 site-container">
   <p className="mb-5 text-xs uppercase tracking-[0.2em] text-muted-foreground">
     Our direction
   </p>
 
   <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
-    <h2 className="max-w-4xl font-heading text-5xl font-light leading-[0.95] tracking-tight sm:text-6xl md:text-7xl lg:col-span-8 lg:text-8xl">
+    <h2 className="max-w-4xl font-heading lg:col-span-8 section-heading">
       What we are here
       <br />
       <span className="text-muted-foreground">to create.</span>
@@ -299,7 +299,7 @@ export default function StackedScrollSlider() {
               ref={(el) => {
                 slidesRef.current[index] = el;
               }}
-              className="absolute inset-0 overflow-hidden rounded-[2.5rem] will-change-transform  backface-hidden"
+              className="absolute inset-0 overflow-hidden rounded-[2.5rem] will-change-transform backface-hidden"
             >
               {/* IMAGE WRAPPER */}
               <div
@@ -322,7 +322,7 @@ export default function StackedScrollSlider() {
 
                 {/* CONTENT */}
                 <div className="absolute bottom-0 left-0 z-10 max-w-2xl p-8 md:p-14">
-                  <h2 className="mb-4 text-4xl font-light tracking-tight text-white md:text-6xl font-heading">
+                  <h2 className="mb-4 text-white font-heading section-heading">
                     {slide.title}
                   </h2>
 

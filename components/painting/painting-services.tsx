@@ -6,7 +6,7 @@ import { Card } from "../ui/card";
 export default function PaintingServices() {
   return (
     <main className="space-y-10 px-10 md:px-16 md:max-lg:px-10">
-      <h2 className="sub-title font-light leading-tight capitalize text-center md:max-lg:text-4xl">
+      <h2 className="capitalize text-center section-heading">
         Professional Painting <br />
         Services for every space
       </h2>

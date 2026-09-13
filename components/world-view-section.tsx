@@ -55,13 +55,13 @@ export default function WorldViewSection() {
   }, [currentIndex]);
 
   return (
-    <section className="relative px-5 py-20 text-foreground sm:px-8 md:px-12 md:py-28 lg:px-20 lg:py-36">
+    <section className="relative px-5 text-foreground sm:px-8 md:px-12 lg:px-20 section-space">
       <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-14 lg:grid-cols-12 lg:items-center lg:gap-16">
         {/* Worldview */}
         <div className="lg:col-span-5">
           
 
-          <h2 className="max-w-xl font-heading text-4xl font-medium leading-[1.05] tracking-[-0.04em] sm:text-5xl md:text-6xl lg:text-7xl">
+          <h2 className="max-w-xl font-heading section-heading">
             We see what things can become.
           </h2>
         </div>

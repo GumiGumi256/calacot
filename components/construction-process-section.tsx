@@ -169,7 +169,7 @@ if (isMobile) {
         {/* Header */}
         <div className="flex items-start justify-between gap-10">
           <div className="max-w-4xl">
-            <h2 className="leading-[0.85] tracking-[-0.06em] text-white">
+            <h2 className="text-white section-heading">
               <span className="block text-[4.5rem] font-light md:text-[8rem]">
                 Steps to your
               </span>

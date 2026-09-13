@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -80,21 +81,21 @@ export function InteriorsHero() {
             data-hero-copy
             className="mx-auto mt-5 max-w-5xl text-balance text-[clamp(2.75rem,6vw,5.75rem)] font-semibold leading-[0.94] tracking-[-0.055em]"
           >
-            Interior design in Uganda, around how you live.
+            Make room for the way you live.
           </h1>
 
           <p
             data-hero-copy
             className="mx-auto mt-6 max-w-xl text-pretty text-base leading-7 text-brand-black/60 dark:text-brand-white/60 sm:text-lg sm:leading-8"
           >
-            Thoughtful spaces shaped by light, material, comfort and the way
-            everyday life actually happens.
+            Interior design for homes and workspaces in Uganda, shaped by light,
+            materials and the routines that make a space yours.
           </p>
 
           <div data-hero-copy className="mt-8">
             <Link
               href="/start-project?service=interior-design"
-              className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-brand-primary px-6 text-sm font-semibold text-brand-black shadow-[0_10px_30px_rgba(255,201,25,0.18)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(255,201,25,0.28)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary"
+              className={buttonVariants({ variant: "default", size: "lg", className: "inline-flex" })}
             >
               Discuss your interior
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import * as React from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -16,30 +17,9 @@ export function ModeToggle() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <button
-          aria-label="Toggle theme"
-          className="group relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 hover:scale-105 active:scale-95 sm:h-auto sm:w-auto sm:gap-2 sm:px-4 sm:py-2 bg-brand-black border border-brand-white/20 dark:bg-brand-white"
-        
-        >
-          {/* Desktop Label */}
-          <span className="hidden text-sm font-semibold tracking-wide sm:block dark:text-brand-black text-brand-white">
-            Theme
-          </span>
-
-          {/* Icon Circle */}
-          <div
-            className="relative flex h-8 w-8 items-center justify-center rounded-full text-brand-white dark:text-brand-black"
-            // style={{
-            //   backgroundColor: "var(--primary)",
-            //   color: "var(--primary-foreground)",
-            // }}
-          >
-            <Sun className="absolute h-4 w-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-
-            <Moon className="absolute h-4 w-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-          </div>
-        </button>
+      <DropdownMenuTrigger render={<Button variant="outline" size="icon" aria-label="Toggle theme" />}>
+        <Sun className="rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
+        <Moon className="absolute rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent

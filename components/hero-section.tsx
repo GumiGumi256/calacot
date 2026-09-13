@@ -19,9 +19,9 @@ export default function HeroSection() {
 
         <div className="flex flex-col lg:col-span-4 lg:pt-3">
           <p className="max-w-md text-sm leading-relaxed text-foreground/75 md:text-base">
-            We create the environments where people live, businesses grow, and
-            ideas become reality in Uganda. From architecture and construction to real
-            estate and technology, we bring ambitious possibilities to life.
+            A home that fits your life. A space with more to offer. A business idea
+            put to work. Through design, construction, property and technology,
+            we help you take the next step. Tell us what you have in mind.
           </p>
 
           <Link
@@ -43,7 +43,7 @@ export default function HeroSection() {
         <div className="relative left-1/2 aspect-[1.84/1] w-[145vw] max-w-none -translate-x-1/2 sm:w-[115vw] md:w-full">
           <Image
             src="/villa-1.png"
-            alt="Modern luxury villa designed and built by Calacot"
+            alt="Architectural rendering of a contemporary villa"
             fill
             priority
             sizes="(max-width: 639px) 145vw, (max-width: 767px) 115vw, 100vw"

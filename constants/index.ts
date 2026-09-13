@@ -12,7 +12,7 @@ export const SERVICE_COPY: Record<string, { title: string; description: string }
   "real-estate": {
     title: "Start Your Real Estate Project",
     description:
-      "Whether you're investing, developing, or selling property, we help you create high-value real estate solutions that are built for growth and long-term returns.",
+      "Tell us about the home or land you want to find, or the property you want to market. Calacot Estates helps you explore options and plan your next step.",
   },
   "architecture": {
     title: "Start Your Architecture Project",

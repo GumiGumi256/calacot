@@ -51,14 +51,14 @@ export default function ConceptualWorkSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full py-24 lg:py-40 bg-brand-white dark:bg-brand-black"
+      className="relative w-full bg-brand-white dark:bg-brand-black section-space"
     >
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="site-container">
         {/* Header */}
         <div className="max-w-2xl mb-16">
          
 
-         <h2 className="text-4xl font-light uppercase title-2 md:text-6xl w-full">
+         <h2 className="uppercase w-full section-heading">
             Designing ideas <br /> before they become form
           </h2>
 

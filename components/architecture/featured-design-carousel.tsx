@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonVariants } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -215,7 +216,7 @@ export default function FeaturedDesignCarousel({
       {designs.length > 1 && (
         <>
           <button
-            className="absolute left-[calc((100%_-_var(--card-width))_/_2_-_6px)] top-[calc((var(--card-width)_-_36px)_/_3.2)] z-2 grid size-12 -translate-y-1/2 place-items-center rounded-full border-[5px] border-brand-white bg-brand-black text-brand-white transition-colors hover:bg-brand-primary hover:text-brand-black disabled:cursor-default disabled:opacity-30 dark:border-brand-black max-[640px]:left-0 max-[640px]:top-[calc((var(--card-width)_-_16px)_/_2.4)] max-[640px]:size-10 max-[640px]:border-4 motion-reduce:transition-none"
+            className={buttonVariants({ variant: "outline", size: "icon", className: "absolute left-[calc((100%_-_var(--card-width))_/_2_-_6px)] top-[calc((var(--card-width)_-_36px)_/_3.2)] z-2 -translate-y-1/2 max-[640px]:left-0 max-[640px]:top-[calc((var(--card-width)_-_16px)_/_2.4)]" })}
             type="button"
             onClick={() => api?.scrollPrev()}
             disabled={!navigation.previous}
@@ -224,7 +225,7 @@ export default function FeaturedDesignCarousel({
             <ArrowLeft size={21} aria-hidden="true" />
           </button>
           <button
-            className="absolute right-[calc((100%_-_var(--card-width))_/_2_-_6px)] top-[calc((var(--card-width)_-_36px)_/_3.2)] z-2 grid size-12 -translate-y-1/2 place-items-center rounded-full border-[5px] border-brand-white bg-brand-black text-brand-white transition-colors hover:bg-brand-primary hover:text-brand-black disabled:cursor-default disabled:opacity-30 dark:border-brand-black max-[640px]:right-0 max-[640px]:top-[calc((var(--card-width)_-_16px)_/_2.4)] max-[640px]:size-10 max-[640px]:border-4 motion-reduce:transition-none"
+            className={buttonVariants({ variant: "outline", size: "icon", className: "absolute right-[calc((100%_-_var(--card-width))_/_2_-_6px)] top-[calc((var(--card-width)_-_36px)_/_3.2)] z-2 -translate-y-1/2 max-[640px]:right-0 max-[640px]:top-[calc((var(--card-width)_-_16px)_/_2.4)]" })}
             type="button"
             onClick={() => api?.scrollNext()}
             disabled={!navigation.next}

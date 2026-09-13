@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -50,7 +51,7 @@ export function TechNavbar() {
 
       <nav
         aria-label="Technology navigation"
-        className="relative mx-auto flex h-20 w-full max-w-[90rem] items-center justify-between px-5 sm:px-8 lg:h-24 lg:px-12"
+        className="relative flex h-20 items-center justify-between lg:h-24 site-container"
       >
         <TechLogo />
 
@@ -90,8 +91,8 @@ export function TechNavbar() {
         {/* Actions & Mobile Menu */}
         <div className="relative z-10 flex items-center gap-3">
           <Link
-            href="/tech/start-a-project"
-            className="group relative hidden min-h-11 items-center justify-center overflow-hidden rounded-full border border-white/25 bg-black/60 px-6 text-sm font-semibold text-white shadow-[0_0_20px_rgba(48,126,255,0.38),-8px_0_22px_rgba(255,174,37,0.22)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/45 sm:inline-flex"
+            href="/start-project?service=software-development"
+            className={buttonVariants({ variant: "glass", size: "lg", className: "hidden sm:inline-flex" })}
           >
             <span
               aria-hidden="true"
@@ -104,16 +105,7 @@ export function TechNavbar() {
 
           {/* Mobile Sheet Navigation */}
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-            <SheetTrigger>
-              <button
-                type="button"
-                aria-label="Open navigation"
-                className="inline-flex size-11 items-center justify-center rounded-full border border-white/25 bg-black/40 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary lg:hidden"
-              >
-                <Menu aria-hidden="true" className="size-5" />
-                <span className="sr-only">Open navigation</span>
-              </button>
-            </SheetTrigger>
+            <SheetTrigger render={<Button variant="glass" size="icon" className="lg:hidden" aria-label="Open navigation" />}><Menu aria-hidden="true" /></SheetTrigger>
 
             <SheetContent
               side="right"
@@ -133,16 +125,7 @@ export function TechNavbar() {
                 <div className="flex items-center justify-between">
                   <TechLogo />
 
-                  <SheetClose>
-                    <button
-                      type="button"
-                      aria-label="Close navigation"
-                      className="inline-flex size-11 items-center justify-center rounded-full border border-white/20 bg-white/[0.06] text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"
-                    >
-                      <X aria-hidden="true" className="size-5" />
-                      <span className="sr-only">Close navigation</span>
-                    </button>
-                  </SheetClose>
+                  <SheetClose render={<Button variant="glass" size="icon" aria-label="Close navigation" />}><X aria-hidden="true" /></SheetClose>
                 </div>
 
                 <SheetHeader className="sr-only">
@@ -201,7 +184,7 @@ export function TechNavbar() {
                     <Link
                       href="/tech/start-a-project"
                       onClick={() => setMenuOpen(false)}
-                      className="group inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-6 text-sm font-semibold text-brand-black transition-colors hover:bg-brand-primary/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary"
+                      className={buttonVariants({ variant: "default", size: "lg", className: "inline-flex w-full" })}
                     >
                       Discuss your business
                       <ArrowRight
@@ -228,7 +211,7 @@ export function TechNavbar() {
 function TechLogo() {
   return (
     <Link
-      href="/tech"
+      href="/software-development"
       aria-label="Calacot Tech home"
       className="group relative z-10 inline-flex items-center gap-3"
     >

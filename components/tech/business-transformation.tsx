@@ -78,7 +78,7 @@ export function BusinessTransformation() {
       ref={sectionRef}
       className="bg-background text-foreground transition-colors duration-300"
     >
-      <div className="mx-auto w-full max-w-[90rem] px-5 py-24 sm:px-8 sm:py-32 lg:px-12 lg:py-40">
+      <div className="section-space site-container">
         <div className="mb-8 flex items-center gap-3">
           <span className="h-px w-8 bg-brand-primary" />
 
@@ -98,7 +98,7 @@ export function BusinessTransformation() {
                 Operational reality
               </span>
 
-              <h2 className="mt-8 max-w-3xl text-balance text-4xl font-semibold leading-[0.98] tracking-[-0.05em] sm:text-5xl lg:text-6xl xl:text-7xl">
+              <h2 className="mt-8 max-w-3xl text-balance section-heading">
                 Growth gets harder when your business is{" "}
                 <span className="text-background/35">disconnected.</span>
               </h2>

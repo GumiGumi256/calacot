@@ -97,7 +97,7 @@ export default function EstatesSection() {
       {/* ------------------------------------------------
           INTRO
       ------------------------------------------------ */}
-      <div className="px-6 py-24 md:px-12 md:py-32 lg:px-20">
+      <div className="px-6 md:px-12 lg:px-20 section-space">
         <div
           ref={headingRef}
           className="mx-auto grid max-w-[1600px] grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-20"
@@ -116,7 +116,7 @@ export default function EstatesSection() {
           </div>
 
           <div className="lg:col-span-6">
-            <h2 className="text-5xl font-light leading-[0.95] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
+            <h2 className="section-heading">
               Exceptional
               <br />
               property.
@@ -130,9 +130,9 @@ export default function EstatesSection() {
          
           <div className="lg:col-span-3 lg:pt-3">
             <p className="max-w-sm text-base leading-relaxed text-muted-foreground md:text-lg">
-              We curate premium homes, developments, and investment
-              opportunities across Uganda, connecting discerning buyers with
-              properties worth knowing about.
+              Find a home or land that fits your plans in Uganda. We help buyers
+              explore their options and owners present their properties through
+              property discovery, marketing and advisory services.
             </p>
 
             <Link
@@ -292,7 +292,7 @@ export default function EstatesSection() {
               {/* CTA */}
               <div className="mt-12">
                 <Link
-                  href="/estates"
+                  href="/real-estate"
                   className="group inline-flex items-center gap-3 text-sm font-medium"
                 >
                   Enter Calacot Estates

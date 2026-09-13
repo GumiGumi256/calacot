@@ -119,9 +119,9 @@ export default function DesignLanguageSection() {
       className="relative"
     >
       {/* Intro */}
-      <div className="mx-auto max-w-7xl px-6 py-10 md:py-32 md:max-lg:px-10 md:max-lg:py-20">
+      <div className="py-10 md:py-32 md:max-lg:py-20 site-container">
         <div className="max-w-4xl">
-          <h2 className="text-4xl font-light uppercase title-2 md:text-7xl w-full md:max-lg:text-5xl">
+          <h2 className="uppercase w-full section-heading">
             Modern architecture.<br />
             Designed for daily life.
           </h2>
@@ -161,7 +161,7 @@ export default function DesignLanguageSection() {
 
             {/* Content */}
             <div className="panel-content relative flex h-full items-end max-lg:h-auto">
-              <div className="mx-auto flex w-full max-w-7xl flex-col justify-between gap-6 px-6 pb-10 pt-6 lg:gap-10 lg:pt-0 lg:pb-24 lg:flex-row lg:items-end md:max-lg:px-10 md:max-lg:pb-12">
+              <div className="flex flex-col justify-between gap-6 pb-10 pt-6 lg:gap-10 lg:pt-0 lg:pb-24 lg:flex-row lg:items-end md:max-lg:pb-12 site-container">
                 <div>
                   <p className="mb-4 text-xs uppercase tracking-[0.35em] text-brand-white/50">
                     0{index + 1}

@@ -1,4 +1,4 @@
-import { siteUrl } from "@/lib/seo";
+import { siteUrl, seoPages } from "@/lib/seo";
 import { SiteStructuredData } from "@/components/seo/structured-data";
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Outfit, Geist } from "next/font/google";
@@ -24,8 +24,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
-  title: { default: "Calacot | Design, Property & Technology in Uganda", template: "%s | Calacot" },
-  description: "Architecture, interior design, painting, real estate and software development services in Uganda from Calacot.",
+  title: { default: "Calacot | We Make Possibilities Real", template: "%s | Calacot" },
+  description: seoPages["/"].description,
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
  
 };

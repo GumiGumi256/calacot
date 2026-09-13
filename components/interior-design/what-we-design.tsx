@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -66,7 +67,7 @@ export function WhatWeDesign() {
   return (
     <section className="bg-brand-white text-brand-black transition-colors duration-300 dark:bg-brand-black dark:text-brand-white">
       {/* Crafted spaces */}
-      <div className="mx-auto w-full max-w-[90rem] px-5 py-20 sm:px-8 sm:py-24 lg:px-12 lg:py-28">
+      <div className="section-space site-container">
         <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
           {/* Main image */}
           <div className="lg:col-span-7">
@@ -89,7 +90,7 @@ export function WhatWeDesign() {
           {/* Message */}
           <div className="lg:col-span-5 lg:pl-4">
           
-            <h2 className="mt-5 max-w-xl font-sans text-4xl leading-[1.02] tracking-[-0.035em] sm:text-5xl lg:text-6xl">
+            <h2 className="mt-5 max-w-xl font-sans section-heading">
               Interiors that reflect you.
             </h2>
 
@@ -101,7 +102,7 @@ export function WhatWeDesign() {
 
             <Link
               href="/start-project?service=interior-design"
-              className="group mt-8 inline-flex min-h-12 items-center gap-3 rounded-full bg-brand-black px-6 text-sm font-semibold text-brand-white transition duration-300 hover:-translate-y-0.5 dark:bg-brand-primary dark:text-brand-black"
+              className={buttonVariants({ variant: "default", size: "lg", className: "mt-8 inline-flex" })}
             >
               Discuss your space
 
@@ -152,12 +153,12 @@ export function WhatWeDesign() {
 
       {/* Our advantage */}
       <div>
-        <div className="mx-auto grid w-full max-w-[90rem] gap-12 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-12 lg:gap-16 lg:px-12 lg:py-28">
+        <div className="grid gap-12 lg:grid-cols-12 lg:gap-16 section-space site-container">
           {/* Editorial statement */}
           <div className="flex flex-col lg:col-span-5">
             
 
-            <h2 className="mt-5 max-w-lg font-serif text-4xl leading-[1.03] tracking-[-0.035em] sm:text-5xl lg:text-6xl">
+            <h2 className="mt-5 max-w-lg font-serif section-heading">
               Thoughtful design for real life.
             </h2>
 

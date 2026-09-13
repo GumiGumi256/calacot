@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -38,7 +39,7 @@ export default function OwnersAndDevelopers() {
       id="developers"
       className="bg-brand-white text-brand-black dark:bg-brand-black dark:text-brand-white"
     >
-      <div className="mx-auto max-w-6xl px-6 py-14 md:px-10 md:py-16">
+      <div className="section-space site-container">
         <div className="grid items-center gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:gap-8 lg:grid-cols-2 lg:gap-16">
           {/* Image composition */}
           <div className="relative mx-auto w-full max-w-md pb-7 pl-6 pt-3 sm:pl-10 md:max-lg:pl-4">
@@ -105,7 +106,7 @@ export default function OwnersAndDevelopers() {
             </div>
 
             <div id="property-audience-content">
-              <h2 className="mt-6 max-w-[19ch] text-3xl font-semibold leading-[1.12] tracking-[-0.04em] md:text-[2rem] lg:text-[2.65rem]">
+              <h2 className="mt-6 max-w-[19ch] section-heading">
                 {content.title}
               </h2>
 
@@ -119,7 +120,7 @@ export default function OwnersAndDevelopers() {
 
               <Link
                 href={content.href}
-                className="group mt-6 inline-flex min-h-12 items-center justify-center gap-3 rounded-md bg-brand-primary px-5 py-3 text-sm font-semibold text-brand-black transition-colors hover:bg-brand-primary/85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary"
+                className={buttonVariants({ variant: "default", size: "lg", className: "mt-6 inline-flex" })}
               >
                 {content.cta}
 

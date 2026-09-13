@@ -41,7 +41,7 @@ export const metadata = pageMetadata("/contact");
 export default function ContactPage(props: ContactPageProps) {
   return (
     <main className="min-h-svh bg-brand-white text-brand-black dark:bg-brand-black dark:text-brand-white">
-      <div className="mx-auto max-w-6xl px-6 pb-16 pt-28 md:px-10 md:pb-20 md:pt-32">
+      <div className="pb-16 pt-28 md:pb-20 md:pt-32 site-container">
         <Link href="/" className="mb-8 inline-flex min-h-11 items-center gap-2 text-sm text-brand-black/65 hover:text-brand-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary dark:text-brand-white/65 dark:hover:text-brand-white">
           <ArrowLeft aria-hidden="true" className="size-4" /> Back to Calacot
         </Link>

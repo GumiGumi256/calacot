@@ -25,12 +25,12 @@ const steps = [
 export default function PropertyJourney() {
   return (
     <section className="bg-brand-white text-brand-black dark:bg-brand-black dark:text-brand-white">
-      <div className="mx-auto max-w-7xl px-6 py-14 md:px-12 md:py-20">
+      <div className="section-space site-container">
         <header className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-10">
           <div className="lg:col-span-8">
          
 
-            <h2 className="mt-4 max-w-2xl font-serif text-3xl leading-[1.08] tracking-[-0.035em] md:text-4xl lg:text-5xl">
+            <h2 className="mt-4 max-w-2xl font-serif section-heading">
               A personal approach, from the first conversation.
             </h2>
           </div>

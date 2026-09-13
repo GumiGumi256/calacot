@@ -6,7 +6,7 @@ import { Controller, useForm, useWatch, type FieldErrors } from "react-hook-form
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, ArrowRight, Check, LoaderCircle } from "lucide-react";
 import { submitEstateEnquiry } from "@/app/contact/actions";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,7 +23,6 @@ import {
 } from "@/lib/enquiry-schema";
 
 const controlClass = "min-h-12 rounded-md border-brand-black/15 bg-transparent px-3 text-base text-brand-black shadow-none placeholder:text-brand-black/40 focus-visible:border-brand-black/50 focus-visible:ring-brand-primary/30 dark:border-brand-white/20 dark:text-brand-white dark:placeholder:text-brand-white/40 dark:focus-visible:border-brand-white/50";
-const primaryClass = "min-h-12 rounded-md bg-brand-primary px-6 text-sm font-semibold text-brand-black shadow-none hover:bg-brand-primary/85 focus-visible:ring-brand-primary/50";
 const mutedClass = "text-brand-black/65 dark:text-brand-white/65";
 
 export function EstateEnquiryForm({ initialIntent }: { initialIntent: EnquiryIntent }) {
@@ -238,13 +237,13 @@ export function EstateEnquiryForm({ initialIntent }: { initialIntent: EnquiryInt
     return (
       <div className="py-4 md:py-8">
         <Check aria-hidden="true" className="mb-6 size-8 text-brand-black dark:text-brand-primary" />
-        <h2 ref={successRef} tabIndex={-1} className="font-serif text-3xl leading-tight outline-none md:text-4xl">Thank you. Your enquiry is with us.</h2>
+        <h2 ref={successRef} tabIndex={-1} className="font-serif outline-none section-heading">Thank you. Your enquiry is with us.</h2>
         <p className={`mt-5 max-w-lg text-base leading-7 ${mutedClass}`}>
           Our team will review your details and contact you by {contactMethod === "email" ? "email" : contactMethod === "whatsapp" ? "WhatsApp" : "phone"} to discuss the next step.
         </p>
         <p className={`mt-5 text-sm leading-6 ${mutedClass}`}>Keep this reference for any follow-up:</p>
         <p className="mt-1 break-all font-mono text-xs leading-6">{reference}</p>
-        <Button className={`mt-8 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary ${primaryClass}`}><Link href="/">Return to Calacot </Link></Button>
+        <Link href="/" className={buttonVariants({ variant: "default", size: "lg", className: "mt-8" })}>Return to Calacot </Link>
       </div>
     );
   }
@@ -262,7 +261,7 @@ export function EstateEnquiryForm({ initialIntent }: { initialIntent: EnquiryInt
         </div>
       </div>
 
-      <h2 ref={titleRef} tabIndex={-1} className="font-serif text-2xl leading-tight outline-none md:text-3xl">
+      <h2 ref={titleRef} tabIndex={-1} className="font-serif outline-none section-heading">
         {step === 1 ? "What do you have in mind?" : "How can we reach you?"}
       </h2>
       <p className={`mt-2 text-sm leading-6 ${mutedClass}`}>
@@ -349,8 +348,8 @@ export function EstateEnquiryForm({ initialIntent }: { initialIntent: EnquiryInt
         {serverError && <div ref={errorRef} tabIndex={-1} role="alert" className="mt-6 text-sm leading-6 text-destructive outline-none">{serverError}</div>}
 
         <div className="mt-7 flex flex-wrap items-center justify-between gap-4">
-          {step === 2 ? <Button type="button" variant="ghost" onClick={() => { setStep(1); setServerError(""); }} className="min-h-12 px-0 hover:bg-transparent hover:opacity-70"><ArrowLeft aria-hidden="true" className="size-4" /> Back</Button> : <span className={`text-xs ${mutedClass}`}>Contact details come next.</span>}
-          <Button type="submit" disabled={busy} className={primaryClass}>
+          {step === 2 ? <Button type="button" variant="ghost" onClick={() => { setStep(1); setServerError(""); }} size="lg"><ArrowLeft aria-hidden="true" className="size-4" /> Back</Button> : <span className={`text-xs ${mutedClass}`}>Contact details come next.</span>}
+          <Button type="submit" disabled={busy} size="lg">
             {busy ? <><LoaderCircle aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" /> Sending enquiry…</> : step === 1 ? <>Continue <ArrowRight aria-hidden="true" className="size-4" /></> : <>Send enquiry <ArrowRight aria-hidden="true" className="size-4" /></>}
           </Button>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonVariants } from "@/components/ui/button";
 import { useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -206,7 +207,7 @@ useGSAP(() => {
             width={140}
             height={60}
             alt="Calacot Logo"
-            className="object-contain  hidden dark:block"
+            className="object-contain hidden dark:block"
           />
 
           <Image
@@ -243,15 +244,15 @@ useGSAP(() => {
             onClick={toggle}
             aria-label={isOpen ? "Close menu" : "Open menu"}
             aria-expanded={isOpen}
-            className="group relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 hover:scale-105 active:scale-95 sm:h-auto sm:w-auto sm:gap-2 sm:px-4 sm:py-2 bg-primary text-brand-black"
+            className={buttonVariants({ variant: "default", size: "default" })}
             
           >
-            <span className="hidden text-sm font-semibold tracking-wide sm:block text-brand-white dark:text-brand-black">
+            <span className="hidden sm:block">
               {isOpen ? "Close" : "Menu"}
             </span>
 
             <span
-              className="flex h-8 w-8 items-center justify-center rounded-full text-brand-white bg-brand-black"
+              className="flex items-center justify-center"
              
             >
               {isOpen ? (
@@ -335,11 +336,7 @@ useGSAP(() => {
               <Link
                 href="/contact"
                 onClick={toggle}
-                className="inline-flex w-fit items-center gap-3 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
-                style={{
-                  backgroundColor: "var(--primary)",
-                  color: "var(--primary-foreground)",
-                }}
+                className={buttonVariants({ variant: "default", size: "lg", className: "w-fit" })}
               >
                 Get in touch
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
@@ -19,7 +20,7 @@ export default function DesignPurchase({ packages: packageOptions, slug, status 
   return (
     <aside className="rounded-2xl border border-current/15 p-6 lg:sticky lg:top-28 lg:self-start lg:p-8">
       <p className="text-xs uppercase tracking-[.16em] opacity-55">Make it yours</p>
-      <h2 className="mt-3 text-3xl tracking-[-.04em]">Choose your package.</h2>
+      <h2 className="mt-3 section-heading">Choose your package.</h2>
       {packages.length > 0 ? (
         <fieldset className="mt-6 space-y-3">
           <legend className="sr-only">Design package</legend>
@@ -40,8 +41,8 @@ export default function DesignPurchase({ packages: packageOptions, slug, status 
         <h3 className="text-sm font-medium">Included in {selected.package.name}</h3>
         <ul className="mt-3 space-y-3">{selected.package.includes?.map((item, index) => <li key={index} className="flex gap-3 text-sm leading-6 opacity-75"><Check className="mt-1 size-4 shrink-0" aria-hidden="true" />{item}</li>)}</ul>
       </div>}
-      {status === "coming-soon" ? <button disabled className="mt-7 w-full rounded-full bg-current/10 px-6 py-4 text-sm opacity-50">Coming soon</button> :
-        <Link href={`/start-project?${query}`} className="mt-7 flex items-center justify-between gap-4 rounded-full bg-brand-primary px-6 py-4 text-sm font-medium text-brand-black hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4">
+      {status === "coming-soon" ? <Button disabled size="lg" className="mt-7 w-full">Coming soon</Button> :
+        <Link href={`/start-project?${query}`} className={buttonVariants({ variant: "default", size: "lg", className: "mt-7" })}>
           {selected ? "Buy this design" : "Enquire about this design"}<ArrowUpRight size={18} aria-hidden="true" />
         </Link>}
       <p className="mt-4 text-xs leading-6 opacity-55">{status === "coming-soon" ? "This design is not yet available to purchase." : "Send a purchase enquiry. Our team will confirm your package and arrange payment with you."}</p>

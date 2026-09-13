@@ -8,8 +8,7 @@ export const metadata: Metadata = {
     default: "Calacot Tech",
     template: "%s | Calacot Tech",
   },
-  description:
-    "Calacot Tech designs intelligent digital systems that help African businesses operate efficiently and scale with greater control.",
+  description: "Calacot Tech helps businesses turn ideas into useful digital products and improve everyday work with custom software.",
 };
 
 type TechLayoutProps = {

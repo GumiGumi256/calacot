@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button";
 import { ServiceStructuredData } from "@/components/seo/structured-data";
 import { pageMetadata } from "@/lib/seo";
 
@@ -42,7 +43,7 @@ export default function CalacotEstatesHomepage() {
 
 
   return (
-    <div className="min-h-screen  ">
+    <div className="min-h-screen ">
       <ServiceStructuredData path="/real-estate" />
       
    
@@ -53,10 +54,10 @@ export default function CalacotEstatesHomepage() {
      
 
    {/* Choose your journey */}
-<section className="bg-brand-white px-6 py-16 text-brand-black dark:bg-brand-black dark:text-brand-white md:px-12 md:py-20">
+<section className="bg-brand-white px-6 text-brand-black dark:bg-brand-black dark:text-brand-white md:px-12 section-space">
   <div className="mx-auto max-w-7xl">
     <header className="mb-8 grid gap-5 lg:grid-cols-[1.4fr_1fr] lg:items-end lg:gap-12 md:mb-10">
-      <h2 className="max-w-2xl font-serif text-3xl leading-[1.08] tracking-[-0.035em] md:text-4xl lg:text-5xl">
+      <h2 className="max-w-2xl font-serif section-heading">
         What does your next
         <br />
         chapter look like?
@@ -195,9 +196,9 @@ export default function CalacotEstatesHomepage() {
       </section> */}
 
       {/* ==================== 13. FINAL CALL TO ACTION ==================== */}
-     <section className="bg-brand-white px-6 py-16 text-brand-black dark:bg-brand-black dark:text-brand-white md:px-12 md:py-20">
+     <section className="bg-brand-white px-6 text-brand-black dark:bg-brand-black dark:text-brand-white md:px-12 section-space">
       <div className="mx-auto max-w-3xl text-center">
-        <h2 className="font-serif text-4xl leading-[1.08] tracking-[-0.035em] md:text-5xl lg:text-6xl">
+        <h2 className="font-serif section-heading">
           Your next chapter
           <br />
           starts with a conversation.
@@ -211,7 +212,7 @@ export default function CalacotEstatesHomepage() {
         <div className="mt-7 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-7">
           <Link
             href="/contact?intent=buy-home"
-            className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-md bg-brand-primary px-6 py-3 text-sm font-semibold text-brand-black transition-colors hover:bg-brand-primary/85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary"
+            className={buttonVariants({ variant: "default", size: "lg", className: "inline-flex" })}
           >
             Discuss your property search
 
@@ -223,7 +224,7 @@ export default function CalacotEstatesHomepage() {
 
           <Link
             href="/list-property?type=individual"
-            className="inline-flex  min-h-12 items-center justify-center text-sm font-medium text-brand-black/70 transition-colors hover:text-brand-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary dark:text-brand-white/70 dark:hover:text-brand-white"
+            className="inline-flex min-h-12 items-center justify-center text-sm font-medium text-brand-black/70 transition-colors hover:text-brand-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary dark:text-brand-white/70 dark:hover:text-brand-white"
           >
             Have a property to sell?
           </Link>

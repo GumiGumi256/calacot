@@ -1,7 +1,7 @@
 import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { CheckCircle2Icon, CalendarIcon, BriefcaseIcon, ArrowRightIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import Image from "next/image";
 
 type PageProps = {
@@ -40,7 +40,7 @@ export default async function ThankYouPage({ searchParams }: PageProps) {
       };
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-4 py-16">
+    <div className="min-h-[70vh] flex items-center justify-center px-4 section-space">
       <div className="max-w-xl w-full text-center space-y-8">
         {/* Success Icon */}
         <div className="relative inline-flex items-center justify-center">
@@ -75,8 +75,7 @@ export default async function ThankYouPage({ searchParams }: PageProps) {
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-          <Button size="lg" >
-            <Link href="/" className="flex items-center justify-center gap-2">
+          <Link href="/" className={buttonVariants({ variant: "default", size: "lg" })}>
             Back to Home
             <Image 
             src='/icons/home.svg'
@@ -87,11 +86,9 @@ export default async function ThankYouPage({ searchParams }: PageProps) {
             />
             
             </Link>
-          </Button>
 
           {!isScheduledCall && (
-            <Button variant="outline" size="lg">
-              <Link href={`/schedule-call${service ? `?service=${service}` : ""}`} className="flex items-center justify-center gap-2">
+            <Link href={`/schedule-call${service ? `?service=${service}` : ""}`} className={buttonVariants({ variant: "outline", size: "lg" })}>
                 Schedule a Call Now <Image 
                 src='/icons/chevron-right.svg'
                 alt="Chevron Right"
@@ -100,7 +97,6 @@ export default async function ThankYouPage({ searchParams }: PageProps) {
                 className="invert"
                 />
               </Link>
-            </Button>
           )}
         </div>
       </div>

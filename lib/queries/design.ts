@@ -21,7 +21,7 @@ export type FeaturedDesign = {
 };
 
 export const FEATURED_DESIGNS_QUERY = defineQuery(/* groq */ `
-*[_type == "design" && isFeatured == true && status != "archived"
+*[_type == "design" && isFeatured == true && coalesce(status, "available") != "archived"
   && defined(slug.current) && defined(featuredImage.asset->url)]
   | order(publishedAt desc, _id asc)[0...12] {
   _id,
@@ -75,7 +75,7 @@ export type DesignDetails = Omit<FeaturedDesign, "startingPrice"> & {
   } | null;
   features: string[] | null;
   images:
-    | { _key: string; image: SanityImageSource; blur: string | null }[]
+    | { _key: string; image: SanityImageSource; alt: string | null; blur: string | null }[]
     | null;
   packages: DesignPackage[];
   additionalServices:
@@ -92,7 +92,7 @@ export type DesignDetails = Omit<FeaturedDesign, "startingPrice"> & {
 };
 
 export const DESIGN_BY_SLUG_QUERY = defineQuery(/* groq */ `
-*[_type == "design" && slug.current == $slug && status != "archived"][0] {
+*[_type == "design" && slug.current == $slug && coalesce(status, "available") != "archived"][0] {
   _id, title, "slug": slug.current, "designCode": designCode.current,
   "description": select(defined(description[0]._type) => pt::text(description), description),
   propertyType, designType, architecturalStyle, bedrooms, bathrooms, floors,
@@ -100,7 +100,7 @@ export const DESIGN_BY_SLUG_QUERY = defineQuery(/* groq */ `
   "status": coalesce(status, "available"),
   featuredImage, "imageAlt": featuredImage.alt,
   "imageBlur": featuredImage.asset->metadata.lqip,
-  "images": images[defined(asset->url)] { _key, "image": @, "blur": asset->metadata.lqip },
+  "images": images[defined(asset->url)] { _key, "image": @, alt, "blur": asset->metadata.lqip },
   "packages": coalesce(packages[price > 0 && package->isActive == true] | order(package->order asc, price asc) {
     _key, price, recommended, package->{ _id, name, description, includes }
   }, []),
@@ -119,3 +119,18 @@ export const getDesignBySlug = cache(async (slug: string) =>
     },
   ),
 );
+
+// Published detail pages, including designs outside the featured carousel.
+export const DESIGN_SITEMAP_QUERY = defineQuery(/* groq */ `
+*[_type == "design" && coalesce(status, "available") != "archived"
+  && defined(slug.current) && slug.current != ""] | order(slug.current asc) {
+  "slug": slug.current, _updatedAt
+}`);
+
+export async function getDesignSitemapEntries() {
+  return client.fetch<{ slug: string; _updatedAt: string }[]>(
+    DESIGN_SITEMAP_QUERY,
+    {},
+    { perspective: "published", useCdn: false, next: { revalidate: 60, tags: ["designs"] } },
+  );
+}

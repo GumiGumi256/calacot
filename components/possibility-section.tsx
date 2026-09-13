@@ -65,7 +65,7 @@ export default function PossibilitySection() {
 
   return (
     <section 
-      className="w-full px-6 py-24 md:px-12 lg:px-16"
+      className="w-full px-6 md:px-12 lg:px-16 section-space"
       aria-labelledby="capabilities-heading"
     >
       <div className="mx-auto max-w-7xl">
@@ -75,7 +75,7 @@ export default function PossibilitySection() {
             
             <h2 
               id="capabilities-heading"
-              className="font-heading text-4xl font-normal leading-tight sm:text-5xl md:text-6xl"
+              className="font-heading section-heading"
             >
               Different capabilities. <br />
               <span className="text-muted-foreground">One shared ambition.</span>

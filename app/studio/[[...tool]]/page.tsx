@@ -12,7 +12,12 @@ import config from '../../../sanity.config'
 
 export const dynamic = 'force-static'
 
-export { metadata, viewport } from 'next-sanity/studio'
+export { viewport } from 'next-sanity/studio'
+export const metadata = {
+  title: { absolute: "Content Studio | Calacot" },
+  description: "Calacot's content authoring environment.",
+  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+}
 
 export default function StudioPage() {
   return <NextStudio config={config} />

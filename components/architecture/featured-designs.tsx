@@ -27,14 +27,14 @@ export default async function FeaturedDesigns() {
   return (
     <section
       id="featured-designs"
-      className="overflow-hidden bg-brand-white py-[clamp(72px,8vw,128px)] text-brand-black dark:bg-brand-black dark:text-brand-white"
+      className="overflow-hidden bg-brand-white text-brand-black dark:bg-brand-black dark:text-brand-white section-space"
       aria-labelledby="featured-designs-title"
     >
       <header className="mx-auto mb-[60px] max-w-[740px] px-6 text-center max-sm:mb-9">
         
         <h2
           id="featured-designs-title"
-          className="text-[clamp(36px,4.3vw,64px)] font-normal leading-[1.07] tracking-[-.055em]"
+          className="section-heading"
         >
           Good design.
           <br />
@@ -60,14 +60,14 @@ function FeaturedDesignsMessage({
   return (
     <section
       id="featured-designs"
-      className="overflow-hidden bg-brand-white py-[clamp(72px,8vw,128px)] text-brand-black dark:bg-brand-black dark:text-brand-white"
+      className="overflow-hidden bg-brand-white text-brand-black dark:bg-brand-black dark:text-brand-white section-space"
       aria-labelledby="featured-designs-title"
     >
       <header className="mx-auto max-w-[740px] px-6 text-center">
         
         <h2
           id="featured-designs-title"
-          className="text-[clamp(36px,4.3vw,64px)] font-normal leading-[1.07] tracking-[-.055em]"
+          className="section-heading"
         >
           Your next chapter,
           <br />

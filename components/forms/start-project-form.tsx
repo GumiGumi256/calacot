@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
@@ -293,15 +293,9 @@ export default function StartProjectForm({
               {isSubmitting ? "Submitting..." : "Start My Project"}
             </Button>
 
-            <Link href={`/schedule-call?service=${initialService || ""}`} passHref>
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => onScheduleCall?.()}
-              >
+            <Link href={`/schedule-call?service=${initialService || ""}`} className={buttonVariants({ variant: "outline", size: "lg" })}>
                 Schedule a Call
-              </Button>
-            </Link>
+              </Link>
           </Field>
         </FieldGroup>
       </form>

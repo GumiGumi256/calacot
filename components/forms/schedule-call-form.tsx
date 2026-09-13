@@ -1,5 +1,6 @@
 "use client";
 
+import { buttonVariants } from "@/components/ui/button";
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -210,7 +211,7 @@ const onValidSubmit = async (data: ScheduleCallFormData) => {
         </Field>
  <Field
               orientation="horizontal"
-              className="flex  gap-4 justify-start items-center"
+              className="flex gap-4 justify-start items-center"
             >
 
   
@@ -218,11 +219,9 @@ const onValidSubmit = async (data: ScheduleCallFormData) => {
         <Button type="submit" disabled={isSubmitting} >
           {isSubmitting ? "Scheduling..." : "Schedule Call"}
         </Button>
-        <Link href={`/start-project?service=${initialService || ""}`} passHref >
-          <Button variant="outline" type="button" >
+        <Link href={`/start-project?service=${initialService || ""}`} className={buttonVariants({ variant: "outline", size: "lg" })}>
             Start a Project Instead
-          </Button>
-        </Link>
+          </Link>
 </Field>
       </form>
     </div>

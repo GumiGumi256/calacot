@@ -296,6 +296,7 @@ export default defineType({
       name: "featuredImage",
       title: "Featured Image",
       type: "image",
+      fields: [{ name: "alt", title: "Image description", type: "string", description: "Describe what is shown without adding keywords or claims about completed construction." }],
       group: "media",
 
       options: {
@@ -314,6 +315,7 @@ export default defineType({
       of: [
         {
           type: "image",
+          fields: [{ name: "alt", title: "Image description", type: "string" }],
           options: {
             hotspot: true,
           },

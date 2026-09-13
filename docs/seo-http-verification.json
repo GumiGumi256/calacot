@@ -1,0 +1,51 @@
+[
+  {
+    "path": "/architecture/designs/4-bedroom-villa",
+    "status": 200,
+    "title": "4 Bedroom villa - Architectural Design | Calacot",
+    "description": "dive into the world of luxury living with this 4 bedroom master piece",
+    "robots": "index, follow"
+  },
+  {
+    "path": "/architecture/designs/ultra-mordern-five-bedroom",
+    "status": 200,
+    "title": "Ultra Mordern Five bedroom  Villa. - Architectural Design | Calacot",
+    "description": "Ground Floor: Open plan – Lounge, Dining and Kitchen, Guest Bedroom, Maid&#x27;s Room, Pantry, and Powder Room. First Floor: Next are the master bedroom, boy&#x27;s...",
+    "robots": "index, follow"
+  },
+  {
+    "path": "/contact?intent=buy-home",
+    "status": 200,
+    "title": "Talk About Your Property Plans | Calacot Estates",
+    "description": "A home to find, land to build on or a property to sell: tell Calacot Estates what you have in mind and how you would like our team to contact you.",
+    "robots": "index, follow"
+  },
+  {
+    "path": "/list-property?type=development",
+    "status": 200,
+    "title": "Property Marketing for Owners &amp; Developers | Calacot Estates",
+    "description": "Help buyers understand what your property offers. Share your home, land or development with Calacot Estates to discuss marketing and sales representation.",
+    "robots": "index, follow"
+  },
+  {
+    "path": "/start-project?service=painting",
+    "status": 200,
+    "title": "Tell Us What You Want to Create | Calacot",
+    "description": "Share your plans for a home, space or digital product with Calacot. Tell us your priorities, scope and budget so we can discuss a practical next step.",
+    "robots": "noindex, follow"
+  },
+  {
+    "path": "/schedule-call?service=architecture",
+    "status": 200,
+    "title": "Discuss Your Next Project | Calacot",
+    "description": "Book a conversation with Calacot about your home, space, property or software plans. Choose a time and tell us what you would like to discuss.",
+    "robots": "noindex, follow"
+  },
+  {
+    "path": "/studio",
+    "status": 200,
+    "title": "Content Studio | Calacot",
+    "description": "Calacot&#x27;s content authoring environment.",
+    "robots": "noindex, nofollow"
+  }
+]

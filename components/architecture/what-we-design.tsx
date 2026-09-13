@@ -12,11 +12,11 @@ export default function WhatWeDesignSection() {
 
   return (
     <section className="relative overflow-hidden pt-14 md:pt-24">
-      <div className="mx-auto max-w-7xl px-6 md:max-lg:px-10">
+      <div className="site-container">
         {/* Header */}
         <div className="mb-14 flex flex-col justify-between gap-8 md:flex-row md:items-end md:max-lg:mb-10 md:max-lg:items-center">
           <div className="max-w-2xl">
-            <h2 className="text-5xl font-light title md:text-7xl md:max-lg:text-5xl">
+            <h2 className="section-heading">
               What We
               <br />
                Visualize
@@ -24,8 +24,9 @@ export default function WhatWeDesignSection() {
           </div>
 
           <p className="max-w-md text-sm leading-relaxed text-p md:max-lg:max-w-xs">
-            Calacot provides architectural visualization services 
-            for studios, developers, and cultural institutions worldwide.
+            Explore residential and commercial design possibilities through
+            layouts and architectural visualizations that help you consider
+            how a building will look, feel and work.
           </p>
         </div>
 

@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
@@ -5,7 +6,7 @@ export function TechCta() {
   return (
     <section
       id="contact"
-      className="relative isolate flex min-h-[32rem] w-full items-center overflow-hidden b bg-brand-white px-5 py-24 text-brand-black dark:border-brand-white/10 dark:bg-brand-black dark:text-brand-white sm:min-h-[38rem] sm:px-8 sm:py-32 lg:min-h-[42rem] lg:px-12 lg:py-36"
+      className="relative isolate flex min-h-[32rem] w-full items-center overflow-hidden b bg-brand-white px-5 text-brand-black dark:border-brand-white/10 dark:bg-brand-black dark:text-brand-white sm:min-h-[38rem] sm:px-8 lg:min-h-[42rem] lg:px-12 section-space"
     >
       {/* Warm central atmosphere */}
       <div
@@ -71,7 +72,7 @@ export function TechCta() {
             Start a conversation
           </p>
 
-          <h2 className="mt-6 text-balance text-[clamp(2.5rem,6vw,5.5rem)] font-semibold leading-[0.98] tracking-[-0.055em]">
+          <h2 className="mt-6 text-balance section-heading">
             Let’s build what your business needs next.
           </h2>
 
@@ -83,7 +84,7 @@ export function TechCta() {
 
           <Link
             href="/start-project?service=software-development"
-            className="group mt-9 inline-flex min-h-13 items-center justify-center gap-3 rounded-full bg-brand-primary px-7 py-3.5 text-sm font-semibold text-brand-black shadow-[0_10px_35px_rgba(255,201,25,0.2)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_40px_rgba(255,201,25,0.3)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary sm:mt-10"
+            className={buttonVariants({ variant: "default", size: "lg", className: "mt-9 inline-flex sm:mt-10" })}
           >
             Discuss your business
 

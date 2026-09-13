@@ -21,12 +21,12 @@ const principles = [
 export function DesignPhilosophy() {
   return (
     <section className="bg-brand-white text-brand-black transition-colors duration-300 dark:bg-brand-black dark:text-brand-white">
-      <div className="mx-auto w-full max-w-[90rem] px-5 py-20 sm:px-8 sm:py-24 lg:px-12 lg:py-32">
+      <div className="section-space site-container">
         
-        <div className="grid gap-x-8 gap-y-8  lg:grid-cols-12">
+        <div className="grid gap-x-8 gap-y-8 lg:grid-cols-12">
         
           {/* Main statement */}
-          <h2 className="max-w-5xl text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.045em] sm:text-5xl lg:col-span-9 lg:text-7xl">
+          <h2 className="max-w-5xl text-balance lg:col-span-9 section-heading">
             We design for the life that will happen{" "}
             <span className="text-brand-primary">inside.</span>
           </h2>

@@ -210,7 +210,7 @@ export default function PaintingProcess() {
                 className="object-contain"
               />
 
-              <h2 className="text-[4rem] leading-[0.9] tracking-tight font-light text-white">
+              <h2 className="text-white section-heading">
                 Painting
                 <br />
                 Process
@@ -266,7 +266,7 @@ export default function PaintingProcess() {
               className="object-contain"
             />
 
-            <h2 className="text-[3.5rem] leading-[0.9] tracking-tight font-light text-white">
+            <h2 className="text-white section-heading">
               Painting
               <br />
               Process

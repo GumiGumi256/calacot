@@ -30,8 +30,8 @@ h1, h2, h3, h4, h5, h6 {
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
+    --primary: var(--color-brand-primary);
+    --primary-foreground: var(--color-brand-black);
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
     --muted: oklch(0.97 0 0);
@@ -67,7 +67,7 @@ h1, h2, h3, h4, h5, h6 {
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
+    --primary: var(--color-brand-primary);
     --primary-foreground: oklch(0.205 0 0);
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
@@ -172,7 +172,45 @@ h1, h2, h3, h4, h5, h6 {
   .text-h5 {
     @apply text-lg/8 md:text-2xl/8 font-medium text-brand-black dark:text-brand-white;
   }
-  text-p {
+  .text-p {
     @apply text-base/5 md:text-lg/5  font-normal text-brand-black dark:text-brand-white leading-relaxed;
   }
+}
+/* Shared rhythm for all service pages. */
+:root {
+  --section-space: clamp(4rem, 7vw, 7rem);
+  --page-gutter: clamp(1.25rem, 4vw, 3rem);
+  --content-width: 90rem;
+  --overlay: oklch(1 0 0 / 10%);
+  --overlay-hover: oklch(1 0 0 / 18%);
+  --overlay-border: oklch(1 0 0 / 30%);
+  --overlay-foreground: oklch(0.985 0 0);
+}
+@theme inline {
+  --color-overlay: var(--overlay);
+  --color-overlay-hover: var(--overlay-hover);
+  --color-overlay-border: var(--overlay-border);
+  --color-overlay-foreground: var(--overlay-foreground);
+}
+@utility section-space { padding-block: var(--section-space); }
+@utility page-gutter { padding-inline: var(--page-gutter); }
+@utility site-container {
+  width: 100%;
+  max-width: var(--content-width);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+}
+@utility section-heading {
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(2rem, 4.5vw, 4rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+@utility section-copy {
+  font-size: clamp(1rem, 1.2vw, 1.125rem);
+  line-height: 1.75;
+  color: var(--muted-foreground);
+  text-wrap: pretty;
 }

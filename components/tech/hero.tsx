@@ -1,3 +1,4 @@
+import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 
 const products = [
@@ -59,26 +60,26 @@ export default function TechHero() {
       />
 
       {/* Hero content */}
-      <div className="relative z-20 mx-auto flex w-full max-w-[90rem] flex-col px-5 pb-16 pt-24 sm:px-8 sm:pb-20 lg:px-12 lg:pb-24 lg:pt-32">
+      <div className="relative z-20 flex flex-col pb-16 pt-24 sm:pb-20 lg:pb-24 lg:pt-32 site-container">
         <div className="flex flex-1 items-center justify-center py-12">
           <div className="mx-auto max-w-5xl text-center">
-            <h1 className="text-balance text-[clamp(2.75rem,7vw,7rem)] font-heading font-semibold leading-[0.92] tracking-[-0.055em] text-brand-white">
-              Software development in Uganda.
+            <h1 className="text-balance text-[clamp(2.75rem,7vw,6rem)] font-heading font-semibold leading-[0.92] tracking-[-0.055em] text-brand-white">
+              Your ideas, put to work.
               <span className="mt-2 block text-brand-primary">
-                Made beautifully simple.
+                Software with a purpose.
               </span>
             </h1>
 
             <p className="mx-auto mt-7 max-w-2xl text-pretty text-base leading-7 text-white/70 sm:text-lg sm:leading-8">
-              Calacot Tech designs intelligent digital products that help
-              businesses in Uganda and across Africa operate efficiently, serve customers better
-              and scale with greater control.
+              Calacot Tech builds custom software and web platforms for businesses
+              in Uganda and across Africa. Turn a product idea into something useful,
+              connect your systems or make everyday work simpler.
             </p>
 
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 href="/start-project?service=software-development"
-                className="group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-6 py-3 text-sm font-semibold text-brand-black transition duration-300 hover:-translate-y-0.5 hover:bg-brand-primary/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary sm:w-auto"
+                className={buttonVariants({ variant: "default", size: "lg", className: "inline-flex w-full sm:w-auto" })}
               >
                 Discuss your business
                 <svg
@@ -99,7 +100,7 @@ export default function TechHero() {
 
               <Link
                 href="#solutions"
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-white/20 bg-white/[0.06] px-6 py-3 text-sm font-medium text-white backdrop-blur-md transition duration-300 hover:border-white/35 hover:bg-white/[0.1] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:w-auto"
+                className={buttonVariants({ variant: "glass", size: "lg", className: "inline-flex w-full sm:w-auto" })}
               >
                 Explore what we&apos;re building
               </Link>

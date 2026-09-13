@@ -18,7 +18,7 @@ export default async function StartProjectPage({
     : undefined;
 
   return (
-    <main className="container py-20">
+    <main className="site-container section-space">
       <StartProjectForm initialService={design ? "architecture" : service} initialOverview={initialOverview} />
     </main>
   );

@@ -66,7 +66,7 @@ const solutions = [
 
 export function SolutionsOverview() {
   return (
-    <section id="solutions" className="bg-background text-foreground py-24 px-6 md:px-12 lg:px-16">
+    <section id="solutions" className="bg-background text-foreground px-6 md:px-12 lg:px-16 section-space">
       <div className="mx-auto max-w-7xl">
         {/* Header Section */}
         <header className="mb-16 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">
@@ -74,7 +74,7 @@ export function SolutionsOverview() {
             <p className="mb-3 text-xs font-semibold tracking-widest uppercase text-muted-foreground">
               What We Build
             </p>
-            <h2 className="font-heading text-4xl font-normal leading-tight sm:text-5xl md:text-6xl">
+            <h2 className="font-heading section-heading">
               Technology built around <br />
               <span className="text-muted-foreground">the core operation.</span>
             </h2>

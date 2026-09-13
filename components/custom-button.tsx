@@ -56,9 +56,13 @@ const CustomButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Button
         className={cn(
-          buttonVariants({ variant, size, fullWidth, className }),
+          className,
           loading && "cursor-wait",
         )}
+        variant={variant}
+        size={size}
+        fullWidth={fullWidth}
+        aria-busy={loading || undefined}
         ref={ref}
         disabled={isDisabled}
         aria-disabled={isDisabled}

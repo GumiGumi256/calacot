@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -75,33 +75,22 @@ export default function PaintingHero() {
       {/* Centered content */}
       <div className="relative z-10 mx-auto max-w-3xl px-6 text-center mb-44 md:mb-64">
         <h1 className="sub-title font-light text-4xl tracking-tight text-neutral-900 dark:text-white md:text-5xl lg:text-6xl hero-title">
-          Professional Painting Services in Uganda
+          A new finish. A fresh sense of home.
         </h1>
 
         <p className="hero-sub mx-auto mt-5 max-w-2xl text-base text-neutral-700 dark:text-neutral-200 md:text-lg">
-          Transform your space with high-quality interior and exterior painting
-          services. Clean finishes, modern color palettes, and long-lasting
-          craftsmanship.
+          Bring colour and care to your home or workspace with interior and
+          exterior painting in Uganda. We consider surface preparation, colour
+          choices and the details of the finish with you.
         </p>
 
         <div className="hero-cta mt-4 flex flex-col gap-4 md:flex-row justify-center">
-          <Link href="/start-project?service=painting">
-            <Button
-              size="lg"
-              className="rounded-full px-8 shadow-md transition-transform hover:scale-105"
-            >
+          <Link href="/start-project?service=painting" className={buttonVariants({ variant: "default", size: "lg" })}>
               Start A Project
-            </Button>
-          </Link>
-           <Link href="/start-project?service=painting">
-            <Button
-            variant="outline"
-              size="lg"
-              className="rounded-full px-8 shadow-md transition-transform hover:scale-105"
-            >
+            </Link>
+           <Link href="/start-project?service=painting" className={buttonVariants({ variant: "outline", size: "lg" })}>
               Get A Quote
-            </Button>
-          </Link>
+            </Link>
         </div>
       </div>
     </section>

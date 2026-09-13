@@ -18,7 +18,7 @@ export default function Painting() {
       <ExperienceSection />
       <PaintingServices />
       < div className="grid w-full items-center gap-8 px-12 pt-8 mb-12 sm:px-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:px-10 md:pt-14 lg:px-16 lg:gap-20">
-        <h2 className="sub-title min-w-0 leading-tight capitalize font-light md:max-lg:text-4xl">
+        <h2 className="min-w-0 capitalize section-heading">
           Your Trusted partner for <br className="md:max-lg:hidden" /> Exceptional Painting
         </h2>
         <p className="text-p min-w-0 max-w-[520px] pt-1 text-left leading-relaxed">
@@ -30,7 +30,7 @@ export default function Painting() {
       </div>
       <PaintingProcess />
        {/* Call to Action Section */}
-      <section className="relative w-full  md:py-40 overflow-hidden">
+      <section className="relative w-full md:py-40 overflow-hidden">
         {/* Next.js Image as background */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -45,7 +45,7 @@ export default function Painting() {
 
         {/* Content */}
         <div className="relative z-20 max-w-4xl ml-16 md:ml-auto text-center text-brand-black px-4 md:px-12 pb-10 md:pb-20">
-          <h2 className="text-2xl md:text-5xl lg:text-6xl font-light tracking-tight">
+          <h2 className="section-heading">
             Transform Your Space with <br />
             <span className="font-semibold">Professional Painting</span>
           </h2>

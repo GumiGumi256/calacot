@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import Container from "@/components/container";
-import { CustomButton } from "@/components/custom-button";
+import { buttonVariants } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -53,37 +53,20 @@ export default function ArchHero() {
      
 
             {/* HEADLINE */}
-            <h1 className="text-brand-white mb-6 max-w-6xl title  font-light">
-             Architectural design in Uganda, shaped by purpose
+            <h1 className="text-brand-white mb-6 max-w-6xl title font-light">
+             A home imagined. A design to build on.
              
             </h1>
 
             {/* SUBTEXT */}
             <p className="text-lg text-brand-white/80 mb-10 text-p">
-              We design residential and commercial spaces with a focus on spatial intelligence and material precision.
+              Bring your plans for a home or building into focus. Our architectural design work in Uganda brings together layouts, materials and 3D concepts around your site and the way you want to use it.
             </p>
 
             {/* CTA */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/architecture/designs">
-              <CustomButton
-                size="lg"
-                icon={<ArrowRight />}
-                iconPosition="right"
-              >
-                Buy Designs
-              </CustomButton>
-              </Link>
-<Link href="/start-project?service=architecture">
-
-              <CustomButton
-                size="lg"
-                variant="outline"
-                className="border-white/30 text-white hover:bg-white/10"
-              >
-                Start a Project
-              </CustomButton>
-</Link>
+              <Link href="/architecture/designs" className={buttonVariants({ size: "lg" })}>Buy Designs <ArrowRight data-icon="inline-end" /></Link>
+<Link href="/start-project?service=architecture" className={buttonVariants({ variant: "glass", size: "lg" })}>Start a Project</Link>
             </div>
           </div>
         </div>

@@ -17,15 +17,15 @@ import {
 
 export function WhyCalacot() {
   return (
-    <section className="relative overflow-hidden  sm:py-24 lg:py-28 bg-background text-foreground">
+    <section className="relative overflow-hidden sm:py-24 lg:py-28 bg-background text-foreground">
      
 
-      <div className="mx-auto max-w-[85rem] px-6 sm:px-8 lg:px-12">
+      <div className="site-container">
         <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
           
           {/* Left Text Block */}
           <div className="max-w-xl lg:col-span-6">
-            <h2 className="text-4xl font-bold tracking-tight text-brand-black dark:text-brand-white sm:text-5xl lg:text-6xl">
+            <h2 className="text-brand-black dark:text-brand-white section-heading">
               We design more than software.
             </h2>
 

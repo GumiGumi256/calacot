@@ -6,7 +6,7 @@ export function JsonLd({ data }: { data: Record<string, unknown> }) {
 
 export function SiteStructuredData() {
   return <JsonLd data={{ "@context": "https://schema.org", "@graph": [
-    { "@type": "Organization", "@id": absoluteUrl("/#organization"), name: "Calacot", legalName: "Calacot Uganda Limited", url: absoluteUrl("/"), logo: absoluteUrl("/calacot-logo-icon-black.svg"), areaServed: { "@type": "Country", name: "Uganda" } },
+    { "@type": "Organization", "@id": absoluteUrl("/#organization"), name: "Calacot", slogan: "We Make Possibilities Real.", description: seoPages["/"].description, legalName: "Calacot Uganda Limited", url: absoluteUrl("/"), logo: absoluteUrl("/calacot-logo-icon-black.svg"), areaServed: { "@type": "Country", name: "Uganda" } },
     { "@type": "WebSite", "@id": absoluteUrl("/#website"), name: "Calacot", url: absoluteUrl("/"), inLanguage: "en-UG", publisher: { "@id": absoluteUrl("/#organization") } },
   ] }} />;
 }

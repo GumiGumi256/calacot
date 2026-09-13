@@ -13,7 +13,7 @@ import {
   type PropertyLeadValues,
 } from "@/lib/property-lead-schema";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
@@ -31,11 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const inputClass =
-  "min-h-12 w-full min-w-0 rounded-md border-brand-black/15 bg-transparent text-base text-brand-black shadow-none focus-visible:ring-brand-primary/30 dark:border-brand-white/20 dark:text-brand-white";
+const inputClass = "w-full min-w-0";
 
-const buttonClass =
-  "min-h-12 rounded-md bg-brand-primary px-6 text-sm font-semibold text-brand-black shadow-none hover:bg-brand-primary/85";
 
 const mutedClass =
   "text-brand-black/65 dark:text-brand-white/65";
@@ -250,7 +247,7 @@ export function PropertyLeadForm({ initialType }: Props) {
         <h2
           ref={successRef}
           tabIndex={-1}
-          className="font-serif text-3xl leading-tight outline-none md:text-4xl"
+          className="font-serif outline-none section-heading"
         >
           Thank you for the introduction.
         </h2>
@@ -260,12 +257,10 @@ export function PropertyLeadForm({ initialType }: Props) {
           discuss your property and the next steps.
         </p>
 
-        <Button className={`mt-7 ${buttonClass}`}>
-          <Link href="/" className="inline-flex items-center gap-2">
+        <Link href="/" className={buttonVariants({ variant: "default", size: "lg", className: "mt-8" })}>
             Return to Calacot
             <ArrowRight aria-hidden="true" className="size-4" />
           </Link>
-        </Button>
       </div>
     );
   }
@@ -398,7 +393,7 @@ export function PropertyLeadForm({ initialType }: Props) {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className={`mt-6 w-full sm:w-auto ${buttonClass}`}
+          size="lg" className="mt-6 w-full sm:w-auto"
         >
           {isSubmitting ? (
             <>

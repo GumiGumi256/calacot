@@ -117,13 +117,13 @@ export function OurProcess() {
       ref={sectionRef}
       className="bg-background text-foreground transition-colors duration-300"
     >
-      <div className="mx-auto w-full max-w-[90rem] px-5 py-20 sm:px-8 sm:py-24 lg:px-12 lg:py-28">
-        <div className="grid gap-7  pb-6 lg:grid-cols-12 lg:gap-8">
+      <div className="section-space site-container">
+        <div className="grid gap-7 pb-6 lg:grid-cols-12 lg:gap-8">
           
 
           <h2
             data-process-heading
-            className="max-w-4xl text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.045em] sm:text-5xl lg:col-span-8 lg:text-6xl"
+            className="max-w-4xl text-balance lg:col-span-8 section-heading"
           >
             From complexity to a system people can use.
           </h2>

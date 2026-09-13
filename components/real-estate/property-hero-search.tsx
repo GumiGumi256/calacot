@@ -1,12 +1,13 @@
 'use client'
 
+import { buttonVariants } from "@/components/ui/button";
 import { Search } from 'lucide-react';
 import React, { useState } from 'react'
 
 export default function PropertyHeroSearch() {
      const [activeTab, setActiveTab] = useState<'buy' | 'invest' | 'rent'>('buy');
   return (
-   <section id="search" className="max-w-7xl mx-auto px-6 md:px-12 -mt-6 relative z-20 mb-28">
+   <section id="search" className="-mt-6 relative z-20 mb-28 site-container">
         <div className="bg-white rounded-2xl shadow-xl border border-stone-200/80 p-6 md:p-8 backdrop-blur-xl">
           {/* Tabs */}
           <div className="flex gap-6 border-b border-stone-200 pb-4 mb-6">
@@ -70,7 +71,7 @@ export default function PropertyHeroSearch() {
               </select>
             </div>
 
-            <button className="w-full bg-stone-950 hover:bg-amber-600 text-white font-medium text-xs uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 transition-colors duration-300 py-4 lg:py-0">
+            <button className={buttonVariants({ variant: "glass", size: "lg", className: "w-full" })}>
               <Search size={16} /> Discover Opportunities
             </button>
           </div>

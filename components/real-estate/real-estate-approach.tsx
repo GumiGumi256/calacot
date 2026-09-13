@@ -49,7 +49,7 @@ export default function RealEstateApproach() {
               </p>
 
               <Link
-                href="/contact"
+                href="/contact?intent=buy-home"
                 className="mt-5 inline-flex min-h-11 items-center rounded-md bg-brand-primary px-5 py-2.5 text-xs font-medium text-brand-black transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary"
               >
                 Begin your search

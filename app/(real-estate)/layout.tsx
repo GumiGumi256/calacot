@@ -8,8 +8,7 @@ export const metadata: Metadata = {
     default: "Calacot Estates",
     template: "%s | Calacot Estates",
   },
-  description:
-    "Calacot Estates is your gateway to finding the perfect home in Uganda, dedicated to making your real estate journey seamless and enjoyable.",
+  description: "Find a home or land that fits your plans. Calacot Estates supports property discovery, marketing and advisory in Uganda.",
 };
 
 type RealEstateLayoutProps = {
