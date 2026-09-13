@@ -113,7 +113,7 @@ const onValidSubmit = async (data: ScheduleCallFormData) => {
                     <SelectItem value="architecture">Architecture</SelectItem>
                     <SelectItem value="painting">Painting</SelectItem>
                     <SelectItem value="interior-design">Interior Design</SelectItem>
-                    <SelectItem value="software-development">Software Development</SelectItem>
+                    <SelectItem value="calacot-tech">Calacot Tech</SelectItem>
                   </SelectContent>
                 </Select>
               )}

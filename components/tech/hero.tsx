@@ -78,7 +78,7 @@ export default function TechHero() {
 
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
-                href="/start-project?service=software-development"
+                href="/start-project?service=calacot-tech"
                 className={buttonVariants({ variant: "default", size: "lg", className: "inline-flex w-full sm:w-auto" })}
               >
                 Discuss your business

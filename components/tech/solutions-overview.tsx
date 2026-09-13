@@ -84,7 +84,7 @@ export function SolutionsOverview() {
               We combine product design, software engineering, and operational understanding to build systems that scale cleanly.
             </p>
             <Link
-              href="/start-project?service=software-development"
+              href="/start-project?service=calacot-tech"
               className="inline-flex items-center gap-2 text-sm font-medium underline underline-offset-4 transition-colors hover:text-muted-foreground"
             >
               Explore All Solutions

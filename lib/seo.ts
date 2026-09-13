@@ -48,11 +48,11 @@ export const seoPages = {
     "service": "Real estate services",
     "brand": "Calacot Estates"
   },
-  "/software-development": {
+  "/calacot-tech": {
     "title": "Custom Software for Better Ways of Working",
     "description": "Turn a business idea or a difficult workflow into useful software. Calacot Tech builds web platforms and custom systems. Tell us what you want to improve.",
     "image": "/tech.jpg",
-    "service": "Custom software development",
+    "service": "Custom software and digital products",
     "brand": "Calacot Tech"
   },
   "/contact": {

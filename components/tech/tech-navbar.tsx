@@ -91,7 +91,7 @@ export function TechNavbar() {
         {/* Actions & Mobile Menu */}
         <div className="relative z-10 flex items-center gap-3">
           <Link
-            href="/start-project?service=software-development"
+            href="/start-project?service=calacot-tech"
             className={buttonVariants({ variant: "glass", size: "lg", className: "hidden sm:inline-flex" })}
           >
             <span
@@ -211,7 +211,7 @@ export function TechNavbar() {
 function TechLogo() {
   return (
     <Link
-      href="/software-development"
+      href="/calacot-tech"
       aria-label="Calacot Tech home"
       className="group relative z-10 inline-flex items-center gap-3"
     >

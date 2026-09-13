@@ -4,7 +4,7 @@ export const NAV_LINKS = [
   { title: "Architecture", link: "/architecture" },
   { title: "Painting", link: "/painting" },
   { title: "Interior Design", link: "/interior-design" },
-  { title: "Software Development", link: "/software-development" },
+  { title: "Calacot Tech", link: "/calacot-tech" },
 ];
 
 
@@ -29,7 +29,7 @@ export const SERVICE_COPY: Record<string, { title: string; description: string }
     description:
       "We craft interior spaces that balance beauty, comfort, and functionality — tailored to your personality and daily living.",
   },
-  "software-development": {
+  "calacot-tech": {
     title: "Start Your Software Project",
     description:
       "From web platforms to custom systems, we build scalable digital products designed for performance and long-term success.",

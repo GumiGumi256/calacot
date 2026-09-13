@@ -8,12 +8,12 @@ import { TechCta } from '@/components/tech/tech-cta'
 import { WhyCalacot } from '@/components/tech/why-calacot'
 import React from 'react'
 
-export const metadata = pageMetadata("/software-development");
+export const metadata = pageMetadata("/calacot-tech");
 
-export default function SoftwareDevelopment() {
+export default function CalacotTech() {
   return (
     <div>
-      <ServiceStructuredData path="/software-development" />
+      <ServiceStructuredData path="/calacot-tech" />
       <TechHero />
       <BusinessTransformation />
       <OurProcess />

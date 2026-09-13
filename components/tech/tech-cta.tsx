@@ -83,7 +83,7 @@ export function TechCta() {
           </p>
 
           <Link
-            href="/start-project?service=software-development"
+            href="/start-project?service=calacot-tech"
             className={buttonVariants({ variant: "default", size: "lg", className: "mt-9 inline-flex sm:mt-10" })}
           >
             Discuss your business
