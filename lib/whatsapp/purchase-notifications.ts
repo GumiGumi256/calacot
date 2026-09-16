@@ -56,7 +56,11 @@ async function deliverPurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
   try {
     await db
       .update(whatsappMessages)
-      .set({ status: "sending", attemptedAt: new Date(), updatedAt: new Date() })
+      .set({
+        status: "sending",
+        attemptedAt: new Date(),
+        updatedAt: new Date(),
+      })
       .where(eq(whatsappMessages.id, message.id));
     const result = await sendWhatsAppTemplate(phone, callbackId, {
       name: WHATSAPP_TEMPLATES.purchaseCreated,
@@ -66,7 +70,11 @@ async function deliverPurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
     if (!result.ok) {
       await db
         .update(whatsappMessages)
-        .set({ status: result.uncertain ? "uncertain" : "failed", errorCode: result.code, updatedAt: new Date() })
+        .set({
+          status: result.uncertain ? "uncertain" : "failed",
+          errorCode: result.code,
+          updatedAt: new Date(),
+        })
         .where(eq(whatsappMessages.id, message.id));
       return;
     }
@@ -93,7 +101,11 @@ async function deliverPurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
     });
     await db
       .update(whatsappMessages)
-      .set({ status: "uncertain", errorCode: "delivery_exception", updatedAt: new Date() })
+      .set({
+        status: "uncertain",
+        errorCode: "delivery_exception",
+        updatedAt: new Date(),
+      })
       .where(eq(whatsappMessages.id, message.id));
   }
 }
