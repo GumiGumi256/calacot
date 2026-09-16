@@ -165,7 +165,7 @@ export default function DesignCheckout({
                   I understand this purchase covers the selected architectural
                   design package. Site adaptation, statutory approvals and
                   additional professional services are separate unless
-                  explicitly included. 
+                  explicitly included.
                 </span>
               </label>
               {state.error && (
