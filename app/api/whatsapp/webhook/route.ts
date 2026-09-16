@@ -1,27 +1,46 @@
+import { db } from "@/database/db";
+import { getWebhookConfig } from "@/lib/whatsapp/config";
+import { readWebhookBody, verifyWebhookChallenge, verifyWebhookSignature } from "@/lib/whatsapp/security";
+import { parseWhatsAppWebhook } from "@/lib/whatsapp/webhook";
+import { recordInboundQuery, recordStatusQuery } from "@/lib/whatsapp/queries";
+
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
-  const url = new URL(request.url);
-
-  const mode = url.searchParams.get("hub.mode");
-  const token = url.searchParams.get("hub.verify_token");
-  const challenge = url.searchParams.get("hub.challenge");
-
-  const expectedToken = process.env.WHATSAPP_VERIFY_TOKEN;
-
-  if (!expectedToken) {
-    return new Response("WHATSAPP_VERIFY_TOKEN is missing", {
-      status: 500,
-    });
-  }
-
-  if (mode === "subscribe" && token === expectedToken && challenge) {
-    return new Response(challenge, { status: 200 });
-  }
-
-  return new Response("Verification failed", { status: 403 });
+  return verifyWebhookChallenge(new URL(request.url), process.env.WHATSAPP_VERIFY_TOKEN);
 }
 
-export async function POST() {
-  return new Response("EVENT_RECEIVED", { status: 200 });
+export async function POST(request: Request) {
+  let config: ReturnType<typeof getWebhookConfig>;
+  try { config = getWebhookConfig(); } catch {
+    console.error("whatsapp_webhook_configuration_missing");
+    return new Response("Webhook temporarily unavailable", { status: 503 });
+  }
+  let raw: Buffer;
+  try { raw = await readWebhookBody(request); } catch {
+    return new Response("Invalid webhook body", { status: 413 });
+  }
+  if (!verifyWebhookSignature(raw, request.headers.get("x-hub-signature-256"), config.appSecret)) {
+    console.warn("whatsapp_webhook_signature_invalid");
+    return new Response("Invalid signature", { status: 401 });
+  }
+  let payload: unknown;
+  try { payload = JSON.parse(raw.toString("utf8")); } catch {
+    return new Response("Invalid JSON", { status: 400 });
+  }
+  const events = parseWhatsAppWebhook(payload, config);
+  if (events.ignored) console.warn("whatsapp_webhook_unknown_format", { ignored: events.ignored });
+  try {
+    // Only short database operations here. A failed write returns 503 so Meta retries;
+    // acknowledging before persistence would lose events on process termination.
+    for (const message of events.messages) {
+      const result = await db.execute<{ id: string; purchase_id: string | null }>(recordInboundQuery(message));
+      if (result.rows.some((row) => !row.purchase_id)) console.info("whatsapp_message_unassociated", { messageId: message.wamid });
+    }
+    for (const status of events.statuses) await db.execute(recordStatusQuery(status));
+    return new Response("EVENT_RECEIVED", { status: 200 });
+  } catch {
+    console.error("whatsapp_webhook_persistence_failed");
+    return new Response("Please retry", { status: 503 });
+  }
 }
