@@ -31,7 +31,12 @@ async function main() {
       `INSERT INTO design_purchases (id, clerk_user_id, customer_name, customer_email, customer_phone, sanity_design_id, design_slug, design_title, sanity_package_id, package_name, package_includes, amount, created_at) VALUES ($1, 'legacy', 'Legacy customer', 'legacy@example.com', '+256700000001', 'legacy-design', 'legacy', 'Original design', 'legacy-package', 'Original package', '["Original deliverable"]', '1250000', '2025-01-10T12:00:00Z')`,
       [legacyId],
     );
-    await pg.exec(await readFile("drizzle/0004_supreme_martin_li.sql", "utf8"));
+    await pg.exec(
+      await readFile("drizzle/0004_supreme_martin_li.sql", "utf8"),
+    );
+    await pg.exec(
+      await readFile("drizzle/0005_whatsapp_purchase_notifications.sql", "utf8"),
+    );
     const [legacy] = await db
       .select()
       .from(designPurchases)

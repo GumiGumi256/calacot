@@ -16,6 +16,7 @@ import {
 } from "@/lib/design-purchases/model";
 import { createPurchaseReferences } from "@/lib/design-purchases/references";
 import { queueDesignEmail } from "@/lib/design-purchases/email";
+import { queuePurchaseCreatedWhatsApp } from "@/lib/whatsapp/purchase-notifications";
 
 export async function createDesignPurchase(
   _: ActionState,
@@ -115,6 +116,7 @@ export async function createDesignPurchase(
     };
   }
   queueDesignEmail(purchase, "invoice");
+  queuePurchaseCreatedWhatsApp(purchase);
   revalidatePath("/account/designs");
   revalidatePath("/admin/design-purchases");
   redirect(`/account/designs/${purchase.id}`);
