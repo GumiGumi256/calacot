@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
         </h1>
 
         <p className="mt-6 text-sm text-muted-foreground">
-          Last updated: 16 September 2026
+          Last updated: 10 September 2026
         </p>
 
         <div className="prose prose-neutral mt-12 max-w-none dark:prose-invert">
