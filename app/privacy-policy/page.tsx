@@ -24,7 +24,7 @@ export default function PrivacyPolicyPage() {
 
         <div className="prose prose-neutral mt-12 max-w-none dark:prose-invert">
           <p>
-            Calacot Group Uganda Limited (“Calacot”, “we”, “our”, or “us”)
+            Calacot Group Uganda Limited we
             respects your privacy. This Privacy Policy explains how we collect,
             use, disclose, and protect your personal information when you use
             calacot.com, contact us, request our services, purchase

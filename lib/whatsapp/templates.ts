@@ -11,13 +11,33 @@ export const WHATSAPP_TEMPLATES = {
 } as const;
 
 export function purchaseMessageVariables(p: DesignPurchaseRecord) {
-  return [p.customerName, p.designTitle, p.packageName, formatAmount(p.amount, p.currency), p.purchaseReference];
+  return [
+    p.customerName,
+    p.designTitle,
+    p.packageName,
+    formatAmount(p.amount, p.currency),
+    p.purchaseReference,
+  ];
 }
+
 export function templateComponents(p: DesignPurchaseRecord): TemplateComponent[] {
   return [
-    { type: "body", parameters: purchaseMessageVariables(p).map((text) => ({ type: "text", text: text.replace(/\s+/g, " ").trim() })) },
-    { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: p.id }] },
+    {
+      type: "body",
+      parameters: purchaseMessageVariables(p).map((text) => ({
+        type: "text",
+        text: text.replace(/\s+/g, " ").trim(),
+      })),
+    },
+    {
+      type: "button",
+      sub_type: "url",
+      index: "0",
+      parameters: [{ type: "text", text: p.id }],
+    },
   ];
+}
+
 export function purchaseMessageText(kind: NotificationKind, p: DesignPurchaseRecord, url: string) {
   const context = `Hi ${p.customerName},\n${p.designTitle} - ${p.packageName}\nAmount: ${formatAmount(p.amount, p.currency)}\nPurchase: ${p.purchaseReference}`;
   const message = {
@@ -26,5 +46,6 @@ export function purchaseMessageText(kind: NotificationKind, p: DesignPurchaseRec
     paymentConfirmed: "Payment confirmed. Your design purchase is now active. Our team will make your design documents available through your account.",
     advisorFollowup: "You requested help with this purchase. Reply here and the Calacot team will assist you.",
   }[kind];
+
   return `${context}\n\n${message}\n\nView your purchase: ${url}`;
 }
