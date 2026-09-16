@@ -1,0 +1,817 @@
+{
+  "id": "43f4f5ed-f810-4f88-bdc2-60b7449d4a39",
+  "prevId": "94d05fd2-2e27-4977-8437-3fd5a46288a9",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.design_purchases": {
+      "name": "design_purchases",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "clerk_user_id": {
+          "name": "clerk_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "customer_name": {
+          "name": "customer_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "customer_email": {
+          "name": "customer_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "customer_phone": {
+          "name": "customer_phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sanity_design_id": {
+          "name": "sanity_design_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "design_slug": {
+          "name": "design_slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "design_title": {
+          "name": "design_title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "design_code": {
+          "name": "design_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sanity_package_id": {
+          "name": "sanity_package_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "package_slug": {
+          "name": "package_slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "package_name": {
+          "name": "package_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "package_description": {
+          "name": "package_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "package_includes": {
+          "name": "package_includes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric(17, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'UGX'"
+        },
+        "purchase_reference": {
+          "name": "purchase_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "invoice_number": {
+          "name": "invoice_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "invoice_issued_at": {
+          "name": "invoice_issued_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "invoice_email_sent_at": {
+          "name": "invoice_email_sent_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "confirmation_email_sent_at": {
+          "name": "confirmation_email_sent_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "revision": {
+          "name": "revision",
+          "type": "numeric(10, 0)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "purchase_status": {
+          "name": "purchase_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'awaiting_payment'"
+        },
+        "payment_method": {
+          "name": "payment_method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payment_reference": {
+          "name": "payment_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payment_status": {
+          "name": "payment_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "payment_submitted_at": {
+          "name": "payment_submitted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "access_status": {
+          "name": "access_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "preferred_contact_method": {
+          "name": "preferred_contact_method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "customer_note": {
+          "name": "customer_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contacted_at": {
+          "name": "contacted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "assigned_to": {
+          "name": "assigned_to",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reviewed_by": {
+          "name": "reviewed_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reviewed_at": {
+          "name": "reviewed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "admin_notes": {
+          "name": "admin_notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "terms_version": {
+          "name": "terms_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "terms_accepted_at": {
+          "name": "terms_accepted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "design_purchases_open_unique": {
+          "name": "design_purchases_open_unique",
+          "columns": [
+            {
+              "expression": "clerk_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sanity_design_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sanity_package_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"design_purchases\".\"purchase_status\" in ('awaiting_payment', 'awaiting_contact', 'payment_submitted')",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "design_purchases_purchase_created_idx": {
+          "name": "design_purchases_purchase_created_idx",
+          "columns": [
+            {
+              "expression": "purchase_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "design_purchases_user_created_idx": {
+          "name": "design_purchases_user_created_idx",
+          "columns": [
+            {
+              "expression": "clerk_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "design_purchases_payment_status_idx": {
+          "name": "design_purchases_payment_status_idx",
+          "columns": [
+            {
+              "expression": "payment_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "design_purchases_design_idx": {
+          "name": "design_purchases_design_idx",
+          "columns": [
+            {
+              "expression": "sanity_design_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "design_purchases_access_status_idx": {
+          "name": "design_purchases_access_status_idx",
+          "columns": [
+            {
+              "expression": "access_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "design_purchases_purchase_reference_unique": {
+          "name": "design_purchases_purchase_reference_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "purchase_reference"
+          ]
+        },
+        "design_purchases_invoice_number_unique": {
+          "name": "design_purchases_invoice_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "invoice_number"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "design_purchases_purchase_status_check": {
+          "name": "design_purchases_purchase_status_check",
+          "value": "\"design_purchases\".\"purchase_status\" in ('awaiting_payment', 'awaiting_contact', 'payment_submitted', 'completed', 'cancelled')"
+        },
+        "design_purchases_contact_check": {
+          "name": "design_purchases_contact_check",
+          "value": "\"design_purchases\".\"preferred_contact_method\" is null or \"design_purchases\".\"preferred_contact_method\" in ('whatsapp', 'phone', 'email')"
+        },
+        "design_purchases_includes_check": {
+          "name": "design_purchases_includes_check",
+          "value": "jsonb_typeof(\"design_purchases\".\"package_includes\") = 'array'"
+        },
+        "design_purchases_active_check": {
+          "name": "design_purchases_active_check",
+          "value": "\"design_purchases\".\"access_status\" <> 'active' or (\"design_purchases\".\"payment_status\" = 'confirmed' and \"design_purchases\".\"purchase_status\" = 'completed')"
+        },
+        "design_purchases_completed_check": {
+          "name": "design_purchases_completed_check",
+          "value": "\"design_purchases\".\"purchase_status\" <> 'completed' or \"design_purchases\".\"payment_status\" = 'confirmed'"
+        },
+        "design_purchases_amount_check": {
+          "name": "design_purchases_amount_check",
+          "value": "\"design_purchases\".\"amount\" > 0"
+        },
+        "design_purchases_currency_check": {
+          "name": "design_purchases_currency_check",
+          "value": "\"design_purchases\".\"currency\" in ('UGX', 'USD')"
+        },
+        "design_purchases_payment_method_check": {
+          "name": "design_purchases_payment_method_check",
+          "value": "\n        \"design_purchases\".\"payment_method\" is null or\n        \"design_purchases\".\"payment_method\" in (\n          'mobile_money',\n          'bank_transfer',\n          'cash',\n          'other'\n        )\n      "
+        },
+        "design_purchases_payment_status_check": {
+          "name": "design_purchases_payment_status_check",
+          "value": "\n        \"design_purchases\".\"payment_status\" in (\n          'pending',\n          'submitted',\n          'confirmed',\n          'rejected'\n        )\n      "
+        },
+        "design_purchases_access_status_check": {
+          "name": "design_purchases_access_status_check",
+          "value": "\n        \"design_purchases\".\"access_status\" in (\n          'pending',\n          'active',\n          'revoked'\n        )\n      "
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.leads": {
+      "name": "leads",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "full_name": {
+          "name": "full_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "service": {
+          "name": "service",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "preferred_date": {
+          "name": "preferred_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "preferred_time": {
+          "name": "preferred_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "project_location": {
+          "name": "project_location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "estimated_budget": {
+          "name": "estimated_budget",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timeline": {
+          "name": "timeline",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "project_overview": {
+          "name": "project_overview",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'new'"
+        },
+        "admin_notes": {
+          "name": "admin_notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.property_leads": {
+      "name": "property_leads",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "submission_type": {
+          "name": "submission_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_type": {
+          "name": "property_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "details": {
+          "name": "details",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "full_name": {
+          "name": "full_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'new'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.real_estate_enquiries": {
+      "name": "real_estate_enquiries",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "payload_hash": {
+          "name": "payload_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "intent": {
+          "name": "intent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "property_type": {
+          "name": "property_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timeline": {
+          "name": "timeline",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "budget_min": {
+          "name": "budget_min",
+          "type": "numeric(17, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "budget_max": {
+          "name": "budget_max",
+          "type": "numeric(17, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "asking_price": {
+          "name": "asking_price",
+          "type": "numeric(17, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "relationship": {
+          "name": "relationship",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "full_name": {
+          "name": "full_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_method": {
+          "name": "contact_method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'new'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "estate_enquiries_status_created_idx": {
+          "name": "estate_enquiries_status_created_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "estate_enquiries_intent_check": {
+          "name": "estate_enquiries_intent_check",
+          "value": "\"real_estate_enquiries\".\"intent\" in ('buy-home', 'buy-land', 'sell-property')"
+        },
+        "estate_enquiries_currency_check": {
+          "name": "estate_enquiries_currency_check",
+          "value": "\"real_estate_enquiries\".\"currency\" in ('UGX', 'USD')"
+        },
+        "estate_enquiries_contact_check": {
+          "name": "estate_enquiries_contact_check",
+          "value": "\"real_estate_enquiries\".\"contact_method\" in ('email', 'phone', 'whatsapp')"
+        },
+        "estate_enquiries_status_check": {
+          "name": "estate_enquiries_status_check",
+          "value": "\"real_estate_enquiries\".\"status\" in ('new', 'contacted', 'closed')"
+        },
+        "estate_enquiries_budget_check": {
+          "name": "estate_enquiries_budget_check",
+          "value": "(\"real_estate_enquiries\".\"budget_min\" is null or \"real_estate_enquiries\".\"budget_min\" > 0) and (\"real_estate_enquiries\".\"budget_max\" is null or \"real_estate_enquiries\".\"budget_max\" > 0) and (\"real_estate_enquiries\".\"budget_min\" is null or \"real_estate_enquiries\".\"budget_max\" is null or \"real_estate_enquiries\".\"budget_max\" >= \"real_estate_enquiries\".\"budget_min\")"
+        },
+        "estate_enquiries_price_check": {
+          "name": "estate_enquiries_price_check",
+          "value": "\"real_estate_enquiries\".\"asking_price\" is null or \"real_estate_enquiries\".\"asking_price\" > 0"
+        },
+        "estate_enquiries_reachable_check": {
+          "name": "estate_enquiries_reachable_check",
+          "value": "(\"real_estate_enquiries\".\"contact_method\" = 'email' and nullif(\"real_estate_enquiries\".\"email\", '') is not null) or (\"real_estate_enquiries\".\"contact_method\" in ('phone', 'whatsapp') and nullif(\"real_estate_enquiries\".\"phone\", '') is not null)"
+        },
+        "estate_enquiries_relationship_check": {
+          "name": "estate_enquiries_relationship_check",
+          "value": "\"real_estate_enquiries\".\"relationship\" is null or \"real_estate_enquiries\".\"relationship\" in ('owner', 'representative')"
+        },
+        "estate_enquiries_seller_check": {
+          "name": "estate_enquiries_seller_check",
+          "value": "\"real_estate_enquiries\".\"intent\" <> 'sell-property' or \"real_estate_enquiries\".\"relationship\" is not null"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

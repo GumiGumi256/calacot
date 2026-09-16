@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import { siteUrl, seoPages } from "@/lib/seo";
 import { SiteStructuredData } from "@/components/seo/structured-data";
 import type { Metadata } from "next";
@@ -49,18 +50,20 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col bg-brand-white dark:bg-brand-black">
-        <SiteStructuredData />
-        <ThemeProvider
+        <ClerkProvider>
+          <SiteStructuredData />
+          <ThemeProvider
           attribute="class"
           defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
-        >
+          >
           {/* <Navbar /> */}
           {children}
           <Footer />
           <Toaster />
-        </ThemeProvider>
+          </ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

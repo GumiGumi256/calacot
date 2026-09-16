@@ -324,6 +324,9 @@ useGSAP(() => {
               <p className="max-w-xs text-base leading-relaxed text-muted-foreground lg:text-lg">
                 Building excellence from the ground up. Designing comfort.
               </p>
+              <Link href="/account/designs" onClick={toggle} className="w-fit text-base underline underline-offset-4">
+                My designs
+              </Link>
 
               <div
                 aria-hidden

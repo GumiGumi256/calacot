@@ -59,6 +59,8 @@ export type DesignPackage = {
   package: {
     _id: string;
     name: string;
+    slug: string | null;
+    isActive: boolean;
     description: string | null;
     includes: string[] | null;
   };
@@ -102,7 +104,7 @@ export const DESIGN_BY_SLUG_QUERY = defineQuery(/* groq */ `
   "imageBlur": featuredImage.asset->metadata.lqip,
   "images": images[defined(asset->url)] { _key, "image": @, alt, "blur": asset->metadata.lqip },
   "packages": coalesce(packages[price > 0 && package->isActive == true] | order(package->order asc, price asc) {
-    _key, price, recommended, package->{ _id, name, description, includes }
+    _key, price, recommended, package->{ _id, name, "slug": slug.current, isActive, description, includes }
   }, []),
   additionalServices[] { _key, service, price, priceOnRequest },
   estimatedBuildCost { minimum, maximum }, canCustomize, customizationNote
@@ -133,4 +135,11 @@ export async function getDesignSitemapEntries() {
     {},
     { perspective: "published", useCdn: false, next: { revalidate: 60, tags: ["designs"] } },
   );
+}
+
+// Always read current published pricing for purchase creation.
+export async function getPurchasableDesign(slug: string) {
+  return client.fetch<DesignDetails | null>(DESIGN_BY_SLUG_QUERY, { slug }, {
+    perspective: "published", useCdn: false, cache: "no-store",
+  });
 }
