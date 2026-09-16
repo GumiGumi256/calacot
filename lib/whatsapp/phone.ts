@@ -1,4 +1,4 @@
-import { parsePhoneNumber } from "react-phone-number-input";
+import { parsePhoneNumber } from "libphonenumber-js";
 
 /** Canonical Cloud API recipient: international country code and digits, no +. */
 export function normalizeWhatsAppPhone(value: string): string | null {
