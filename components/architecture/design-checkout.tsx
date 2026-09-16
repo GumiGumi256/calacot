@@ -129,7 +129,7 @@ export default function DesignCheckout({
                 2. Confirm your request
               </h2>
               <p className="text-sm leading-6 text-muted-foreground">
-                No payment is required at this stage. You&apos;ll receive your
+                You&apos;ll receive your
                 invoice and payment options after confirming your request.
               </p>
               <label className="block text-xs font-medium">
