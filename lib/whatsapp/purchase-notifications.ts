@@ -13,8 +13,8 @@ import { sendWhatsAppTemplate } from "./client";
 import { normalizeWhatsAppPhone } from "./phone";
 import {
   purchaseMessageText,
+  getWhatsAppTemplateName,
   templateComponents,
-  WHATSAPP_TEMPLATES,
 } from "./templates";
 
 export function queuePurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
@@ -34,6 +34,7 @@ async function deliverPurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
   const callbackId = purchase.id;
   const dedupeKey = `purchaseCreated/${purchase.id}`;
   const url = purchaseUrl(purchase.id);
+  const templateName = getWhatsAppTemplateName("purchaseCreated");
   const [message] = await db
     .insert(whatsappMessages)
     .values({
@@ -44,7 +45,7 @@ async function deliverPurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
       messageType: "template",
       notificationKind: "purchaseCreated",
       body: purchaseMessageText("purchaseCreated", purchase, url),
-      templateName: WHATSAPP_TEMPLATES.purchaseCreated,
+      templateName,
       status: "queued",
       eventAt: new Date(),
     })
@@ -63,7 +64,7 @@ async function deliverPurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
       })
       .where(eq(whatsappMessages.id, message.id));
     const result = await sendWhatsAppTemplate(phone, callbackId, {
-      name: WHATSAPP_TEMPLATES.purchaseCreated,
+      name: templateName,
       language: process.env.WHATSAPP_TEMPLATE_LANGUAGE?.trim() || "en_US",
       components: templateComponents(purchase),
     });

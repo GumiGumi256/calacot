@@ -2,13 +2,21 @@ import type { DesignPurchaseRecord } from "@/database/schema";
 import { formatAmount } from "@/lib/design-purchases/model";
 import type { NotificationKind, TemplateComponent } from "./types";
 
-// Values are configured names of approved Meta templates, never presumed IDs.
-export const WHATSAPP_TEMPLATES = {
+const templateEnvironmentVariables = {
   purchaseCreated: "WHATSAPP_TEMPLATE_PURCHASE_CREATED",
   paymentSubmitted: "WHATSAPP_TEMPLATE_PAYMENT_SUBMITTED",
   paymentConfirmed: "WHATSAPP_TEMPLATE_PAYMENT_CONFIRMED",
   advisorFollowup: "WHATSAPP_TEMPLATE_ADVISOR_FOLLOWUP",
 } as const;
+
+export function getWhatsAppTemplateName(kind: NotificationKind) {
+  const environmentVariable = templateEnvironmentVariables[kind];
+  const name = process.env[environmentVariable]?.trim();
+  if (!name) {
+    throw new Error(`${environmentVariable} is not configured.`);
+  }
+  return name;
+}
 
 export function purchaseMessageVariables(p: DesignPurchaseRecord) {
   return [
