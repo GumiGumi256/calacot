@@ -42,11 +42,14 @@ export const purchaseSchema = z.object({
   acceptTerms: z.literal("true", {
     error: "Please accept the purchase terms.",
   }),
+  whatsappConsent: z.literal("true", {
+    error: "Please agree to receive purchase updates on WhatsApp.",
+  }),
   preferredContactMethod: z
     .enum(["whatsapp", "phone", "email"])
     .default("email"),
   customerNote: z.string().trim().max(2000).default(""),
-}).refine((data) => data.preferredContactMethod !== "whatsapp" || normalizeWhatsAppPhone(data.phone) !== null, {
+}).refine((data) => normalizeWhatsAppPhone(data.phone) !== null, {
   path: ["phone"], message: "Enter a valid WhatsApp number including its country code.",
 });
 export const paymentSchema = z.object({

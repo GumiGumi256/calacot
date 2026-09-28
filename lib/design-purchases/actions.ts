@@ -174,7 +174,7 @@ export async function retryDesignPurchaseEmail(
 export async function retryDesignPurchaseWhatsApp(_: ActionState, data: FormData): Promise<ActionState> {
   const p = await getAdminDesignPurchase(String(data.get("purchaseId") || ""));
   if (p.purchaseStatus === "cancelled" || p.purchaseStatus === "completed") return { error: "This purchase is closed." };
-  if (p.preferredContactMethod !== "whatsapp") return { error: "The customer did not choose WhatsApp." };
+  if (!p.whatsappConsentAt) return { error: "The customer has not consented to WhatsApp updates." };
   const [message] = await db.select({ status: whatsappMessages.status }).from(whatsappMessages)
     .where(eq(whatsappMessages.dedupeKey, `purchaseCreated/${p.id}`)).limit(1);
   if (message && ["uncertain", "sending"].includes(message.status || "")) {

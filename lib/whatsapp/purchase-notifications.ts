@@ -20,7 +20,7 @@ import {
 } from "./templates";
 
 export function queuePurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
-  if (purchase.preferredContactMethod !== "whatsapp") return;
+  if (!purchase.whatsappConsentAt) return;
   after(async () => {
     try {
       await deliverPurchaseCreatedWhatsApp(purchase);
@@ -123,5 +123,7 @@ async function deliverPurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
         updatedAt: new Date(),
       })
       .where(and(eq(whatsappMessages.id, message.id), eq(whatsappMessages.status, "sending")));
+    await db.update(designPurchases).set({ whatsappStatus: "failed", updatedAt: new Date() })
+      .where(and(eq(designPurchases.id, purchase.id), inArray(designPurchases.whatsappStatus, ["not_started", "failed"])));
   }
 }

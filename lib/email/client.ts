@@ -17,6 +17,6 @@ export function getEmailClient() {
 }
 
 export function getTeamEmail() {
-  const address = process.env.ENQUIRY_TEAM_EMAIL?.trim();
+  const address = process.env.ENQUIRY_TEAM_EMAIL?.trim() || "info@calacot.com";
   return z.email().safeParse(address).success ? address! : null;
 }

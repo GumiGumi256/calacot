@@ -10,7 +10,7 @@ async function main() {
   if (process.env.DATABASE_URL) {
     const db = neon(process.env.DATABASE_URL);
     for (const query of [
-      "select purchase_status, preferred_contact_method, (invoice_email_sent_at is not null) as invoice_sent, (confirmation_email_sent_at is not null) as confirmation_sent, whatsapp_status, count(*) from design_purchases group by 1,2,3,4,5",
+      "select purchase_status, preferred_contact_method, (invoice_email_sent_at is not null) as invoice_sent, (invoice_team_email_sent_at is not null) as invoice_team_sent, (confirmation_email_sent_at is not null) as confirmation_sent, (confirmation_team_email_sent_at is not null) as confirmation_team_sent, whatsapp_status, count(*) from design_purchases group by 1,2,3,4,5,6,7",
       "select status,error_code,count(*) from whatsapp_messages where direction='outbound' group by 1,2",
     ]) {
       try { console.log(await db.query(query)); }

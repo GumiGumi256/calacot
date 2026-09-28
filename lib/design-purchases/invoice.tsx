@@ -1,4 +1,5 @@
 import React from "react";
+import { readFile } from "node:fs/promises";
 import type { DesignPurchaseRecord } from "@/database/schema";
 import { formatAmount, formatDate } from "./model";
 
@@ -8,12 +9,12 @@ export async function generateDesignInvoice(purchase: DesignPurchaseRecord) {
     Page,
     Text,
     View,
-    Image,
+    Image: PdfImage,
     StyleSheet,
     renderToBuffer,
   } = await import("@react-pdf/renderer");
 
-  const logoPath = `${process.cwd()}/public/calacot-logo-vertical-black.svg`;
+  const logoData = await readFile(`${process.cwd()}/public/calacot-logo.png`);
 
   const styles = StyleSheet.create({
     page: {
@@ -233,7 +234,7 @@ export async function generateDesignInvoice(purchase: DesignPurchaseRecord) {
           {/* Header */}
           <View style={styles.header} wrap={false}>
             <View style={styles.headerTop}>
-              <Image src={logoPath} style={styles.logo} />
+              <PdfImage src={{ data: logoData, format: "png" }} style={styles.logo} />
 
               <View style={styles.invoiceMeta}>
                 <Text style={styles.invoiceLabel}>INVOICE NUMBER</Text>

@@ -145,9 +145,22 @@ export default function DesignCheckout({
                 </select>
               </label>
               <p className="text-xs leading-6 text-muted-foreground">
-                Choosing WhatsApp allows Calacot to send a purchase confirmation
-                to the WhatsApp number above. You will also receive an email.
+                Your preferred contact method is for follow-up. Purchase updates
+                are sent by email and WhatsApp.
               </p>
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/40 bg-card p-4 text-xs leading-6 text-muted-foreground">
+                <input
+                  type="checkbox"
+                  name="whatsappConsent"
+                  value="true"
+                  required
+                  className="mt-1 size-4 shrink-0 accent-brand-primary"
+                />
+                <span>
+                  I agree to receive transactional purchase and payment updates
+                  on WhatsApp at the number above. Message and data rates may apply.
+                </span>
+              </label>
               <label className="block text-xs font-medium">
                 Anything we should know? (optional)
                 <textarea
@@ -218,7 +231,7 @@ export default function DesignCheckout({
                   aria-hidden="true"
                 />
               </div>
-              <h3 className="mt-4 break-words text-xl font-medium tracking-tight">
+              <h3 className="mt-4 wrap-break-word text-xl font-medium tracking-tight">
                 {design.title}
               </h3>
               {design.code && (

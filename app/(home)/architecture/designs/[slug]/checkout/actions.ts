@@ -97,7 +97,7 @@ export async function createDesignPurchase(
           ...createPurchaseReferences(),
           purchaseStatus: "awaiting_payment",
           preferredContactMethod: values.preferredContactMethod,
-          whatsappConsentAt: values.preferredContactMethod === "whatsapp" ? new Date() : null,
+          whatsappConsentAt: new Date(),
           customerNote: values.customerNote || null,
           termsVersion: TERMS_VERSION,
           termsAcceptedAt: new Date(),
@@ -109,6 +109,16 @@ export async function createDesignPurchase(
     }
     if (!purchase)
       return { error: "We couldn't create your request. Please try again." };
+    if (!purchase.whatsappConsentAt) {
+      const [consentedPurchase] = await db
+        .update(designPurchases)
+        .set({ whatsappConsentAt: new Date(), updatedAt: new Date() })
+        .where(eq(designPurchases.id, purchase.id))
+        .returning();
+      if (!consentedPurchase)
+        return { error: "We couldn't update your purchase request. Please try again." };
+      purchase = consentedPurchase;
+    }
   } catch {
     console.error("Design purchase creation failed", { userId });
     return {

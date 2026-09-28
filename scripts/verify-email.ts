@@ -26,6 +26,8 @@ async function main() {
     assert.equal(messages[1].payload.replyTo, purchase.customerEmail);
     assert.notEqual(messages[0].key, messages[1].key);
     assert.match(messages[0].payload.html!, /Courtyard &lt;house&gt;/);
+    assert.match(messages[0].payload.html!, /calacot-logo-green\.png/);
+    assert.match(messages[0].payload.html!, /#1db954/);
     assert(!messages[0].payload.html!.includes("private note"));
     assert(!messages[1].payload.html!.includes("<script>"));
     assert(!messages.some(m => m.payload.text!.includes("internal-only")));

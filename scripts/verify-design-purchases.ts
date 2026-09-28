@@ -232,6 +232,7 @@ async function main() {
       designSlug: "design",
       packageId: "package",
       acceptTerms: "true",
+      whatsappConsent: "true",
       amount: "1",
       clerkUserId: "victim",
       packageName: "Forged",
@@ -244,6 +245,10 @@ async function main() {
     );
     assert(
       !purchaseSchema.safeParse({ ...parsed, acceptTerms: "false" }).success,
+    );
+    assert(
+      !purchaseSchema.safeParse({ ...parsed, whatsappConsent: undefined }).success,
+      "Every new design purchase requires explicit WhatsApp consent",
     );
     assert(
       !paymentSchema.safeParse({

@@ -14,7 +14,7 @@ ENQUIRY_TEAM_EMAIL=info@calacot.com
 
 The sender must be a bare email address on a domain verified in Resend. The app adds the Calacot display name. Customer replies go to ENQUIRY_TEAM_EMAIL; team replies go to the customer.
 
-Reusable HTML lives in lib/email/template.ts, using renderNotificationTemplate. It provides escaped content, mobile styles, presentation tables, live-text branding and an optional HTTPS action. Enquiry messages are built in lib/email/enquiry.ts; purchase messages in lib/design-purchases/email-messages.ts. Plain-text alternatives are included. Customer enquiry acknowledgements do not echo arbitrary submitted content.
+Reusable HTML lives in lib/email/template.ts, using renderNotificationTemplate. It provides escaped content, mobile styles, a hosted PNG wordmark with live-text fallback, presentation tables and an optional HTTPS action. Enquiry messages are built in lib/email/enquiry.ts; purchase messages in lib/design-purchases/email-messages.ts. Plain-text alternatives are included. Customer enquiry acknowledgements do not echo arbitrary submitted content.
 
 Run `npx tsx scripts/preview-email.ts` to create customer and team HTML previews under docs/email-previews. No messages are sent.
 
@@ -45,7 +45,7 @@ CALACOT_WHATSAPP_NUMBER=
 
 Outbound delivery uses Meta Cloud API, not the wa.me link. CALACOT_WHATSAPP_NUMBER only controls the customer-initiated chat link. API version defaults to v23.0 when omitted; explicitly configure the supported version for your Meta app.
 
-Customers choosing WhatsApp at checkout are told they will receive a purchase confirmation on that number. Their choice and timestamp are saved. Invalid WhatsApp numbers fail validation, and opted-out contacts are not messaged.
+Every new design checkout requires explicit consent to receive transactional WhatsApp purchase and payment updates, and validates the number before saving the consent timestamp. The preferred contact method remains a separate follow-up preference. Existing purchases without a consent timestamp are not messaged. Opted-out contacts are not messaged.
 
 The approved template must match the configured name and language. Its body takes five positional text parameters: customer name, design title, package, formatted amount, purchase reference. URL button 0 must use https://calacot.com/account/designs/{{1}}, with the purchase UUID as its dynamic suffix. Use the corresponding production origin if different. See [Meta's template API reference](https://whatsapp.github.io/WhatsApp-Nodejs-SDK/api-reference/messages/template/).
 
