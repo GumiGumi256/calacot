@@ -5,6 +5,7 @@ import { PurchaseSummary } from "@/components/architecture/purchase-summary";
 import {
   AdminReviewForms,
   RetryPurchaseEmailForm,
+  RetryPurchaseWhatsAppForm,
 } from "@/components/architecture/purchase-forms";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -32,6 +33,9 @@ export default async function AdminPurchasePage({
     ["Reviewed by", p.reviewedBy],
     ["Reviewed", p.reviewedAt ? formatDate(p.reviewedAt) : null],
     ["Admin notes", p.adminNotes],
+    ["WhatsApp status", p.whatsappStatus.replaceAll("_", " ")],
+    ["Team invoice email", p.invoiceTeamEmailSentAt ? `Accepted ${formatDate(p.invoiceTeamEmailSentAt)}` : "Not sent"],
+    ["Team confirmation email", p.confirmationTeamEmailSentAt ? `Accepted ${formatDate(p.confirmationTeamEmailSentAt)}` : "Not sent"],
     [
       "Invoice email",
       p.invoiceEmailSentAt
@@ -84,11 +88,14 @@ export default async function AdminPurchasePage({
             Download invoice
           </a>
           {p.purchaseStatus !== "cancelled" &&
-            (!p.invoiceEmailSentAt ||
+            (!p.invoiceEmailSentAt || !p.invoiceTeamEmailSentAt ||
               (p.purchaseStatus === "completed" &&
-                !p.confirmationEmailSentAt)) && (
+                (!p.confirmationEmailSentAt || !p.confirmationTeamEmailSentAt))) && (
               <RetryPurchaseEmailForm purchaseId={p.id} />
             )}
+          {open && p.preferredContactMethod === "whatsapp" && ["not_started", "failed"].includes(p.whatsappStatus) && (
+            <RetryPurchaseWhatsAppForm purchaseId={p.id} />
+          )}
           {open && (
             <AdminReviewForms
               purchaseId={p.id}

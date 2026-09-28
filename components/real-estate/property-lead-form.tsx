@@ -365,7 +365,8 @@ export function PropertyLeadForm({ initialType }: Props) {
             )}
           </div>
 
-          {renderInput("email", "Email address (optional)", {
+          {renderInput("email", "Email address", {
+            required: true,
             type: "email",
             inputMode: "email",
             autoComplete: "email",

@@ -144,6 +144,10 @@ export default function DesignCheckout({
                   <option value="email">Email</option>
                 </select>
               </label>
+              <p className="text-xs leading-6 text-muted-foreground">
+                Choosing WhatsApp allows Calacot to send a purchase confirmation
+                to the WhatsApp number above. You will also receive an email.
+              </p>
               <label className="block text-xs font-medium">
                 Anything we should know? (optional)
                 <textarea

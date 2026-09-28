@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizeWhatsAppPhone } from "@/lib/whatsapp/phone";
 import type { DesignPurchaseRecord } from "@/database/schema";
 
 export const purchaseStatuses = [
@@ -45,6 +46,8 @@ export const purchaseSchema = z.object({
     .enum(["whatsapp", "phone", "email"])
     .default("email"),
   customerNote: z.string().trim().max(2000).default(""),
+}).refine((data) => data.preferredContactMethod !== "whatsapp" || normalizeWhatsAppPhone(data.phone) !== null, {
+  path: ["phone"], message: "Enter a valid WhatsApp number including its country code.",
 });
 export const paymentSchema = z.object({
   purchaseId: z.uuid(),

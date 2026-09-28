@@ -186,9 +186,6 @@ export function EstateEnquiryForm({ initialIntent }: { initialIntent: EnquiryInt
                 field.onChange(value);
 
                 if (name === "contactMethod") {
-                  if (value !== "email" && !form.getValues("email")) {
-                    form.clearErrors("email");
-                  }
                   if (value === "email" && !form.getValues("phone")) {
                     form.clearErrors("phone");
                   }
@@ -335,8 +332,8 @@ export function EstateEnquiryForm({ initialIntent }: { initialIntent: EnquiryInt
             {selectField("contactMethod", "Preferred contact method", [
               { value: "email", label: "Email" }, { value: "whatsapp", label: "WhatsApp" }, { value: "phone", label: "Phone call" },
             ])}
-            {textField("email", `Email address${contactMethod === "email" ? "" : " (optional)"}`, {
-              type: "email", required: contactMethod === "email", autoComplete: "email", inputMode: "email", maxLength: 254, placeholder: "you@example.com",
+            {textField("email", "Email address", {
+              type: "email", required: true, autoComplete: "email", inputMode: "email", maxLength: 254, placeholder: "you@example.com",
             })}
             {textField("phone", `Phone number${contactMethod === "email" ? " (optional)" : ""}`, {
               type: "tel", required: contactMethod !== "email", autoComplete: "tel", inputMode: "tel", maxLength: 40, placeholder: "+256 772 123 456",

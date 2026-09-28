@@ -6,6 +6,10 @@ export function normalizeWhatsAppPhone(value: string): string | null {
   if (!input || input.length > 40 || /[^+\d\s().-]/.test(input)) return null;
   const digits = input.replace(/\D/g, "");
   const international = input.startsWith("+") ? input : input.startsWith("00") ? `+${digits.slice(2)}` : !digits.startsWith("0") && digits.length > 9 ? `+${digits}` : input;
-  const phone = parsePhoneNumberWithError(international, "UG");
-  return phone?.isValid() ? phone.number.slice(1) : null;
+  try {
+    const phone = parsePhoneNumberWithError(international, "UG");
+    return phone.isValid() ? phone.number.slice(1) : null;
+  } catch {
+    return null;
+  }
 }

@@ -97,6 +97,7 @@ export async function createDesignPurchase(
           ...createPurchaseReferences(),
           purchaseStatus: "awaiting_payment",
           preferredContactMethod: values.preferredContactMethod,
+          whatsappConsentAt: values.preferredContactMethod === "whatsapp" ? new Date() : null,
           customerNote: values.customerNote || null,
           termsVersion: TERMS_VERSION,
           termsAcceptedAt: new Date(),

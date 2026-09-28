@@ -1,3 +1,4 @@
+﻿import { sendEmailWithRetry, type EmailSend } from "./delivery";
 import { renderEnquiryTemplate } from "./template";
 import type { CreateEmailOptions } from "resend";
 
@@ -48,30 +49,11 @@ export function buildEnquiryEmails(enquiry: EnquiryEmail, from: string, team: st
   return emails;
 }
 
-type Send = (payload: CreateEmailOptions, options: { idempotencyKey: string }) => Promise<{
-  data: { id: string } | null;
-  error: { name: string; statusCode?: number | null } | null;
-}>;
-
 export async function deliverEnquiryEmails(
-  enquiry: EnquiryEmail, from: string, team: string, send: Send,
+  enquiry: EnquiryEmail, from: string, team: string, send: EmailSend,
   pause = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)),
 ) {
   for (const { key, payload } of buildEnquiryEmails(enquiry, from, team)) {
-    for (let attempt = 0; attempt < 3; attempt++) {
-      let retry = false;
-      try {
-        const { data, error } = await send(payload, { idempotencyKey: key });
-        if (!error && data?.id) break;
-        retry = !!error && (error.statusCode === 429 || (error.statusCode ?? 0) >= 500);
-        if (!retry || attempt === 2) console.error("Enquiry email failed", { reference: key, code: error?.name || "missing_response" });
-      } catch {
-        // Transport failures may throw even though API failures return { data, error }.
-        retry = true;
-        if (attempt === 2) console.error("Enquiry email network failure", { reference: key });
-      }
-      if (!retry || attempt === 2) break;
-      await pause(1000 * 2 ** attempt);
-    }
+    await sendEmailWithRetry(payload, key, send, pause);
   }
 }

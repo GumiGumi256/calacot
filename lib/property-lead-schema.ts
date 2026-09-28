@@ -57,7 +57,7 @@ export const propertyLeadSchema = z.object({
     .trim()
     .max(254, "Enter a valid email address.")
     .refine(
-      (value) => value === "" || z.string().email().safeParse(value).success,
+      (value) => z.string().email().safeParse(value).success,
       "Enter a valid email address.",
     ),
 });

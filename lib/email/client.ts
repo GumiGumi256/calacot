@@ -9,10 +9,14 @@ export function getEmailClient() {
   if (
     !key ||
     !from ||
-    !z.email().safeParse(from).success ||
-    !from.endsWith("@contact.calacot.com")
+    !z.email().safeParse(from).success
   )
     return null;
   client ??= new Resend(key);
   return { client, from: `Calacot <${from}>` };
+}
+
+export function getTeamEmail() {
+  const address = process.env.ENQUIRY_TEAM_EMAIL?.trim();
+  return z.email().safeParse(address).success ? address! : null;
 }

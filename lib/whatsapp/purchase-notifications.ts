@@ -1,15 +1,17 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { after } from "next/server";
 import { db } from "@/database/db";
 import {
   designPurchases,
   whatsappMessages,
+  whatsappContacts,
   type DesignPurchaseRecord,
 } from "@/database/schema";
 import { purchaseUrl } from "@/lib/company";
 import { sendWhatsAppTemplate } from "./client";
+import { getWhatsAppConfig } from "./config";
 import { normalizeWhatsAppPhone } from "./phone";
 import {
   purchaseMessageText,
@@ -19,7 +21,18 @@ import {
 
 export function queuePurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
   if (purchase.preferredContactMethod !== "whatsapp") return;
-  after(() => deliverPurchaseCreatedWhatsApp(purchase));
+  after(async () => {
+    try {
+      await deliverPurchaseCreatedWhatsApp(purchase);
+    } catch (error) {
+      console.error("Design purchase WhatsApp setup failed", {
+        purchaseId: purchase.id,
+        reason: error instanceof Error ? error.message : "Unknown failure",
+      });
+      await db.update(designPurchases).set({ whatsappStatus: "failed" })
+        .where(and(eq(designPurchases.id, purchase.id), eq(designPurchases.whatsappStatus, "not_started")));
+    }
+  });
 }
 
 async function deliverPurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
@@ -28,10 +41,13 @@ async function deliverPurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
     console.warn("Design purchase WhatsApp skipped: invalid phone", {
       purchaseId: purchase.id,
     });
-    return;
+    throw new Error("Customer WhatsApp number is invalid");
   }
 
-  const callbackId = purchase.id;
+  getWhatsAppConfig();
+  const [contact] = await db.select({ optedOutAt: whatsappContacts.optedOutAt })
+    .from(whatsappContacts).where(eq(whatsappContacts.phone, phone)).limit(1);
+  if (contact?.optedOutAt) return;
   const dedupeKey = `purchaseCreated/${purchase.id}`;
   const url = purchaseUrl(purchase.id);
   const templateName = getWhatsAppTemplateName("purchaseCreated");
@@ -46,29 +62,27 @@ async function deliverPurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
       notificationKind: "purchaseCreated",
       body: purchaseMessageText("purchaseCreated", purchase, url),
       templateName,
-      status: "queued",
+      status: "sending",
+      attemptedAt: new Date(),
       eventAt: new Date(),
     })
-    .onConflictDoNothing({ target: whatsappMessages.dedupeKey })
+    .onConflictDoUpdate({
+      target: whatsappMessages.dedupeKey,
+      set: { status: "sending", attemptedAt: new Date(), updatedAt: new Date(), errorCode: null, templateName },
+      setWhere: and(eq(whatsappMessages.status, "failed"), isNull(whatsappMessages.wamid)),
+    })
     .returning({ id: whatsappMessages.id });
 
   if (!message) return;
 
   try {
-    await db
-      .update(whatsappMessages)
-      .set({
-        status: "sending",
-        attemptedAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(whatsappMessages.id, message.id));
-    const result = await sendWhatsAppTemplate(phone, callbackId, {
+    const result = await sendWhatsAppTemplate(phone, message.id, {
       name: templateName,
       language: process.env.WHATSAPP_TEMPLATE_LANGUAGE?.trim() || "en_US",
       components: templateComponents(purchase),
     });
     if (!result.ok) {
+      console.error("WhatsApp provider rejected or could not confirm message", { purchaseId: purchase.id, code: result.code, uncertain: result.uncertain });
       await db
         .update(whatsappMessages)
         .set({
@@ -76,25 +90,26 @@ async function deliverPurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
           errorCode: result.code,
           updatedAt: new Date(),
         })
-        .where(eq(whatsappMessages.id, message.id));
+        .where(and(eq(whatsappMessages.id, message.id), eq(whatsappMessages.status, "sending")));
+      await db.update(designPurchases).set({ whatsappStatus: "failed" })
+        .where(and(eq(designPurchases.id, purchase.id), inArray(designPurchases.whatsappStatus, ["not_started", "failed"])));
       return;
     }
     await db
       .update(whatsappMessages)
       .set({ wamid: result.wamid, status: "sent", updatedAt: new Date() })
-      .where(eq(whatsappMessages.id, message.id));
+      .where(and(eq(whatsappMessages.id, message.id), eq(whatsappMessages.status, "sending")));
     await db
       .update(designPurchases)
       .set({
         whatsappPhone: phone,
-        whatsappConsentAt: new Date(),
         whatsappStatus: "message_sent",
         whatsappLastMessageId: result.wamid,
         whatsappStartedAt: new Date(),
         whatsappLastActivityAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(designPurchases.id, purchase.id));
+      .where(and(eq(designPurchases.id, purchase.id), inArray(designPurchases.whatsappStatus, ["not_started", "failed", "message_sent"])));
   } catch (error) {
     console.error("Design purchase WhatsApp delivery failed", {
       purchaseId: purchase.id,
@@ -107,6 +122,6 @@ async function deliverPurchaseCreatedWhatsApp(purchase: DesignPurchaseRecord) {
         errorCode: "delivery_exception",
         updatedAt: new Date(),
       })
-      .where(eq(whatsappMessages.id, message.id));
+      .where(and(eq(whatsappMessages.id, message.id), eq(whatsappMessages.status, "sending")));
   }
 }

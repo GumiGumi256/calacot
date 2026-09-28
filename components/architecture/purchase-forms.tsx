@@ -9,6 +9,7 @@ import {
   cancelDesignPurchase,
   requestDesignAssistance,
   retryDesignPurchaseEmail,
+  retryDesignPurchaseWhatsApp,
 } from "@/lib/design-purchases/actions";
 import type { ActionState, PurchaseAction } from "@/lib/design-purchases/model";
 
@@ -191,6 +192,19 @@ export function RetryPurchaseEmailForm({ purchaseId }: { purchaseId: string }) {
       <input type="hidden" name="purchaseId" value={purchaseId} />
       <Button type="submit" variant="outline" disabled={pending}>
         {pending ? "Queuing…" : "Retry undelivered emails"}
+      </Button>
+      <Result state={state} />
+    </form>
+  );
+}
+
+export function RetryPurchaseWhatsAppForm({ purchaseId }: { purchaseId: string }) {
+  const [state, action, pending] = useActionState(retryDesignPurchaseWhatsApp, {});
+  return (
+    <form action={action} className="mt-5">
+      <input type="hidden" name="purchaseId" value={purchaseId} />
+      <Button type="submit" variant="outline" disabled={pending}>
+        {pending ? "Queuing…" : "Retry WhatsApp confirmation"}
       </Button>
       <Result state={state} />
     </form>

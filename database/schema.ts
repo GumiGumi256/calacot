@@ -163,6 +163,8 @@ export const designPurchases = pgTable(
     invoiceIssuedAt: timestamp("invoice_issued_at", { withTimezone: true }).defaultNow().notNull(),
     invoiceEmailSentAt: timestamp("invoice_email_sent_at", { withTimezone: true }),
     confirmationEmailSentAt: timestamp("confirmation_email_sent_at", { withTimezone: true }),
+    invoiceTeamEmailSentAt: timestamp("invoice_team_email_sent_at", { withTimezone: true }),
+    confirmationTeamEmailSentAt: timestamp("confirmation_team_email_sent_at", { withTimezone: true }),
     revision: numeric("revision", { precision: 10, scale: 0 }).default("0").notNull(),
     whatsappPhone: text("whatsapp_phone"),
     whatsappConsentAt: timestamp("whatsapp_consent_at", { withTimezone: true }),

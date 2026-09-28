@@ -73,7 +73,7 @@ export const enquirySchema = z.object({
       minorUnits(data.budgetMin) > minorUnits(data.budgetMax)) {
     issue("budgetMax", "The maximum should be at least the minimum budget.");
   }
-  if (data.contactMethod === "email" && !data.email) {
+  if (!data.email) {
     issue("email", "Enter the email address we should use.");
   } else if (data.email && !z.email().safeParse(data.email).success) {
     issue("email", "Enter a valid email address.");

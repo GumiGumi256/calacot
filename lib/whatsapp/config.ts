@@ -6,7 +6,7 @@ const outbound = z.object({
   apiVersion: z.string().regex(/^v\d+\.0$/),
 });
 export function getWhatsAppConfig() {
-  const parsed = outbound.safeParse({ accessToken: process.env.WHATSAPP_ACCESS_TOKEN?.trim(), phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID?.trim(), apiVersion: process.env.WHATSAPP_API_VERSION?.trim() });
+  const parsed = outbound.safeParse({ accessToken: process.env.WHATSAPP_ACCESS_TOKEN?.trim(), phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID?.trim(), apiVersion: process.env.WHATSAPP_API_VERSION?.trim() || "v23.0" });
   if (!parsed.success) throw new Error("WhatsApp outbound configuration is incomplete. Check the token, phone number ID and API version.");
   return parsed.data;
 }
