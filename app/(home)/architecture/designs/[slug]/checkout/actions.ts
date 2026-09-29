@@ -116,7 +116,9 @@ export async function createDesignPurchase(
         .where(eq(designPurchases.id, purchase.id))
         .returning();
       if (!consentedPurchase)
-        return { error: "We couldn't update your purchase request. Please try again." };
+        return {
+          error: "We couldn't update your purchase request. Please try again.",
+        };
       purchase = consentedPurchase;
     }
   } catch {

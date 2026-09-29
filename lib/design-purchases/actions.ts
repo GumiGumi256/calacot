@@ -90,7 +90,14 @@ async function reviewPurchase(
         error:
           "This purchase changed or is already closed. Refresh before reviewing it again.",
       };
-    queueDesignEmail(updated, decision === "confirm" ? "confirmed" : decision === "reject" ? "rejected" : "cancelled");
+    queueDesignEmail(
+      updated,
+      decision === "confirm"
+        ? "confirmed"
+        : decision === "reject"
+          ? "rejected"
+          : "cancelled",
+    );
     refreshPurchase(updated.id);
     return {
       success:
@@ -162,8 +169,12 @@ export async function retryDesignPurchaseEmail(
   const p = await getAdminDesignPurchase(String(data.get("purchaseId") || ""));
   if (p.purchaseStatus === "cancelled")
     return { error: "This purchase is cancelled." };
-  if (!p.invoiceEmailSentAt || !p.invoiceTeamEmailSentAt) queueDesignEmail(p, "invoice");
-  if (p.purchaseStatus === "completed" && (!p.confirmationEmailSentAt || !p.confirmationTeamEmailSentAt))
+  if (!p.invoiceEmailSentAt || !p.invoiceTeamEmailSentAt)
+    queueDesignEmail(p, "invoice");
+  if (
+    p.purchaseStatus === "completed" &&
+    (!p.confirmationEmailSentAt || !p.confirmationTeamEmailSentAt)
+  )
     queueDesignEmail(p, "confirmed");
   return {
     success:
@@ -171,18 +182,35 @@ export async function retryDesignPurchaseEmail(
   };
 }
 
-export async function retryDesignPurchaseWhatsApp(_: ActionState, data: FormData): Promise<ActionState> {
+export async function retryDesignPurchaseWhatsApp(
+  _: ActionState,
+  data: FormData,
+): Promise<ActionState> {
   const p = await getAdminDesignPurchase(String(data.get("purchaseId") || ""));
-  if (p.purchaseStatus === "cancelled" || p.purchaseStatus === "completed") return { error: "This purchase is closed." };
-  if (!p.whatsappConsentAt) return { error: "The customer has not consented to WhatsApp updates." };
-  const [message] = await db.select({ status: whatsappMessages.status }).from(whatsappMessages)
-    .where(eq(whatsappMessages.dedupeKey, `purchaseCreated/${p.id}`)).limit(1);
+  if (p.purchaseStatus === "cancelled" || p.purchaseStatus === "completed")
+    return { error: "This purchase is closed." };
+  if (!p.whatsappConsentAt)
+    return { error: "The customer has not consented to WhatsApp updates." };
+  const [message] = await db
+    .select({ status: whatsappMessages.status })
+    .from(whatsappMessages)
+    .where(eq(whatsappMessages.dedupeKey, `purchaseCreated/${p.id}`))
+    .limit(1);
   if (message && ["uncertain", "sending"].includes(message.status || "")) {
-    return { error: "The previous send has an unknown outcome. Check Meta delivery logs before retrying to avoid a duplicate confirmation." };
+    return {
+      error:
+        "The previous send has an unknown outcome. Check Meta delivery logs before retrying to avoid a duplicate confirmation.",
+    };
   }
   if (message && ["sent", "delivered", "read"].includes(message.status || "")) {
-    return { success: "Meta already accepted this confirmation. It will not be sent again." };
+    return {
+      success:
+        "Meta already accepted this confirmation. It will not be sent again.",
+    };
   }
   queuePurchaseCreatedWhatsApp(p);
-  return { success: "WhatsApp retry queued. Sent or uncertain attempts will not be duplicated. Refresh to check status." };
+  return {
+    success:
+      "WhatsApp retry queued. Sent or uncertain attempts will not be duplicated. Refresh to check status.",
+  };
 }

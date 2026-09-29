@@ -129,8 +129,8 @@ export default function DesignCheckout({
                 2. Confirm your request
               </h2>
               <p className="text-sm leading-6 text-muted-foreground">
-                You&apos;ll receive your
-                invoice and payment options after confirming your request.
+                You&apos;ll receive your invoice and payment options after
+                confirming your request.
               </p>
               <label className="block text-xs font-medium">
                 Preferred contact method
@@ -158,7 +158,8 @@ export default function DesignCheckout({
                 />
                 <span>
                   I agree to receive transactional purchase and payment updates
-                  on WhatsApp at the number above. Message and data rates may apply.
+                  on WhatsApp at the number above. Message and data rates may
+                  apply.
                 </span>
               </label>
               <label className="block text-xs font-medium">

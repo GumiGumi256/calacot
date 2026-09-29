@@ -27,31 +27,34 @@ export type PurchaseAction = (
   state: ActionState,
   data: FormData,
 ) => Promise<ActionState>;
-export const purchaseSchema = z.object({
-  designSlug: z.string().trim().min(1).max(200),
-  packageId: z.string().trim().min(1).max(200),
-  fullName: z.string().trim().min(2, "Enter your full name.").max(150),
-  email: z.email("Enter a valid email address.").max(254),
-  phone: z
-    .string()
-    .trim()
-    .regex(
-      /^\+?[\d\s().-]{7,25}$/,
-      "Enter a valid phone number with country code.",
-    ),
-  acceptTerms: z.literal("true", {
-    error: "Please accept the purchase terms.",
-  }),
-  whatsappConsent: z.literal("true", {
-    error: "Please agree to receive purchase updates on WhatsApp.",
-  }),
-  preferredContactMethod: z
-    .enum(["whatsapp", "phone", "email"])
-    .default("email"),
-  customerNote: z.string().trim().max(2000).default(""),
-}).refine((data) => normalizeWhatsAppPhone(data.phone) !== null, {
-  path: ["phone"], message: "Enter a valid WhatsApp number including its country code.",
-});
+export const purchaseSchema = z
+  .object({
+    designSlug: z.string().trim().min(1).max(200),
+    packageId: z.string().trim().min(1).max(200),
+    fullName: z.string().trim().min(2, "Enter your full name.").max(150),
+    email: z.email("Enter a valid email address.").max(254),
+    phone: z
+      .string()
+      .trim()
+      .regex(
+        /^\+?[\d\s().-]{7,25}$/,
+        "Enter a valid phone number with country code.",
+      ),
+    acceptTerms: z.literal("true", {
+      error: "Please accept the purchase terms.",
+    }),
+    whatsappConsent: z.literal("true", {
+      error: "Please agree to receive purchase updates on WhatsApp.",
+    }),
+    preferredContactMethod: z
+      .enum(["whatsapp", "phone", "email"])
+      .default("email"),
+    customerNote: z.string().trim().max(2000).default(""),
+  })
+  .refine((data) => normalizeWhatsAppPhone(data.phone) !== null, {
+    path: ["phone"],
+    message: "Enter a valid WhatsApp number including its country code.",
+  });
 export const paymentSchema = z.object({
   purchaseId: z.uuid(),
   paymentMethod: z.enum(["mobile_money", "bank_transfer", "cash", "other"]),

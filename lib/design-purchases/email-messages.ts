@@ -50,7 +50,8 @@ export async function deliverDesignMessages(p: DesignPurchaseRecord, kind: Desig
     if (field && p[field]) continue;
     try {
       if (kind === "invoice" && audience === "customer") {
-        try { payload.attachments = [{ filename: `${p.invoiceNumber}.pdf`, content: await deps.invoice() }]; }
+        // Resend's API requires attachment content as base64; a raw Buffer serializes incorrectly and silently fails the send.
+        try { payload.attachments = [{ filename: `${p.invoiceNumber}.pdf`, content: (await deps.invoice()).toString("base64") }]; }
         catch { console.error("Invoice PDF unavailable; sending account link", { purchaseId: p.id }); }
       }
       const accepted = await sendEmailWithRetry(payload, key, deps.send);

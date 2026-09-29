@@ -62,6 +62,7 @@ WhatsApp API version was missing. Old code validated configuration inside the se
 Meta sender/template checks timed out both inside and outside the sandbox. Token validity, template approval, sender readiness and actual WhatsApp delivery remain unverified. No live emails or WhatsApp messages were sent by the repair.
 
 Checks:
+
 - `npx tsx scripts/verify-email.ts`: mocked notifications, required email fields, retry isolation, PDF fallback, template escaping, WhatsApp phone/template/transport.
 - `npx tsx scripts/verify-design-purchases.ts`: isolated database migrations, purchase transitions, concurrency, access and PDF generation.
 - `npx tsx scripts/diagnose-notifications.ts`: read-only configuration/provider checks and aggregate database status; no recipient details or credentials printed.

@@ -39,7 +39,9 @@ async function main() {
         "utf8",
       ),
     );
-    await pg.exec(await readFile("drizzle/0006_purchase_team_emails.sql", "utf8"));
+    await pg.exec(
+      await readFile("drizzle/0006_purchase_team_emails.sql", "utf8"),
+    );
     const [legacy] = await db
       .select()
       .from(designPurchases)
@@ -75,16 +77,40 @@ async function main() {
       ...createPurchaseReferences(),
     };
     const [p] = await db.insert(designPurchases).values(values).returning();
-    const [outbound] = await db.insert(whatsappMessages).values({
-      purchaseId: p.id, customerPhone: "256772123456", direction: "outbound",
-      messageType: "template", status: "uncertain", eventAt: new Date(),
-    }).returning();
-    const receipt = { wamid: "wamid.receipt-test", phone: "256772123456", timestamp: new Date(), callbackId: outbound.id, errorCode: null };
+    const [outbound] = await db
+      .insert(whatsappMessages)
+      .values({
+        purchaseId: p.id,
+        customerPhone: "256772123456",
+        direction: "outbound",
+        messageType: "template",
+        status: "uncertain",
+        eventAt: new Date(),
+      })
+      .returning();
+    const receipt = {
+      wamid: "wamid.receipt-test",
+      phone: "256772123456",
+      timestamp: new Date(),
+      callbackId: outbound.id,
+      errorCode: null,
+    };
     await db.execute(recordStatusQuery({ ...receipt, status: "delivered" }));
     await db.execute(recordStatusQuery({ ...receipt, status: "sent" }));
-    const [reconciled] = await db.select().from(whatsappMessages).where(eq(whatsappMessages.id, outbound.id));
-    assert.equal(reconciled.wamid, receipt.wamid, "A message callback ID must reconcile an uncertain send");
-    assert.equal(reconciled.status, "delivered", "A late sent receipt must not downgrade delivery");
+    const [reconciled] = await db
+      .select()
+      .from(whatsappMessages)
+      .where(eq(whatsappMessages.id, outbound.id));
+    assert.equal(
+      reconciled.wamid,
+      receipt.wamid,
+      "A message callback ID must reconcile an uncertain send",
+    );
+    assert.equal(
+      reconciled.status,
+      "delivered",
+      "A late sent receipt must not downgrade delivery",
+    );
     assert.equal(p.purchaseStatus, "awaiting_payment");
     assert.equal(canAccessDesign(p), false);
     assert.equal(
@@ -247,7 +273,8 @@ async function main() {
       !purchaseSchema.safeParse({ ...parsed, acceptTerms: "false" }).success,
     );
     assert(
-      !purchaseSchema.safeParse({ ...parsed, whatsappConsent: undefined }).success,
+      !purchaseSchema.safeParse({ ...parsed, whatsappConsent: undefined })
+        .success,
       "Every new design purchase requires explicit WhatsApp consent",
     );
     assert(

@@ -220,11 +220,7 @@ export async function generateDesignInvoice(purchase: DesignPurchaseRecord) {
     return "Awaiting payment";
   }
 
-  function DesignInvoice({
-    purchase: p,
-  }: {
-    purchase: DesignPurchaseRecord;
-  }) {
+  function DesignInvoice({ purchase: p }: { purchase: DesignPurchaseRecord }) {
     return (
       <Document
         title={`Proforma invoice ${p.invoiceNumber}`}
@@ -234,7 +230,10 @@ export async function generateDesignInvoice(purchase: DesignPurchaseRecord) {
           {/* Header */}
           <View style={styles.header} wrap={false}>
             <View style={styles.headerTop}>
-              <PdfImage src={{ data: logoData, format: "png" }} style={styles.logo} />
+              <PdfImage
+                src={{ data: logoData, format: "png" }}
+                style={styles.logo}
+              />
 
               <View style={styles.invoiceMeta}>
                 <Text style={styles.invoiceLabel}>INVOICE NUMBER</Text>
@@ -268,9 +267,7 @@ export async function generateDesignInvoice(purchase: DesignPurchaseRecord) {
 
               <Text style={styles.primaryText}>{p.designTitle}</Text>
 
-              {p.designCode && (
-                <Text style={styles.muted}>{p.designCode}</Text>
-              )}
+              {p.designCode && <Text style={styles.muted}>{p.designCode}</Text>}
             </View>
           </View>
 
@@ -314,16 +311,12 @@ export async function generateDesignInvoice(purchase: DesignPurchaseRecord) {
           <View style={styles.referenceSection} wrap={false}>
             <View style={styles.referenceBlock}>
               <Text style={styles.heading}>PURCHASE REFERENCE</Text>
-              <Text style={styles.referenceValue}>
-                {p.purchaseReference}
-              </Text>
+              <Text style={styles.referenceValue}>{p.purchaseReference}</Text>
             </View>
 
             <View style={styles.referenceBlock}>
               <Text style={styles.heading}>PAYMENT STATUS</Text>
-              <Text style={styles.referenceValue}>
-                {getPaymentStatus(p)}
-              </Text>
+              <Text style={styles.referenceValue}>{getPaymentStatus(p)}</Text>
             </View>
           </View>
 

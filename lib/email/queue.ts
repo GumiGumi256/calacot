@@ -8,12 +8,22 @@ export function queueEnquiryEmails(enquiry: EnquiryEmail) {
     const email = getEmailClient();
     const team = getTeamEmail();
     if (!email || !team) {
-      console.error("Enquiry email configuration missing or invalid", { reference: enquiry.id });
+      console.error("Enquiry email configuration missing or invalid", {
+        reference: enquiry.id,
+      });
       return;
     }
-    await deliverEnquiryEmails(enquiry, email.from, team, async (payload, options) => {
-      const { data, error } = await email.client.emails.send(payload, options);
-      return { data, error };
-    });
+    await deliverEnquiryEmails(
+      enquiry,
+      email.from,
+      team,
+      async (payload, options) => {
+        const { data, error } = await email.client.emails.send(
+          payload,
+          options,
+        );
+        return { data, error };
+      },
+    );
   });
 }
