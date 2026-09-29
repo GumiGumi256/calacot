@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowUpRight, Bath, BedDouble, LoaderCircle, Ruler } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Bath, BedDouble, LoaderCircle, Ruler, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { CollectionDesign, DesignCollectionPage } from "@/lib/queries/design";
 
@@ -13,14 +13,21 @@ const label = (value: string) => value.replace(/-/g, " ").replace(/^./, (letter)
 export default function DesignCollectionBrowser({ initialPage }: { initialPage: DesignCollectionPage | null }) {
   const [page, setPage] = useState(initialPage);
   const [type, setType] = useState("");
+  const [search, setSearch] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
+  const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchInput = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<"filter" | "more" | null>(null);
   const [error, setError] = useState(initialPage ? "" : "We couldn’t load the collection. Please try again.");
   const controller = useRef<AbortController | null>(null);
-  const retry = useRef({ type: "", offset: 0 });
+  const retry = useRef({ type: "", offset: 0, search: "" });
   const grid = useRef<HTMLUListElement>(null);
   const focusIndex = useRef<number | null>(null);
 
-  useEffect(() => () => controller.current?.abort(), []);
+  useEffect(() => () => {
+    controller.current?.abort();
+    if (debounce.current) clearTimeout(debounce.current);
+  }, []);
   useEffect(() => {
     if (focusIndex.current !== null && page) {
       grid.current?.querySelectorAll<HTMLAnchorElement>("a")[focusIndex.current]?.focus({ preventScroll: true });
@@ -28,15 +35,16 @@ export default function DesignCollectionBrowser({ initialPage }: { initialPage: 
     }
   }, [page]);
 
-  async function load(nextType: string, offset = 0) {
+  async function load(nextType: string, offset = 0, nextSearch = search) {
+    if (debounce.current) clearTimeout(debounce.current);
     controller.current?.abort();
     const request = new AbortController();
     controller.current = request;
-    retry.current = { type: nextType, offset };
+    retry.current = { type: nextType, offset, search: nextSearch };
     setPending(offset ? "more" : "filter");
     setError("");
     try {
-      const params = new URLSearchParams({ type: nextType, offset: String(offset) });
+      const params = new URLSearchParams({ type: nextType, offset: String(offset), q: nextSearch.trim() });
       const response = await fetch(`/api/designs?${params}`, { signal: request.signal });
       if (!response.ok) throw new Error("Collection request failed");
       const result: DesignCollectionPage = await response.json();
@@ -49,11 +57,27 @@ export default function DesignCollectionBrowser({ initialPage }: { initialPage: 
           : result.designs,
       }));
       setType(nextType);
+      setAppliedSearch(nextSearch.trim());
     } catch {
       if (!request.signal.aborted) setError("We couldn’t load these designs. Your place is saved — please try again.");
     } finally {
       if (!request.signal.aborted) setPending(null);
     }
+  }
+
+  function updateSearch(value: string) {
+    setSearch(value);
+    controller.current?.abort();
+    if (debounce.current) clearTimeout(debounce.current);
+    setPending("filter");
+    setError("");
+    debounce.current = setTimeout(() => void load(type, 0, value), 350);
+  }
+
+  function clearSearch() {
+    setSearch("");
+    void load(type, 0, "");
+    searchInput.current?.focus();
   }
 
   return (
@@ -67,8 +91,9 @@ export default function DesignCollectionBrowser({ initialPage }: { initialPage: 
           <p className="max-w-sm text-sm leading-7 text-muted-foreground">Find a design that fits your life. Explore the details, compare spaces, and make it your own.</p>
         </header>
 
-        <div className="mb-8 flex flex-col gap-5 border-y border-border py-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <div className="mb-8 flex flex-col gap-4 border-y border-border py-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+          <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
             <label htmlFor="design-type" className="text-sm font-medium">Design type</label>
             <select id="design-type" value={type} disabled={pending !== null || !page}
               onChange={(event) => void load(event.target.value)}
@@ -79,14 +104,31 @@ export default function DesignCollectionBrowser({ initialPage }: { initialPage: 
             </select>
             {type && <Button variant="ghost" disabled={pending !== null} onClick={() => void load("")}>Clear filter</Button>}
           </div>
+          <form role="search" className="min-w-0 flex-1" onSubmit={(event) => { event.preventDefault(); void load(type); }}>
+            <label htmlFor="design-search" className="sr-only">Search designs</label>
+            <div className="relative">
+              <Search aria-hidden="true" className="pointer-events-none absolute left-4 top-3.5 size-4 text-muted-foreground" />
+              <input ref={searchInput} id="design-search" type="search" value={search} maxLength={120}
+                onChange={(event) => updateSearch(event.target.value)}
+                onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); clearSearch(); } }}
+                placeholder="Search names, styles or bedrooms…" autoComplete="off" spellCheck={false}
+                aria-describedby="design-search-help" aria-controls="design-results"
+                className="h-11 w-full rounded-xl border border-border bg-background pl-11 pr-12 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:appearance-none" />
+              {search && <Button type="button" variant="ghost" size="icon-sm" aria-label="Clear search" className="absolute right-1 top-1" onClick={clearSearch}><X aria-hidden="true" /></Button>}
+            </div>
+          </form>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p id="design-search-help" className="text-xs text-muted-foreground">search the entire design collection by name, style, or number of bedrooms.</p>
           <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
             {pending === "filter" ? "Finding your designs…" : pending === "more" ? "Loading more designs…" : page ? `${page.designs.length} of ${page.total} ${page.total === 1 ? "design" : "designs"}${type ? ` · ${label(type)}` : ""}` : "Collection unavailable"}
           </p>
+          </div>
         </div>
 
         {error && <div role="alert" className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-background p-5">
           <p className="text-sm">{error}</p>
-          <Button variant="outline" disabled={pending !== null} onClick={() => void load(retry.current.type, retry.current.offset)}>Try again</Button>
+          <Button variant="outline" disabled={pending !== null} onClick={() => void load(retry.current.type, retry.current.offset, retry.current.search)}>Try again</Button>
         </div>}
 
         <div id="design-results" aria-busy={pending !== null}>
@@ -94,15 +136,16 @@ export default function DesignCollectionBrowser({ initialPage }: { initialPage: 
             {page?.designs.map((design) => <li key={design._id}><DesignCard design={design} /></li>)}
           </ul>
           {page?.designs.length === 0 && !pending && !error && <div className="rounded-2xl border border-dashed border-border px-6 py-16 text-center">
-            <h3 className="text-2xl tracking-tight">{type ? "More designs are on their way." : "You’re all caught up."}</h3>
-            <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-muted-foreground">{type ? "Try another design type to discover more possibilities." : "Explore the featured designs above, or check back soon for new additions to the collection."}</p>
+            <h3 className="text-2xl tracking-tight">{appliedSearch ? `No designs found for “${appliedSearch}”` : type ? "More designs are on their way." : "You’re all caught up."}</h3>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-muted-foreground">{appliedSearch ? "Try fewer words, another style, or a different design type." : type ? "Try another design type to discover more possibilities." : "Explore the featured designs above, or check back soon for new additions to the collection."}</p>
+            {appliedSearch && <Button className="mt-6 mr-3" variant="outline" onClick={clearSearch}>Clear search</Button>}
             {type && <Button className="mt-6" variant="outline" onClick={() => void load("")}>Explore all types</Button>}
           </div>}
         </div>
 
         {!!page?.designs.length && <div className="mt-12 flex flex-col items-center gap-4 border-t border-border pt-8">
           <p className="text-xs text-muted-foreground">Showing {page.designs.length} of {page.total} designs</p>
-          {page.nextOffset !== null ? <Button variant="outline" size="lg" disabled={pending !== null} aria-controls="design-results" onClick={() => void load(type, page.nextOffset!)}>
+          {page.nextOffset !== null ? <Button variant="outline" size="lg" disabled={pending !== null || search.trim() !== appliedSearch} aria-controls="design-results" onClick={() => void load(type, page.nextOffset!, appliedSearch)}>
             {pending === "more" ? <><LoaderCircle aria-hidden="true" className="motion-safe:animate-spin" /> Loading designs…</> : <>Load more designs <ArrowDown aria-hidden="true" /></>}
           </Button> : <p className="text-sm text-muted-foreground">You’ve explored every {type ? `${label(type).toLowerCase()} ` : ""}design in this collection.</p>}
         </div>}

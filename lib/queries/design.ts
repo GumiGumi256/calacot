@@ -3,6 +3,7 @@ import { defineQuery } from "next-sanity";
 import { cache } from "react";
 import { urlFor } from "@/sanity/lib/image";
 import { DESIGN_TYPES } from "@/sanity/design-types";
+import { rankDesigns, type SearchableDesign } from "@/lib/design-search";
 import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 
 export type FeaturedDesign = {
@@ -85,12 +86,31 @@ export const DESIGN_COLLECTION_QUERY = defineQuery(/* groq */ `{
   "total": count(*[${collectionFilter} && ($type == "" || designType == $type)])
 }`);
 
-export async function getDesignCollection(type = "", offset = 0): Promise<DesignCollectionPage> {
+const DESIGN_SEARCH_INDEX_QUERY = defineQuery(/* groq */ `
+  *[${collectionFilter} && ($type == "" || designType == $type)]
+    | order(publishedAt desc, _id asc) { _id, title, designType, architecturalStyle, bedrooms }
+`);
+
+export async function getDesignCollection(type = "", offset = 0, search = ""): Promise<DesignCollectionPage> {
+  let rankedIds: string[] | null = null;
+  if (search.trim()) {
+    const index = await client.fetch<SearchableDesign[]>(DESIGN_SEARCH_INDEX_QUERY, { type }, {
+      perspective: "published", useCdn: false, next: { revalidate: 60, tags: ["designs"] },
+    });
+    rankedIds = rankDesigns(index, search);
+  }
+  const ids = rankedIds?.slice(offset, offset + DESIGN_PAGE_SIZE) ?? [];
   const result = await client.fetch<{ designs: FeaturedDesign[]; total: number }>(
-    DESIGN_COLLECTION_QUERY,
-    { type, offset, end: offset + DESIGN_PAGE_SIZE },
+    rankedIds === null ? DESIGN_COLLECTION_QUERY : DESIGN_COLLECTION_QUERY.replaceAll(
+      '$type == "" || designType == $type', '_id in $ids',
+    ),
+    { type, ids, offset: rankedIds === null ? offset : 0, end: rankedIds === null ? offset + DESIGN_PAGE_SIZE : DESIGN_PAGE_SIZE },
     { perspective: "published", useCdn: false, next: { revalidate: 60, tags: ["designs"] } },
   );
+  if (rankedIds !== null) {
+    result.total = rankedIds.length;
+    result.designs.sort((a, b) => ids.indexOf(a._id) - ids.indexOf(b._id));
+  }
   return {
     ...result,
     types: DESIGN_TYPES.map(({ value }) => value),
