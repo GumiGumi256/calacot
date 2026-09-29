@@ -1,6 +1,8 @@
 import { client } from "@/sanity/lib/client";
 import { defineQuery } from "next-sanity";
 import { cache } from "react";
+import { urlFor } from "@/sanity/lib/image";
+import { DESIGN_TYPES } from "@/sanity/design-types";
 import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 
 export type FeaturedDesign = {
@@ -50,6 +52,55 @@ export async function getFeaturedDesigns() {
       next: { revalidate: 60, tags: ["featured-designs"] },
     },
   );
+}
+
+export const DESIGN_PAGE_SIZE = 12;
+export type CollectionDesign = Omit<FeaturedDesign, "featuredImage"> & { imageUrl: string };
+export type DesignCollectionPage = {
+  designs: CollectionDesign[];
+  total: number;
+  types: string[];
+  nextOffset: number | null;
+};
+
+// Exclude only the twelve designs actually shown in the featured carousel.
+const collectionFilter = /* groq */ `
+  _type == "design" && coalesce(status, "available") != "archived"
+  && defined(slug.current) && defined(featuredImage.asset->url)
+  && !(_id in *[_type == "design" && isFeatured == true
+    && coalesce(status, "available") != "archived"
+    && defined(slug.current) && defined(featuredImage.asset->url)]
+    | order(publishedAt desc, _id asc)[0...12]._id)
+`;
+
+export const DESIGN_COLLECTION_QUERY = defineQuery(/* groq */ `{
+  "designs": *[${collectionFilter} && ($type == "" || designType == $type)]
+    | order(publishedAt desc, _id asc)[$offset...$end] {
+      _id, title, "slug": slug.current, featuredImage,
+      "imageAlt": featuredImage.alt, "imageBlur": featuredImage.asset->metadata.lqip,
+      "description": null, designType, architecturalStyle, bedrooms, bathrooms, totalArea,
+      "status": coalesce(status, "available"),
+      "startingPrice": (packages[price > 0 && package->isActive == true] | order(price asc))[0].price
+    },
+  "total": count(*[${collectionFilter} && ($type == "" || designType == $type)])
+}`);
+
+export async function getDesignCollection(type = "", offset = 0): Promise<DesignCollectionPage> {
+  const result = await client.fetch<{ designs: FeaturedDesign[]; total: number }>(
+    DESIGN_COLLECTION_QUERY,
+    { type, offset, end: offset + DESIGN_PAGE_SIZE },
+    { perspective: "published", useCdn: false, next: { revalidate: 60, tags: ["designs"] } },
+  );
+  return {
+    ...result,
+    types: DESIGN_TYPES.map(({ value }) => value),
+    designs: result.designs.map(({ featuredImage, ...design }) => ({
+      ...design,
+      imageUrl: urlFor(featuredImage).width(960).height(720).fit("crop").auto("format").url(),
+    })),
+    nextOffset: offset + result.designs.length < result.total && result.designs.length > 0
+      ? offset + result.designs.length : null,
+  };
 }
 
 export type DesignPackage = {

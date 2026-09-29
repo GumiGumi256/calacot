@@ -1,4 +1,5 @@
 import { defineField, defineType } from "sanity";
+import { DESIGN_TYPES } from "../design-types";
 
 export default defineType({
   name: "design",
@@ -104,14 +105,7 @@ export default defineType({
       type: "string",
       group: "basic",
       options: {
-        list: [
-          { title: "Bungalow", value: "bungalow" },
-          { title: "Duplex", value: "duplex" },
-          { title: "Villa", value: "villa" },
-          { title: "Townhouse", value: "townhouse" },
-          { title: "Apartment", value: "apartment" },
-          { title: "Commercial", value: "commercial" },
-        ],
+        list: DESIGN_TYPES,
       },
       validation: (Rule) => Rule.required(),
     }),
