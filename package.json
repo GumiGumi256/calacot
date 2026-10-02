@@ -10,12 +10,17 @@
     "test:customer-care": "tsx scripts/verify-customer-care.ts",
     "customer-care:migrate": "tsx scripts/migrate-customer-care.ts",
     "customer-care:worker": "tsx scripts/customer-care-worker.ts",
-    "customer-care:check-model": "tsx scripts/check-customer-care-model.ts"
+    "customer-care:check-model": "tsx scripts/check-customer-care-model.ts",
+    "customer-care:diagnose": "tsx scripts/diagnose-customer-care.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@clerk/nextjs": "^7.9.3",
     "@clerk/ui": "^1.33.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@google/genai": "^2.26.0",
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^5.4.0",
@@ -23,6 +28,7 @@
     "@react-pdf/renderer": "^4.9.0",
     "@sanity/image-url": "^1.2.0",
     "@sanity/vision": "^4.22.0",
+    "@tanstack/react-table": "^9.2.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cn": "^0.2.6",
@@ -42,6 +48,7 @@
     "react-dom": "19.2.4",
     "react-hook-form": "^7.77.0",
     "react-phone-number-input": "^3.4.18",
+    "recharts": "^3.8.0",
     "resend": "^6.26.0",
     "sanity": "^4.22.0",
     "shadcn": "^4.18.0",
@@ -49,7 +56,7 @@
     "styled-components": "^6.3.12",
     "tailwind-merge": "^3.6.0",
     "tw-animate-css": "^1.4.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",

@@ -1,15 +1,24 @@
 import { db } from "@/database/db";
 import { getWebhookConfig } from "@/lib/whatsapp/config";
 import { recordInboundQuery, recordStatusQuery } from "@/lib/whatsapp/queries";
-import { readWebhookBody, verifyWebhookChallenge, verifyWebhookSignature } from "@/lib/whatsapp/security";
+import {
+  readWebhookBody,
+  verifyWebhookChallenge,
+  verifyWebhookSignature,
+} from "@/lib/whatsapp/security";
 import { parseWhatsAppWebhook } from "@/lib/whatsapp/webhook";
 import { enqueueQuery, insertJobQuery } from "@/lib/customer-care/queries";
+import { after } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 180;
 
 export async function GET(request: Request) {
-  return verifyWebhookChallenge(new URL(request.url), process.env.WHATSAPP_VERIFY_TOKEN);
+  return verifyWebhookChallenge(
+    new URL(request.url),
+    process.env.WHATSAPP_VERIFY_TOKEN,
+  );
 }
 
 export async function POST(request: Request) {
@@ -28,7 +37,13 @@ export async function POST(request: Request) {
     return new Response("Invalid webhook body", { status: 413 });
   }
 
-  if (!verifyWebhookSignature(raw, request.headers.get("x-hub-signature-256"), config.appSecret)) {
+  if (
+    !verifyWebhookSignature(
+      raw,
+      request.headers.get("x-hub-signature-256"),
+      config.appSecret,
+    )
+  ) {
     console.warn("whatsapp_webhook_signature_invalid");
     return new Response("Invalid signature", { status: 401 });
   }
@@ -41,14 +56,22 @@ export async function POST(request: Request) {
   }
 
   const events = parseWhatsAppWebhook(payload, config);
-  if (events.ignored) console.warn("whatsapp_webhook_unknown_format", { ignored: events.ignored });
+  if (events.ignored)
+    console.warn("whatsapp_webhook_unknown_format", {
+      ignored: events.ignored,
+    });
 
   try {
     // Only short database operations here. A failed write returns 503 so Meta retries.
     for (const message of events.messages) {
-      const result = await db.execute<{ id: string; purchase_id: string | null }>(recordInboundQuery(message));
+      const result = await db.execute<{
+        id: string;
+        purchase_id: string | null;
+      }>(recordInboundQuery(message));
       if (result.rows.some((row) => !row.purchase_id)) {
-        console.info("whatsapp_message_unassociated", { messageId: message.wamid });
+        console.info("whatsapp_message_unassociated", {
+          messageId: message.wamid,
+        });
       }
       if (process.env.CUSTOMER_CARE_ENABLED === "true") {
         await db.execute(enqueueQuery(message.wamid));
@@ -58,6 +81,22 @@ export async function POST(request: Request) {
 
     for (const status of events.statuses) {
       await db.execute(recordStatusQuery(status));
+    }
+
+    if (
+      process.env.CUSTOMER_CARE_ENABLED === "true" &&
+      events.messages.length > 0
+    ) {
+      // Respond to Meta first; durable jobs remain available to the scheduled
+      // worker if this best-effort immediate trigger is interrupted.
+      after(async () => {
+        try {
+          const { runCareWorker } = await import("@/lib/customer-care/worker");
+          await runCareWorker(2);
+        } catch {
+          console.error("customer_care_immediate_worker_failed");
+        }
+      });
     }
 
     return new Response("EVENT_RECEIVED", { status: 200 });

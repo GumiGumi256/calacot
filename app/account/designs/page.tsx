@@ -9,7 +9,7 @@ import {
   canAccessDesign,
 } from "@/lib/design-purchases/model";
 import { purchaseWhatsAppUrl } from "@/lib/company";
-import { PurchaseStatus } from "@/components/architecture/purchase-summary";
+import { PurchaseSummary } from "@/components/architecture/purchase-summary";
 import { buttonVariants } from "@/components/ui/button";
 
 export const metadata = { title: "My designs" };
@@ -59,7 +59,7 @@ export default async function MyDesignsPage() {
                 className="grid gap-5 py-8 sm:grid-cols-[1fr_auto]"
               >
                 <div>
-                  <PurchaseStatus purchase={p} />
+                  <PurchaseSummary purchase={p} />
                   <h2 className="mt-4 text-2xl font-medium tracking-tight">
                     <Link href={`/account/designs/${p.id}`}>
                       {p.designTitle}

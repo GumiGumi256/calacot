@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import Footer from "@/components/footer";
 import { Toaster } from "@/components/ui/toast";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 // const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -18,17 +19,28 @@ const outfitHeading = Outfit({
 });
 
 const plusJakartaSans = Plus_Jakarta_Sans({
- 
   subsets: ["latin"],
   variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
-  title: { default: "Calacot | We Make Possibilities Real", template: "%s | Calacot" },
+  title: {
+    default: "Calacot | We Make Possibilities Real",
+    template: "%s | Calacot",
+  },
   description: seoPages["/"].description,
-  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
- 
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -53,15 +65,17 @@ export default function RootLayout({
         <ClerkProvider>
           <SiteStructuredData />
           <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
           >
-          {/* <Navbar /> */}
-          {children}
-          <Footer />
-          <Toaster />
+            <TooltipProvider>
+              {/* <Navbar /> */}
+              {children}
+            </TooltipProvider>
+            <Footer />
+            <Toaster />
           </ThemeProvider>
         </ClerkProvider>
       </body>

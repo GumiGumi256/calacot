@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
 import { NAV_LINKS } from "@/constants";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const SOCIAL_LINKS = [
   {
@@ -40,20 +41,22 @@ const LEGAL_LINKS = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    return null;
+  }
 
   return (
     <footer className="relative overflow-hidden border-t border-black/10 bg-brand-white dark:border-white/10 dark:bg-brand-black">
       <div className="mx-auto flex min-h-[85vh] max-w-[1800px] flex-col justify-between px-6 pt-16 md:px-10 lg:px-14 lg:pt-20">
-
         {/* Top */}
         <div className="grid gap-14 lg:grid-cols-[0.9fr_0.5fr_0.5fr]">
-
           {/* Brand */}
           <div className="max-w-md">
-             {/* Logo */}
+            {/* Logo */}
             <Link href="/" className="mt-12 inline-block">
-              
               {/* Light Mode Logo */}
               <Image
                 src="/calacot-logo-icon-black.svg"
@@ -106,8 +109,6 @@ export default function Footer() {
                 </Link>
               ))}
             </div>
-
-           
           </div>
 
           {/* Navigation */}
@@ -155,7 +156,6 @@ export default function Footer() {
 
         {/* Large Typography Section */}
         <div className="relative mt-20 border-t border-black/10 pt-10 dark:border-white/10">
-
           <div className="overflow-hidden">
             <h2
               className="
@@ -178,7 +178,8 @@ export default function Footer() {
           {/* Bottom */}
           <div className="mt-4 flex flex-col items-start justify-between gap-4 pb-8 text-xs uppercase tracking-[0.15em] text-brand-black/40 dark:text-brand-white/40 md:flex-row md:items-center">
             <span>
-              © {currentYear} Calacot Uganda Limited. <span className="capitalize">All rights reserved.</span>
+              © {currentYear} Calacot Uganda Limited.{" "}
+              <span className="capitalize">All rights reserved.</span>
             </span>
 
             {/* <span>

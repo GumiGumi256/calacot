@@ -40,7 +40,7 @@ Treat account links as sensitive: approve only your own WhatsApp conversation, d
 
 `0007_customer_care.sql` adds `care_conversations`, `care_jobs`, `care_requests`, `care_link_tokens` and `care_audit`. It preserves existing tables. It is idempotent and is registered in the migration journal. The dedicated migration command requires the existing purchase/WhatsApp migrations to have been applied already.
 
-When `CUSTOMER_CARE_ENABLED=true`, the signed webhook saves the inbound event using the existing atomic query, ensures a conversation exists and inserts a unique job. It acknowledges Meta only after those writes succeed. A failure returns 503. A replay heals a partially completed enqueue and never creates duplicate jobs. No Gemini call occurs in the webhook. Status-only events continue to use the original receipt handler.
+When `CUSTOMER_CARE_ENABLED=true`, the signed webhook saves the inbound event using the existing atomic query, ensures a conversation exists and inserts a unique job. It acknowledges Meta only after those writes succeed. A failure returns 503. A replay heals a partially completed enqueue and never creates duplicate jobs. A Next.js `after()` callback immediately starts a bounded worker after the webhook response, so new messages do not wait for a scheduler tick. The durable queue and scheduled worker remain necessary for interrupted work and retries. Status-only events continue to use the original receipt handler. Exact greetings can use the reviewed welcome template without a model call; substantive questions still require approved content.
 
 The worker claims jobs using `FOR UPDATE SKIP LOCKED`, a per-phone ordering guard, a lease token and a three-minute lease. Different phones may run concurrently, but messages for one phone remain serial. Infrastructure errors use bounded exponential retry, up to five claims; exhausted jobs become dead and pause the bot. Rate limits route busy conversations to staff. Model/CMS failures produce a reviewed failure response and a staff handoff rather than repeated AI attempts.
 
@@ -88,6 +88,7 @@ No arbitrary website fetcher was added. The optional import requirement is fulfi
 
 ```powershell
 npm run test:customer-care
+npm run customer-care:diagnose
 npx tsx scripts/verify-design-purchases.ts
 npx tsx scripts/verify-email.ts
 npx tsc --noEmit

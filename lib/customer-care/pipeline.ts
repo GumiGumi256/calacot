@@ -72,6 +72,13 @@ export async function prepareReply(
 ): Promise<string> {
   if (type !== "text" && type !== "interactive") return templates.attachment;
   if (!body?.trim()) return templates.clarify;
+  // Reviewed greeting text needs no model or unpublished company facts.
+  if (
+    /^(hello|hi|hey|good morning|good afternoon|good evening|thanks|thank you)[.!\s]*$/i.test(
+      body.trim(),
+    )
+  )
+    return templates.welcome;
   if (/^(human|agent|advisor|help from a person)$/i.test(body.trim()))
     return request(job, "handoff");
   if (/^(unlink|unlink account)$/i.test(body.trim())) {
@@ -140,13 +147,11 @@ export async function prepareReply(
         );
       if (!linked?.clerkUserId) {
         const token = randomBytes(32).toString("hex");
-        await db
-          .insert(careLinkTokens)
-          .values({
-            hash: createHash("sha256").update(token).digest("hex"),
-            phone: job.phone,
-            expiresAt: new Date(Date.now() + 15 * 60_000),
-          });
+        await db.insert(careLinkTokens).values({
+          hash: createHash("sha256").update(token).digest("hex"),
+          phone: job.phone,
+          expiresAt: new Date(Date.now() + 15 * 60_000),
+        });
         return renderAccountLink(token);
       }
       const reference = plan.extractedFields.purchaseReference;

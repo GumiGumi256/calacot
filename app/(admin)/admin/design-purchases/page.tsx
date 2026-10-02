@@ -10,9 +10,11 @@ import {
   formatAmount,
   formatDate,
 } from "@/lib/design-purchases/model";
-import { PurchaseStatus } from "@/components/architecture/purchase-summary";
+import { PurchaseSummary} from "@/components/architecture/purchase-summary";
+import { getStatusBadgeClasses } from "@/lib/design-purchases/helper";
 
 export const metadata = { title: "Design purchase administration" };
+
 export default async function AdminPurchasesPage({
   searchParams,
 }: {
@@ -26,6 +28,7 @@ export default async function AdminPurchasesPage({
     10000,
     Math.max(1, Number.parseInt(query.page || "1", 10) || 1),
   );
+
   const purchases = await db
     .select()
     .from(designPurchases)
@@ -36,21 +39,24 @@ export default async function AdminPurchasesPage({
     )
     .limit(51)
     .offset((page - 1) * 50);
+
   const pageLink = (n: number) =>
     `/admin/design-purchases?${new URLSearchParams({ ...(status ? { status } : {}), page: String(n) })}`;
+
   return (
     <main className="mx-auto min-h-screen max-w-7xl px-5 pb-24 pt-28 text-foreground sm:px-8">
-      <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-        Calacot Administration
-      </p>
+     
       <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl">
         Design purchases.
       </h1>
-      <Link href="/admin/customer-care" className="mt-4 inline-block text-sm underline underline-offset-4">Open WhatsApp customer care inbox</Link>
+      <Link href="/admin/customer-care" className="mt-4 inline-block text-sm underline underline-offset-4">
+        Open WhatsApp customer care inbox
+      </Link>
       <p className="mt-4 text-sm text-muted-foreground">
-        Review customer requests and verify payments. Submitted payments appear
-        first.
+        Review customer requests and verify payments. Submitted payments appear first.
       </p>
+
+      {/* Filter Tabs with State Colors */}
       <nav aria-label="Filter purchases" className="my-8 flex flex-wrap gap-2">
         {[
           { value: "", label: "All purchases" },
@@ -58,17 +64,30 @@ export default async function AdminPurchasesPage({
             value: s,
             label: statusLabels[s],
           })),
-        ].map(({ value, label }) => (
-          <Link
-            key={value}
-            href={`/admin/design-purchases${value ? `?status=${value}` : ""}`}
-            aria-current={(status || "") === value ? "page" : undefined}
-            className={`rounded-full border px-4 py-2 text-xs ${(status || "") === value ? "border-foreground bg-foreground text-background" : "border-border"}`}
-          >
-            {label}
-          </Link>
-        ))}
+        ].map(({ value, label }) => {
+          const isActive = (status || "") === value;
+          const activeColor = value
+            ? getStatusBadgeClasses(value)
+            : "bg-foreground text-background border-foreground";
+
+          return (
+            <Link
+              key={value}
+              href={`/admin/design-purchases${value ? `?status=${value}` : ""}`}
+              aria-current={isActive ? "page" : undefined}
+              className={`rounded-full border px-4 py-2 text-xs font-medium transition-colors ${
+                isActive
+                  ? activeColor
+                  : "border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground"
+              }`}
+            >
+              {label}
+            </Link>
+          );
+        })}
       </nav>
+
+      {/* Table */}
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full min-w-[900px] text-left text-sm">
           <thead className="bg-muted/50 text-xs text-muted-foreground">
@@ -87,9 +106,9 @@ export default async function AdminPurchasesPage({
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-border">
             {purchases.slice(0, 50).map((p) => (
-              <tr key={p.id} className="border-t border-border">
+              <tr key={p.id} className="transition-colors hover:bg-muted/30">
                 <td className="px-5 py-5">
                   <Link
                     href={`/admin/design-purchases/${p.id}`}
@@ -98,26 +117,34 @@ export default async function AdminPurchasesPage({
                     {p.purchaseReference}
                   </Link>
                   <div className="mt-2">
-                    <PurchaseStatus purchase={p} />
+                    <PurchaseSummary purchase={p} />
                   </div>
                 </td>
                 <td className="px-5 py-5">
-                  {p.customerName}
+                  <div className="font-medium">{p.customerName}</div>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {p.customerPhone}
                   </p>
                 </td>
                 <td className="px-5 py-5">
-                  {p.designTitle}
+                  <div>{p.designTitle}</div>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {p.packageName}
                   </p>
                 </td>
-                <td className="whitespace-nowrap px-5 py-5">
+                <td className="whitespace-nowrap px-5 py-5 font-medium">
                   {formatAmount(p.amount, p.currency)}
                 </td>
-                <td className="px-5 py-5 capitalize">{p.paymentStatus}</td>
-                <td className="whitespace-nowrap px-5 py-5">
+                <td className="px-5 py-5">
+                  <span
+                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${getStatusBadgeClasses(
+                      p.paymentStatus
+                    )}`}
+                  >
+                    {p.paymentStatus}
+                  </span>
+                </td>
+                <td className="whitespace-nowrap px-5 py-5 text-muted-foreground">
                   {formatDate(p.createdAt)}
                 </td>
               </tr>
@@ -130,16 +157,24 @@ export default async function AdminPurchasesPage({
           </p>
         )}
       </div>
+
+      {/* Pagination */}
       <nav
         aria-label="Purchase pages"
         className="mt-6 flex justify-between text-sm"
       >
         {page > 1 ? (
-          <Link href={pageLink(page - 1)}>← Previous</Link>
+          <Link href={pageLink(page - 1)} className="hover:underline">
+            ← Previous
+          </Link>
         ) : (
           <span />
         )}
-        {purchases.length > 50 && <Link href={pageLink(page + 1)}>Next →</Link>}
+        {purchases.length > 50 && (
+          <Link href={pageLink(page + 1)} className="hover:underline">
+            Next →
+          </Link>
+        )}
       </nav>
     </main>
   );

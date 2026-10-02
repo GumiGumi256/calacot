@@ -105,9 +105,7 @@ export default async function CustomerCareInbox({
     <main className="mx-auto min-h-screen max-w-7xl px-5 pb-20 pt-28 sm:px-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-widest text-muted-foreground">
-            Calacot administration
-          </p>
+         
           <h1 className="mt-3 text-4xl font-medium">Customer care.</h1>
           <p className="mt-3 text-sm text-muted-foreground">
             Review enquiries, take over conversations, and send reviewed
