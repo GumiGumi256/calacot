@@ -43,18 +43,20 @@ export const purchaseSchema = z
     acceptTerms: z.literal("true", {
       error: "Please accept the purchase terms.",
     }),
-    whatsappConsent: z.literal("true", {
-      error: "Please agree to receive purchase updates on WhatsApp.",
-    }),
+    whatsappConsent: z.literal("true").optional(),
     preferredContactMethod: z
       .enum(["whatsapp", "phone", "email"])
       .default("email"),
     customerNote: z.string().trim().max(2000).default(""),
   })
-  .refine((data) => normalizeWhatsAppPhone(data.phone) !== null, {
-    path: ["phone"],
-    message: "Enter a valid WhatsApp number including its country code.",
-  });
+  .refine(
+    (data) =>
+      !data.whatsappConsent || normalizeWhatsAppPhone(data.phone) !== null,
+    {
+      path: ["phone"],
+      message: "Enter a valid WhatsApp number including its country code.",
+    },
+  );
 export const paymentSchema = z.object({
   purchaseId: z.uuid(),
   paymentMethod: z.enum(["mobile_money", "bank_transfer", "cash", "other"]),

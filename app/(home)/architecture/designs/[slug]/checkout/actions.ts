@@ -27,6 +27,7 @@ export async function createDesignPurchase(
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const values = parsed.data;
   let purchase: DesignPurchaseRecord | undefined;
+  let stage = "load_customer_and_design";
   try {
     const [user, design] = await Promise.all([
       currentUser(),
@@ -74,6 +75,7 @@ export async function createDesignPurchase(
           )
           .limit(1)
       )[0];
+    stage = "find_or_create_purchase";
     purchase = await findOpen();
     for (let attempt = 0; !purchase && attempt < 3; attempt++) {
       [purchase] = await db
@@ -97,7 +99,7 @@ export async function createDesignPurchase(
           ...createPurchaseReferences(),
           purchaseStatus: "awaiting_payment",
           preferredContactMethod: values.preferredContactMethod,
-          whatsappConsentAt: new Date(),
+          whatsappConsentAt: values.whatsappConsent ? new Date() : null,
           customerNote: values.customerNote || null,
           termsVersion: TERMS_VERSION,
           termsAcceptedAt: new Date(),
@@ -109,7 +111,8 @@ export async function createDesignPurchase(
     }
     if (!purchase)
       return { error: "We couldn't create your request. Please try again." };
-    if (!purchase.whatsappConsentAt) {
+    if (values.whatsappConsent && !purchase.whatsappConsentAt) {
+      stage = "record_whatsapp_consent";
       const [consentedPurchase] = await db
         .update(designPurchases)
         .set({ whatsappConsentAt: new Date(), updatedAt: new Date() })
@@ -121,15 +124,24 @@ export async function createDesignPurchase(
         };
       purchase = consentedPurchase;
     }
-  } catch {
-    console.error("Design purchase creation failed", { userId });
+  } catch (error) {
+    const failure = error as {
+      name?: string;
+      code?: string;
+      cause?: { code?: string };
+    };
+    console.error("Design purchase creation failed", {
+      stage,
+      name: failure?.name,
+      code: failure?.code || failure?.cause?.code,
+    });
     return {
       error:
         "We couldn't save your purchase request. Please try again; an existing request will be reused.",
     };
   }
   queueDesignEmail(purchase, "invoice");
-  queuePurchaseCreatedWhatsApp(purchase);
+  if (values.whatsappConsent) queuePurchaseCreatedWhatsApp(purchase);
   revalidatePath("/account/designs");
   revalidatePath("/admin/design-purchases");
   redirect(`/account/designs/${purchase.id}`);

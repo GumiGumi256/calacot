@@ -91,6 +91,12 @@ async function main() {
   assert.equal(normalizeWhatsAppPhone("0772123456"), "256772123456");
   const components = templateComponents(purchase);
   assert.equal(components[0].parameters.length, 5);
+  assert.equal(components[1].parameters[0].text, purchase.id);
+  assert.equal(
+    `https://www.calacot.com/account/designs/${components[1].parameters[0].text}`,
+    `https://www.calacot.com/account/designs/${purchase.id}`,
+    "Meta's URL placeholder must receive only the order ID",
+  );
   const sent = await postWhatsAppMessage(
     { accessToken: "test", phoneNumberId: "123", apiVersion: "v23.0" },
     {

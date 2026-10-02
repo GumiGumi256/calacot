@@ -273,9 +273,9 @@ async function main() {
       !purchaseSchema.safeParse({ ...parsed, acceptTerms: "false" }).success,
     );
     assert(
-      !purchaseSchema.safeParse({ ...parsed, whatsappConsent: undefined })
+      purchaseSchema.safeParse({ ...parsed, whatsappConsent: undefined })
         .success,
-      "Every new design purchase requires explicit WhatsApp consent",
+      "Email-only purchases do not require WhatsApp consent",
     );
     assert(
       !paymentSchema.safeParse({

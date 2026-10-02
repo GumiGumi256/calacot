@@ -56,7 +56,7 @@ Keep these values server-side; never use `NEXT_PUBLIC_` for credentials:
 
 ```dotenv
 # Start disabled; enable only after migration and content review.
-CUSTOMER_CARE_ENABLED=false
+CUSTOMER_CARE_ENABLED=true
 GEMINI_API_KEY=your-server-side-key
 GEMINI_MODEL=gemini-3.8-flash
 CUSTOMER_CARE_WORKER_SECRET=at-least-32-random-characters
@@ -109,6 +109,10 @@ Staging acceptance:
 - Create and pay for a test design through the existing workflow; confirm existing email, order WhatsApp templates and receipt tracking still work.
 
 ## Operations
+
+For delivery troubleshooting, run `npx tsx scripts/diagnose-notifications.ts` and `npx tsx scripts/diagnose-delivery-endpoints.ts`. These inspect configuration, delivery records, recent Resend events, endpoint reachability and empty signed webhook authentication without sending notifications. An accepted email timestamp is not by itself a delivery receipt; inspect the provider's last event. A repeated checkout reuses an open order and does not duplicate already accepted confirmations. If no new purchase/reference appears, inspect checkout validation and server-action logs before retrying notifications.
+
+Use `https://www.calacot.com/api/whatsapp/webhook` as the public Meta callback on the current deployment: the bare domain redirects to `www`. Verify that callback in Meta and subscribe the app/account to `messages` events. A successful empty signed authentication probe validates the route and app secret, but does not prove that Meta subscriptions, phone IDs, deployment environment variables or worker scheduling are configured. The local environment and the deployed environment must be checked separately. A published company profile with `approvalStatus: draft` is intentionally excluded; a reviewer must set it to approved and publish before substantive automated answers can work.
 
 Monitor ready-job count, oldest ready job age, dead jobs, uncertain outbound messages and staff requests. The inbox exposes recent failures; query Postgres for longer-range metrics. Alerts should contain job IDs and error codes, not raw customer messages, credentials or model output. Provide staff coverage before enabling automated handoff. No response-time SLA is invented.
 

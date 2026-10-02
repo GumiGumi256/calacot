@@ -145,15 +145,15 @@ export default function DesignCheckout({
                 </select>
               </label>
               <p className="text-xs leading-6 text-muted-foreground">
-                Your preferred contact method is for follow-up. Purchase updates
-                are sent by email and WhatsApp.
+                Your invoice is always emailed to your account email, and
+                Calacot receives your order details. Select the option below to
+                also receive purchase updates on WhatsApp.
               </p>
               <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/40 bg-card p-4 text-xs leading-6 text-muted-foreground">
                 <input
                   type="checkbox"
                   name="whatsappConsent"
                   value="true"
-                  required
                   className="mt-1 size-4 shrink-0 accent-brand-primary"
                 />
                 <span>

@@ -1,0 +1,1577 @@
+[
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 10
+              },
+              {
+                "flag": "max",
+                "constraint": 120
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "rows": 4,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 50
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "price",
+        "type": "number",
+        "title": "Price (UGX)"
+      },
+      {
+        "options": {
+          "list": [
+            "sale",
+            "rent"
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "sale",
+                  "rent"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "listingType",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            "house",
+            "apartment",
+            "land",
+            "commercial"
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "house",
+                  "apartment",
+                  "land",
+                  "commercial"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "propertyType",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "bedrooms",
+        "type": "number"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "bathrooms",
+        "type": "number"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "area",
+        "type": "number",
+        "title": "Area (sqm)"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "fields": [
+          {
+            "name": "address",
+            "type": "string"
+          },
+          {
+            "name": "district",
+            "type": "string"
+          },
+          {
+            "name": "city",
+            "type": "string"
+          },
+          {
+            "name": "coordinates",
+            "type": "geopoint"
+          }
+        ],
+        "name": "location",
+        "type": "object"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 5
+              },
+              {
+                "flag": "max",
+                "constraint": 10
+              }
+            ],
+            "level": "error",
+            "message": "You must upload between 5 and 10 images"
+          }
+        ],
+        "of": [
+          {
+            "options": {
+              "hotspot": true
+            },
+            "type": "image"
+          }
+        ],
+        "name": "images",
+        "type": "array"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "featuredImage",
+        "type": "image"
+      },
+      {
+        "options": {
+          "list": [
+            "parking",
+            "security",
+            "wifi",
+            "swimming pool",
+            "garden",
+            "furnished"
+          ]
+        },
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "amenities",
+        "type": "array"
+      },
+      {
+        "options": {
+          "list": [
+            "available",
+            "sold",
+            "rented"
+          ]
+        },
+        "initialValue": "available",
+        "name": "status",
+        "type": "string"
+      },
+      {
+        "initialValue": false,
+        "name": "isFeatured",
+        "type": "boolean",
+        "title": "Featured Listing"
+      },
+      {
+        "name": "publishedAt",
+        "type": "datetime"
+      }
+    ],
+    "name": "property",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string",
+        "title": "Design Name"
+      },
+      {
+        "options": {
+          "source": "title",
+          "maxLength": 96
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "options": {
+          "source": "title"
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Generate from the design name.",
+        "name": "designCode",
+        "type": "slug"
+      },
+      {
+        "rows": 5,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 50
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Residential",
+              "value": "residential"
+            },
+            {
+              "title": "Commercial",
+              "value": "commercial"
+            },
+            {
+              "title": "Mixed Use",
+              "value": "mixed-use"
+            }
+          ],
+          "layout": "radio"
+        },
+        "initialValue": "residential",
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "residential",
+                  "commercial",
+                  "mixed-use"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "propertyType",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Bungalow",
+              "value": "bungalow"
+            },
+            {
+              "title": "Duplex",
+              "value": "duplex"
+            },
+            {
+              "title": "Villa",
+              "value": "villa"
+            },
+            {
+              "title": "Townhouse",
+              "value": "townhouse"
+            },
+            {
+              "title": "Apartment",
+              "value": "apartment"
+            },
+            {
+              "title": "Commercial",
+              "value": "commercial"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "bungalow",
+                  "duplex",
+                  "villa",
+                  "townhouse",
+                  "apartment",
+                  "commercial"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "designType",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Modern",
+              "value": "modern"
+            },
+            {
+              "title": "Contemporary",
+              "value": "contemporary"
+            },
+            {
+              "title": "Minimalist",
+              "value": "minimalist"
+            },
+            {
+              "title": "Luxury",
+              "value": "luxury"
+            },
+            {
+              "title": "Tropical",
+              "value": "tropical"
+            },
+            {
+              "title": "Traditional",
+              "value": "traditional"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "modern",
+                  "contemporary",
+                  "minimalist",
+                  "luxury",
+                  "tropical",
+                  "traditional"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "architecturalStyle",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "bedrooms",
+        "type": "number"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "bathrooms",
+        "type": "number"
+      },
+      {
+        "initialValue": 1,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "min",
+                "constraint": 1
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "floors",
+        "type": "number",
+        "title": "Number of Floors"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Enter area in square metres.",
+        "name": "totalArea",
+        "type": "number",
+        "title": "Total Floor Area"
+      },
+      {
+        "fields": [
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "min",
+                    "constraint": 0
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "width",
+            "type": "number"
+          },
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "min",
+                    "constraint": 0
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "length",
+            "type": "number"
+          },
+          {
+            "options": {
+              "list": [
+                {
+                  "title": "Feet",
+                  "value": "ft"
+                },
+                {
+                  "title": "Metres",
+                  "value": "m"
+                }
+              ],
+              "layout": "radio"
+            },
+            "initialValue": "ft",
+            "name": "unit",
+            "type": "string"
+          }
+        ],
+        "name": "plotSize",
+        "type": "object",
+        "title": "Recommended Plot Size"
+      },
+      {
+        "options": {
+          "layout": "tags"
+        },
+        "description": "Examples: Home office, balcony, servant quarters, walk-in closet, swimming pool.",
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "features",
+        "type": "array",
+        "title": "Key Features"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 1
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "of": [
+          {
+            "fields": [
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "to": [
+                  {
+                    "type": "designPackage"
+                  }
+                ],
+                "name": "package",
+                "type": "reference"
+              },
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      },
+                      {
+                        "flag": "min",
+                        "constraint": 0
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "price",
+                "type": "number",
+                "title": "Price (UGX)"
+              },
+              {
+                "initialValue": false,
+                "name": "recommended",
+                "type": "boolean"
+              }
+            ],
+            "type": "object",
+            "name": "designPackagePrice",
+            "title": "Package"
+          }
+        ],
+        "name": "packages",
+        "type": "array",
+        "title": "Design Packages"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "fields": [
+          {
+            "description": "Describe what is shown without adding keywords or claims about completed construction.",
+            "name": "alt",
+            "type": "string",
+            "title": "Image description"
+          }
+        ],
+        "name": "featuredImage",
+        "type": "image"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 3
+              },
+              {
+                "flag": "max",
+                "constraint": 15
+              }
+            ],
+            "level": "error",
+            "message": "Upload between 3 and 15 images."
+          }
+        ],
+        "of": [
+          {
+            "options": {
+              "hotspot": true
+            },
+            "fields": [
+              {
+                "name": "alt",
+                "type": "string",
+                "title": "Image description"
+              }
+            ],
+            "type": "image"
+          }
+        ],
+        "name": "images",
+        "type": "array",
+        "title": "Design Gallery"
+      },
+      {
+        "description": "Optional services customers can request with this design.",
+        "of": [
+          {
+            "fields": [
+              {
+                "options": {
+                  "list": [
+                    {
+                      "title": "Structural Engineering",
+                      "value": "structural"
+                    },
+                    {
+                      "title": "Electrical Design",
+                      "value": "electrical"
+                    },
+                    {
+                      "title": "Mechanical Design",
+                      "value": "mechanical"
+                    },
+                    {
+                      "title": "BOQ",
+                      "value": "boq"
+                    },
+                    {
+                      "title": "Interior Design",
+                      "value": "interior"
+                    },
+                    {
+                      "title": "Site Adaptation",
+                      "value": "site-adaptation"
+                    },
+                    {
+                      "title": "Approval Assistance",
+                      "value": "approval"
+                    }
+                  ]
+                },
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "valid",
+                        "constraint": [
+                          "structural",
+                          "electrical",
+                          "mechanical",
+                          "boq",
+                          "interior",
+                          "site-adaptation",
+                          "approval"
+                        ]
+                      },
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "service",
+                "type": "string"
+              },
+              {
+                "name": "price",
+                "type": "number",
+                "title": "Price (UGX)"
+              },
+              {
+                "initialValue": false,
+                "name": "priceOnRequest",
+                "type": "boolean"
+              }
+            ],
+            "type": "object",
+            "title": "Service"
+          }
+        ],
+        "name": "additionalServices",
+        "type": "array"
+      },
+      {
+        "description": "Optional approximate construction cost for this design.",
+        "fields": [
+          {
+            "name": "minimum",
+            "type": "number",
+            "title": "Minimum Cost (UGX)"
+          },
+          {
+            "name": "maximum",
+            "type": "number",
+            "title": "Maximum Cost (UGX)"
+          }
+        ],
+        "name": "estimatedBuildCost",
+        "type": "object",
+        "title": "Estimated Construction Cost"
+      },
+      {
+        "initialValue": true,
+        "name": "canCustomize",
+        "type": "boolean",
+        "title": "Can This Design Be Customized?"
+      },
+      {
+        "rows": 3,
+        "hidden": "conditional",
+        "name": "customizationNote",
+        "type": "text",
+        "title": "Customization Information"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Available",
+              "value": "available"
+            },
+            {
+              "title": "Coming Soon",
+              "value": "coming-soon"
+            },
+            {
+              "title": "Archived",
+              "value": "archived"
+            }
+          ]
+        },
+        "initialValue": "available",
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "available",
+                  "coming-soon",
+                  "archived"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "status",
+        "type": "string",
+        "title": "Availability"
+      },
+      {
+        "initialValue": false,
+        "name": "isFeatured",
+        "type": "boolean",
+        "title": "Featured Design"
+      },
+      {
+        "name": "publishedAt",
+        "type": "datetime"
+      }
+    ],
+    "name": "design",
+    "type": "document",
+    "title": "Architectural Design"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "name",
+        "type": "string",
+        "title": "Package Name"
+      },
+      {
+        "options": {
+          "source": "name"
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "rows": 3,
+        "name": "description",
+        "type": "text",
+        "title": "Short Description"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 1
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "includes",
+        "type": "array",
+        "title": "What's Included"
+      },
+      {
+        "initialValue": true,
+        "name": "isActive",
+        "type": "boolean",
+        "title": "Active"
+      },
+      {
+        "initialValue": 1,
+        "name": "order",
+        "type": "number",
+        "title": "Display Order"
+      }
+    ],
+    "name": "designPackage",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "initialValue": "Calacot",
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "companyName",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "overview",
+        "type": "text",
+        "title": "Approved overview"
+      },
+      {
+        "name": "country",
+        "type": "string"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "serviceLocations",
+        "type": "array"
+      },
+      {
+        "initialValue": "https://calacot.com",
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "website",
+        "type": "url"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "contactInformation",
+        "type": "text",
+        "title": "Verified contact information (no embedded URLs)"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "options": {
+                  "list": [
+                    "architecture",
+                    "real_estate",
+                    "painting",
+                    "interiors",
+                    "tech",
+                    "customer_care"
+                  ]
+                },
+                "name": "unit",
+                "type": "string"
+              },
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "presence",
+                        "constraint": "required"
+                      },
+                      {
+                        "flag": "custom"
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "description",
+                "type": "text"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "businessUnits",
+        "type": "array"
+      },
+      {
+        "initialValue": "We sell possibility.",
+        "name": "brandPositioning",
+        "type": "string"
+      },
+      {
+        "initialValue": "Warm, professional, concise, clear, and never pushy.",
+        "name": "communicationGuidelines",
+        "type": "text"
+      },
+      {
+        "name": "businessHours",
+        "type": "text",
+        "title": "Verified business hours (leave empty until verified)"
+      },
+      {
+        "options": {
+          "list": [
+            "draft",
+            "approved"
+          ]
+        },
+        "initialValue": "draft",
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "draft",
+                  "approved"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "approvalStatus",
+        "type": "string"
+      },
+      {
+        "initialValue": 1,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "version",
+        "type": "number"
+      }
+    ],
+    "name": "customerCareCompanyProfile",
+    "type": "document",
+    "title": "Customer care company profile"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            "architecture",
+            "real_estate",
+            "painting",
+            "interiors",
+            "tech",
+            "customer_care"
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "architecture",
+                  "real_estate",
+                  "painting",
+                  "interiors",
+                  "tech",
+                  "customer_care"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "businessUnit",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            "greeting",
+            "thanks",
+            "language",
+            "service",
+            "packages",
+            "design_search",
+            "property_search",
+            "order_status",
+            "support_status",
+            "payment",
+            "customisation",
+            "quotation",
+            "viewing",
+            "callback",
+            "complaint",
+            "contact",
+            "hours",
+            "professional",
+            "unknown"
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "greeting",
+                  "thanks",
+                  "language",
+                  "service",
+                  "packages",
+                  "design_search",
+                  "property_search",
+                  "order_status",
+                  "support_status",
+                  "payment",
+                  "customisation",
+                  "quotation",
+                  "viewing",
+                  "callback",
+                  "complaint",
+                  "contact",
+                  "hours",
+                  "professional",
+                  "unknown"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "topic",
+        "type": "string"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "relatedQuestions",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "tags",
+        "type": "array"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "approvedAnswer",
+        "type": "text"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              },
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "displayLink",
+        "type": "url",
+        "title": "Reviewed Calacot link"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "sourceReference",
+        "type": "string"
+      },
+      {
+        "readOnly": true,
+        "name": "importedAt",
+        "type": "datetime"
+      },
+      {
+        "to": [
+          {
+            "type": "customerCareKnowledge"
+          }
+        ],
+        "name": "proposedRevisionOf",
+        "type": "reference"
+      },
+      {
+        "options": {
+          "list": [
+            "draft",
+            "approved"
+          ]
+        },
+        "initialValue": "draft",
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "draft",
+                  "approved"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "approvalStatus",
+        "type": "string"
+      },
+      {
+        "initialValue": false,
+        "name": "active",
+        "type": "boolean"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "lastReviewedAt",
+        "type": "datetime"
+      },
+      {
+        "initialValue": 1,
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              },
+              {
+                "flag": "min",
+                "constraint": 0
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "version",
+        "type": "number"
+      }
+    ],
+    "name": "customerCareKnowledge",
+    "type": "document",
+    "title": "Customer care knowledge"
+  }
+]

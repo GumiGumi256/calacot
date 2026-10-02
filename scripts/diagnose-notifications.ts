@@ -23,6 +23,7 @@ async function main() {
     for (const query of [
       "select purchase_status, preferred_contact_method, (invoice_email_sent_at is not null) as invoice_sent, (invoice_team_email_sent_at is not null) as invoice_team_sent, (confirmation_email_sent_at is not null) as confirmation_sent, (confirmation_team_email_sent_at is not null) as confirmation_team_sent, whatsapp_status, count(*) from design_purchases group by 1,2,3,4,5,6,7",
       "select status,error_code,count(*) from whatsapp_messages where direction='outbound' group by 1,2",
+      "select created_at,updated_at,purchase_status,(invoice_email_sent_at is not null) as customer_invoice_accepted,(invoice_team_email_sent_at is not null) as team_invoice_accepted,(whatsapp_consent_at is not null) as whatsapp_consent,whatsapp_status from design_purchases order by created_at desc limit 6",
     ]) {
       try {
         console.log(await db.query(query));
@@ -69,8 +70,23 @@ async function main() {
           }),
         ),
       });
-    } catch {
-      console.log(check.label, "Connection unavailable");
+      if (check.label === "Resend domains") {
+        const from = process.env.RESEND_FROM_EMAIL?.trim() || "";
+        const domain = from.split("@")[1];
+        console.log("Resend sender configuration", {
+          plainEmailFormat: /^[^<>\s@]+@[^<>\s@]+\.[^<>\s@]+$/.test(from),
+          domainVerified: !!data.data?.some(
+            (item: { name: string; status: string }) =>
+              item.name === domain && item.status === "verified",
+          ),
+        });
+      }
+    } catch (error) {
+      const e = error as { name?: string; cause?: { code?: string } };
+      console.log(check.label, "Connection unavailable", {
+        name: e.name,
+        code: e.cause?.code,
+      });
     }
   }
 }

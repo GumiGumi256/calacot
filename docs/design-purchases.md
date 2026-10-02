@@ -30,8 +30,8 @@ RESEND_API_KEY=
 RESEND_FROM_EMAIL=
 ENQUIRY_TEAM_EMAIL=
 
-# Optional app origin for invoice/confirmation email links; defaults to https://calacot.com
-CALACOT_APP_URL=https://calacot.com
+# Optional app origin for invoice/confirmation email links; defaults to https://www.calacot.com
+CALACOT_APP_URL=https://www.calacot.com
 
 # International WhatsApp business number; include country code
 CALACOT_WHATSAPP_NUMBER=
@@ -90,6 +90,10 @@ Admins may confirm a submitted payment or an independently verified manual payme
 `canAccessDesign()` centralizes the confirmed-payment plus active-access check. Secure document delivery is intentionally deferred; no private files are exposed. Completed purchases explain that the team will make documents available through the account. Refunds, cancellation of completed purchases, and full review history are not implemented.
 
 ## PDF/email reliability
+
+Every new order sends a customer invoice email to the verified account address and a separate Calacot notification to `ENQUIRY_TEAM_EMAIL`, regardless of the preferred follow-up method. WhatsApp updates are optional and require the explicit consent checkbox. Repeating checkout for the same open order reuses that order and skips invoice emails already accepted; it does not create a new order or resend its original invoice.
+
+For the WhatsApp template URL button, set the approved template URL to exactly `https://www.calacot.com/account/designs/{{1}}` (no trailing period). The API supplies only the purchase UUID for `{{1}}`; the static domain/path comes from the template configured in Meta, not `CALACOT_APP_URL`. Changing the app origin cannot repair a malformed approved Meta template or an already sent button.
 
 Invoices use `@react-pdf/renderer` on the server, with page wrapping for long included-item lists. PDF regeneration uses only saved purchase data. Email/PDF generation runs through Next.js `after()` after the authoritative database write and cannot roll back the purchase. Resend requests use stable idempotency keys, bounded retries and recorded delivery timestamps. Failures are logged without customer contact details.
 

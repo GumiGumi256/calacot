@@ -1,5 +1,4 @@
 import "server-only";
-import { absoluteUrl } from "@/lib/seo";
 import { formatAmount } from "@/lib/design-purchases/model";
 import type { DesignPurchaseRecord } from "@/database/schema";
 
@@ -35,8 +34,12 @@ export function purchaseWhatsAppUrl(
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 }
 export function purchaseUrl(id: string) {
-  const origin = setting("CALACOT_APP_URL");
-  return origin
-    ? new URL(`/account/designs/${id}`, origin).toString()
-    : absoluteUrl(`/account/designs/${id}`);
+  const origin = new URL(
+    setting("CALACOT_APP_URL") || "https://www.calacot.com",
+  );
+  if (origin.hostname === "calacot.com") origin.hostname = "www.calacot.com";
+  return new URL(
+    `/account/designs/${encodeURIComponent(id)}`,
+    origin,
+  ).toString();
 }
