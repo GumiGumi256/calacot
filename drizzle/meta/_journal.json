@@ -50,6 +50,13 @@
       "when": 1790553600000,
       "tag": "0006_purchase_team_emails",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790899200000,
+      "tag": "0007_customer_care",
+      "breakpoints": true
     }
   ]
 }

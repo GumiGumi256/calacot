@@ -2,6 +2,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+WhatsApp customer care implementation and activation: [docs/customer-care.md](docs/customer-care.md).
+
 First, run the development server:
 
 ```bash

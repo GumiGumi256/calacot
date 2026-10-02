@@ -46,6 +46,7 @@ export default async function AdminPurchasesPage({
       <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl">
         Design purchases.
       </h1>
+      <Link href="/admin/customer-care" className="mt-4 inline-block text-sm underline underline-offset-4">Open WhatsApp customer care inbox</Link>
       <p className="mt-4 text-sm text-muted-foreground">
         Review customer requests and verify payments. Submitted payments appear
         first.

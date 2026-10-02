@@ -3,6 +3,7 @@ import { getWebhookConfig } from "@/lib/whatsapp/config";
 import { recordInboundQuery, recordStatusQuery } from "@/lib/whatsapp/queries";
 import { readWebhookBody, verifyWebhookChallenge, verifyWebhookSignature } from "@/lib/whatsapp/security";
 import { parseWhatsAppWebhook } from "@/lib/whatsapp/webhook";
+import { enqueueQuery, insertJobQuery } from "@/lib/customer-care/queries";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,6 +49,10 @@ export async function POST(request: Request) {
       const result = await db.execute<{ id: string; purchase_id: string | null }>(recordInboundQuery(message));
       if (result.rows.some((row) => !row.purchase_id)) {
         console.info("whatsapp_message_unassociated", { messageId: message.wamid });
+      }
+      if (process.env.CUSTOMER_CARE_ENABLED === "true") {
+        await db.execute(enqueueQuery(message.wamid));
+        await db.execute(insertJobQuery(message.wamid));
       }
     }
 
