@@ -22,7 +22,11 @@ export default async function KnowledgeManagement() {
         businessUnit: string;
         version: number;
       }[]
-    >(`*[_type=="customerCareKnowledge"] | order(_updatedAt desc)[0...100] {_id,title,approvalStatus,active,businessUnit,version}`, {}, { perspective: "published", useCdn: false, cache: "no-store" })
+    >(
+      `*[_type=="customerCareKnowledge"] | order(_updatedAt desc)[0...100] {_id,title,approvalStatus,active,businessUnit,version}`,
+      {},
+      { perspective: "published", useCdn: false, cache: "no-store" },
+    )
     .catch(() => []);
   return (
     <main className="mx-auto min-h-screen max-w-4xl px-6 pb-20 pt-28">
@@ -32,8 +36,8 @@ export default async function KnowledgeManagement() {
       <h1 className="my-5 text-4xl font-medium">Customer care content.</h1>
       <p className="mb-6 text-sm text-muted-foreground">
         Automated replies use a fixed Calacot menu and the published company
-        profile. Approved knowledge entries below are for staff-assisted replies.
-        Review the company profile in{" "}
+        profile. Approved knowledge entries below are for staff-assisted
+        replies. Review the company profile in{" "}
         <Link href="/studio" className="underline">
           Sanity Studio
         </Link>
@@ -69,7 +73,8 @@ export default async function KnowledgeManagement() {
               className="mt-2"
             />
             <span className="mt-2 block text-xs text-muted-foreground">
-              Copy the document ID from Studio. Do not paste the Studio URL or title.
+              Copy the document ID from Studio. Do not paste the Studio URL or
+              title.
             </span>
           </label>
           <label className="block text-sm">

@@ -481,17 +481,17 @@ async function main() {
     },
     async (_input, init) => {
       transmittedMenu = JSON.parse(String(init?.body));
-      return new Response(JSON.stringify({ messages: [{ id: "wamid.menu" }] }), {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ messages: [{ id: "wamid.menu" }] }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        },
+      );
     },
   );
   assert.equal(menuSent.ok, true);
-  assert.equal(
-    (transmittedMenu as { type: string }).type,
-    "interactive",
-  );
+  assert.equal((transmittedMenu as { type: string }).type, "interactive");
   console.log(
     "Customer care checks passed: menu bounds and selection, interactive webhook parsing and delivery, renderer safety, migrations, replay dedupe, leases, account ownership, tokens, opt-outs, takeover and receipt handling.",
   );

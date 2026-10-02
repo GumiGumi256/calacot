@@ -88,7 +88,11 @@ export async function prepareReply(
 ): Promise<string> {
   if (type !== "text" && type !== "interactive") return CARE_MENU_MESSAGE;
   const text = body?.trim() || "";
-  if (/^(menu|start|hello|hi|hey|good morning|good afternoon|good evening|thanks|thank you)[.!\s]*$/i.test(text))
+  if (
+    /^(menu|start|hello|hi|hey|good morning|good afternoon|good evening|thanks|thank you)[.!\s]*$/i.test(
+      text,
+    )
+  )
     return CARE_MENU_MESSAGE;
   if (/^(human|agent|advisor|talk to our team)$/i.test(text))
     return request(job, "handoff");

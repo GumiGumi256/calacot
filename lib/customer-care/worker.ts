@@ -34,7 +34,11 @@ export async function deliverCareMessage(
   if (!m) return;
   const sent =
     m.message_type === "interactive"
-      ? await sendWhatsAppInteractiveList(m.customer_phone, m.id, careMenuPayload)
+      ? await sendWhatsAppInteractiveList(
+          m.customer_phone,
+          m.id,
+          careMenuPayload,
+        )
       : await sendWhatsAppText(m.customer_phone, m.id, m.body);
   await db
     .update(whatsappMessages)

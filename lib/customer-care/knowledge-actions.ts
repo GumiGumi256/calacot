@@ -83,13 +83,11 @@ export async function prepareKnowledgeDraft(form: FormData) {
       : {}),
   };
   await writer().create(draft);
-  await db
-    .insert(careAudit)
-    .values({
-      actor,
-      action: "knowledge_draft_prepared",
-      details: { draftId: id, sourceId, revisionOf },
-    });
+  await db.insert(careAudit).values({
+    actor,
+    action: "knowledge_draft_prepared",
+    details: { draftId: id, sourceId, revisionOf },
+  });
   revalidatePath("/admin/customer-care/knowledge");
 }
 export async function prepareCompanyProfile() {
