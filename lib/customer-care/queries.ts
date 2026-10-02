@@ -57,7 +57,7 @@ export function claimOutboundQuery(
       AND EXISTS(SELECT 1 FROM care_conversations conv WHERE conv.phone=m.customer_phone AND conv.mode<>'closed'
         AND (${!automated} OR conv.assigned_to IS NULL))
       AND (${!requireBot} OR EXISTS(SELECT 1 FROM care_conversations conv WHERE conv.phone=m.customer_phone AND conv.mode='bot'))
-    RETURNING m.id,m.customer_phone,m.body`;
+    RETURNING m.id,m.customer_phone,m.body,m.message_type`;
 }
 
 export function revokeLinkQuery(phone: string) {

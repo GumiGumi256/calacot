@@ -5,13 +5,6 @@ import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import { sql } from "drizzle-orm";
 import {
-  classificationSchema,
-  approvedKnowledgeId,
-  permittedAction,
-  type Classification,
-  actions,
-} from "../lib/customer-care/contracts";
-import {
   OUT_OF_SCOPE,
   renderStatic,
   renderKnowledge,
@@ -38,30 +31,29 @@ import {
   parseWhatsAppWebhook,
 } from "../lib/whatsapp/webhook";
 import { postWhatsAppMessage } from "../lib/whatsapp/transport";
+import {
+  CARE_MENU_MESSAGE,
+  careMenuOptions,
+  careMenuPayload,
+  getCareMenuChoice,
+} from "../lib/customer-care/menu";
 
-function plan(overrides: Partial<Classification> = {}): Classification {
-  return classificationSchema.parse({
-    scope: "in_scope",
-    businessUnit: "architecture",
-    intent: "design_search",
-    approvedAction: "designs",
-    extractedFields: {
-      bedrooms: null,
-      listingType: null,
-      designSlug: null,
-      purchaseReference: null,
-      location: null,
-      projectDetails: null,
-      preferredTime: null,
-      language: null,
-    },
-    clarificationRequired: false,
-    handoffRequired: false,
-    knowledgeId: null,
-    ...overrides,
-  });
-}
 async function main() {
+  assert.equal(getCareMenuChoice("Architecture & design"), "architecture");
+  assert.equal(getCareMenuChoice("Order status"), "order_status");
+  assert.equal(getCareMenuChoice("menu"), null);
+  assert.equal(getCareMenuChoice("Tell me a football score"), null);
+  assert.equal(careMenuPayload.body.text, CARE_MENU_MESSAGE);
+  assert.equal(
+    careMenuPayload.action.sections[0].rows.length,
+    careMenuOptions.length,
+  );
+  assert.ok(careMenuOptions.length <= 10);
+  assert.ok(careMenuOptions.every((option) => option.title.length <= 24));
+  assert.equal(
+    new Set(careMenuOptions.map((option) => option.id)).size,
+    careMenuOptions.length,
+  );
   const workerSecret = "f".repeat(64);
   assert.equal(workerAuthorized(`Bearer ${workerSecret}`, workerSecret), true);
   for (const header of [
@@ -72,63 +64,7 @@ async function main() {
   ])
     assert.equal(workerAuthorized(header, workerSecret), false);
   assert.equal(workerAuthorized("Bearer undefined", undefined), false);
-  for (const action of actions) {
-    assert.equal(
-      permittedAction(plan({ scope: "out_of_scope", approvedAction: action })),
-      "refuse",
-    );
-    assert.equal(renderStatic("refuse"), OUT_OF_SCOPE);
-  }
-  assert.equal(permittedAction(plan({ scope: "mixed" })), "designs");
-  assert.equal(permittedAction(plan({ scope: "ambiguous" })), "clarify");
-  assert.equal(permittedAction(plan({ scope: "human_required" })), "handoff");
-  assert.equal(permittedAction(plan({ intent: "professional" })), "handoff");
-  assert.equal(permittedAction(plan({ intent: "complaint" })), "handoff");
-  assert.equal(permittedAction(plan({ approvedAction: "order" })), "clarify");
-  assert.equal(permittedAction(plan({ businessUnit: "tech" })), "clarify");
-  const original = plan({ intent: "service", approvedAction: "knowledge" });
-  const selection = { ...original, knowledgeId: "approved" };
-  const entries = [
-    { _id: "approved", businessUnit: "architecture", topic: "service" },
-  ];
-  assert.equal(approvedKnowledgeId(original, selection, entries), "approved");
-  for (const changed of [
-    { scope: "out_of_scope" },
-    { scope: "mixed" },
-    { businessUnit: "tech" },
-    { intent: "payment" },
-    { approvedAction: "order" },
-    { knowledgeId: "unreviewed" },
-  ])
-    assert.equal(
-      approvedKnowledgeId(
-        original,
-        { ...selection, ...changed } as Classification,
-        entries,
-      ),
-      null,
-    );
-  assert.equal(
-    approvedKnowledgeId(original, selection, [
-      { ...entries[0], businessUnit: "tech" },
-    ]),
-    null,
-  );
-  assert.throws(() =>
-    classificationSchema.parse({
-      ...plan(),
-      answer: "Unrestricted football prediction",
-    }),
-  );
-  assert.throws(() =>
-    classificationSchema.parse({ ...plan(), approvedAction: "google_search" }),
-  );
-  assert.throws(() =>
-    classificationSchema.parse({
-      ...plan(),
-      extractedFields: { ...plan().extractedFields, designSlug: "../../admin" },
-    }),
-  );
+  assert.equal(renderStatic("refuse"), OUT_OF_SCOPE);
   assert.throws(() =>
     renderListings([
       {
@@ -446,6 +382,41 @@ async function main() {
       { phoneNumberId: "number", businessAccountId: "business" },
     );
     assert.equal(parsed.messages[0].type, "unknown");
+    const interactive = parseWhatsAppWebhook(
+      {
+        object: "whatsapp_business_account",
+        entry: [
+          {
+            id: "business",
+            changes: [
+              {
+                field: "messages",
+                value: {
+                  metadata: { phone_number_id: "number" },
+                  messages: [
+                    {
+                      id: "wamid.menu-choice",
+                      from: phone,
+                      timestamp: String(Math.floor(Date.now() / 1000)),
+                      type: "interactive",
+                      interactive: {
+                        type: "list_reply",
+                        list_reply: {
+                          id: "architecture",
+                          title: "Architecture & design",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      },
+      { phoneNumberId: "number", businessAccountId: "business" },
+    );
+    assert.equal(interactive.messages[0].body, "Architecture & design");
     // A crashed final claim creates a visible staff request and does not strand later work.
     await pg.query(
       "UPDATE care_jobs SET attempts=5,lease_until=now()-interval '1 second' WHERE id=$1",
@@ -497,8 +468,32 @@ async function main() {
   );
   assert.equal(transport.ok, false);
   if (!transport.ok) assert.equal(transport.uncertain, true);
+  let transmittedMenu: unknown;
+  const menuSent = await postWhatsAppMessage(
+    { accessToken: "test", phoneNumberId: "test", apiVersion: "v23.0" },
+    {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: "256772123456",
+      biz_opaque_callback_data: randomUUID(),
+      type: "interactive",
+      interactive: careMenuPayload,
+    },
+    async (_input, init) => {
+      transmittedMenu = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({ messages: [{ id: "wamid.menu" }] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    },
+  );
+  assert.equal(menuSent.ok, true);
+  assert.equal(
+    (transmittedMenu as { type: string }).type,
+    "interactive",
+  );
   console.log(
-    "Customer care checks passed: scope policy, renderer safety, migrations, new contacts, replay dedupe, per-phone leases, account ownership, one-time tokens, expiry, opt-outs, takeover, send fencing, uncertain sends and receipts.",
+    "Customer care checks passed: menu bounds and selection, interactive webhook parsing and delivery, renderer safety, migrations, replay dedupe, leases, account ownership, tokens, opt-outs, takeover and receipt handling.",
   );
 }
 void main();

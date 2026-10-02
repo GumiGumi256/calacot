@@ -6,26 +6,13 @@ import {
   careConversations,
   careLinkTokens,
   careRequests,
-  careJobs,
 } from "@/database/customer-care-schema";
-import { classifyEnquiry, selectApprovedAction } from "./gemini";
-import {
-  approvedKnowledgeId,
-  permittedAction,
-  type Classification,
-} from "./contracts";
-import { loadCompanyProfile, retrieveKnowledge } from "./knowledge";
-import {
-  authorisedOrder,
-  authorisedSupport,
-  designResults,
-  propertyResults,
-} from "./live-data";
-import { paymentInstructions } from "@/lib/company";
+import { careMenuOptions, CARE_MENU_MESSAGE, getCareMenuChoice } from "./menu";
+import { loadCompanyProfile } from "./knowledge";
+import { authorisedOrder, authorisedSupport } from "./live-data";
 import {
   renderAccountLink,
   renderKnowledge,
-  renderPayment,
   renderStatic,
   templates,
 } from "./render";
@@ -41,7 +28,7 @@ export type CareJob = {
 async function request(
   job: CareJob,
   kind: "lead" | "callback" | "handoff",
-  plan?: Classification,
+  businessUnit?: string,
 ) {
   await db
     .insert(careRequests)
@@ -49,8 +36,8 @@ async function request(
       jobId: job.id,
       phone: job.phone,
       kind,
-      businessUnit: plan?.businessUnit,
-      fields: plan?.extractedFields || {},
+      businessUnit,
+      fields: {},
     })
     .onConflictDoNothing();
   if (kind === "handoff")
@@ -65,139 +52,69 @@ async function request(
       );
   return renderStatic(kind);
 }
+async function accountLink(job: CareJob) {
+  const token = randomBytes(32).toString("hex");
+  await db.insert(careLinkTokens).values({
+    hash: createHash("sha256").update(token).digest("hex"),
+    phone: job.phone,
+    expiresAt: new Date(Date.now() + 15 * 60_000),
+  });
+  return renderAccountLink(token);
+}
+async function accountReply(
+  job: CareJob,
+  kind: "order" | "support",
+  body: string,
+) {
+  const [linked] = await db
+    .select({ clerkUserId: careConversations.clerkUserId })
+    .from(careConversations)
+    .where(
+      and(
+        eq(careConversations.phone, job.phone),
+        gt(careConversations.linkedUntil, new Date()),
+      ),
+    );
+  if (!linked?.clerkUserId) return accountLink(job);
+  if (kind === "support") return authorisedSupport(job.phone);
+  const reference = body.trim().toUpperCase();
+  if (!/^CAL-DES-[A-F0-9]{16}$/.test(reference)) return templates.reference;
+  return authorisedOrder(job.phone, reference);
+}
 export async function prepareReply(
   job: CareJob,
   body: string | null,
   type: string,
 ): Promise<string> {
-  if (type !== "text" && type !== "interactive") return templates.attachment;
-  if (!body?.trim()) return templates.clarify;
-  // Reviewed greeting text needs no model or unpublished company facts.
-  if (
-    /^(hello|hi|hey|good morning|good afternoon|good evening|thanks|thank you)[.!\s]*$/i.test(
-      body.trim(),
-    )
-  )
-    return templates.welcome;
-  if (/^(human|agent|advisor|help from a person)$/i.test(body.trim()))
+  if (type !== "text" && type !== "interactive") return CARE_MENU_MESSAGE;
+  const text = body?.trim() || "";
+  if (/^(menu|start|hello|hi|hey|good morning|good afternoon|good evening|thanks|thank you)[.!\s]*$/i.test(text))
+    return CARE_MENU_MESSAGE;
+  if (/^(human|agent|advisor|talk to our team)$/i.test(text))
     return request(job, "handoff");
-  if (/^(unlink|unlink account)$/i.test(body.trim())) {
+  if (/^(unlink|unlink account)$/i.test(text)) {
     await db.execute(revokeLinkQuery(job.phone));
-    return templates.welcome;
+    return CARE_MENU_MESSAGE;
   }
+  if (/^CAL-DES-[A-F0-9]{16}$/i.test(text))
+    return accountReply(job, "order", text);
+  if (/^(support status|my support requests?)$/i.test(text))
+    return accountReply(job, "support", text);
+
+  const choice = getCareMenuChoice(text);
+  if (!choice) return CARE_MENU_MESSAGE;
+  if (choice === "order_status") return accountReply(job, "order", text);
+  if (choice === "support_status") return accountReply(job, "support", text);
+  if (choice === "talk_to_team") return request(job, "handoff");
+
+  const option = careMenuOptions.find((item) => item.id === choice);
+  if (!option || !("businessUnit" in option)) return CARE_MENU_MESSAGE;
   const profile = await loadCompanyProfile();
-  if (!profile) return request(job, "handoff");
-  const [conversation] = await db
-    .select({ businessUnit: careConversations.businessUnit })
-    .from(careConversations)
-    .where(eq(careConversations.phone, job.phone));
-  const plan = await classifyEnquiry(body, profile, conversation);
-  const action = permittedAction(plan);
-  await db
-    .update(careJobs)
-    .set({
-      decision: {
-        scope: plan.scope,
-        businessUnit: plan.businessUnit,
-        intent: plan.intent,
-        action,
-        profileVersion: profile.version,
-      },
-    })
-    .where(
-      and(eq(careJobs.id, job.id), eq(careJobs.leaseToken, job.lease_token)),
-    );
-  if (plan.businessUnit && ["in_scope", "mixed"].includes(plan.scope))
-    await db
-      .update(careConversations)
-      .set({ businessUnit: plan.businessUnit })
-      .where(eq(careConversations.phone, job.phone));
-  switch (action) {
-    case "refuse":
-      return renderStatic("refuse");
-    case "clarify":
-      return templates.clarify;
-    case "welcome":
-      return templates.welcome;
-    case "handoff":
-      return request(job, "handoff", plan);
-    case "designs":
-      return designResults(plan.extractedFields);
-    case "properties":
-      return propertyResults(plan.extractedFields);
-    case "lead":
-      if (
-        !plan.extractedFields.projectDetails &&
-        !plan.extractedFields.location
-      )
-        return templates.details;
-      return request(job, "lead", plan);
-    case "callback":
-      return request(job, "callback", plan);
-    case "support":
-    case "order": {
-      const [linked] = await db
-        .select()
-        .from(careConversations)
-        .where(
-          and(
-            eq(careConversations.phone, job.phone),
-            gt(careConversations.linkedUntil, new Date()),
-          ),
-        );
-      if (!linked?.clerkUserId) {
-        const token = randomBytes(32).toString("hex");
-        await db.insert(careLinkTokens).values({
-          hash: createHash("sha256").update(token).digest("hex"),
-          phone: job.phone,
-          expiresAt: new Date(Date.now() + 15 * 60_000),
-        });
-        return renderAccountLink(token);
-      }
-      const reference = plan.extractedFields.purchaseReference;
-      if (action === "support") return authorisedSupport(job.phone);
-      // Do not act on a hallucinated reference; it must occur verbatim in this inbound message.
-      if (!reference || !body.toUpperCase().includes(reference))
-        return templates.reference;
-      return authorisedOrder(job.phone, reference);
-    }
-    case "knowledge": {
-      if (plan.intent === "payment")
-        return renderPayment(paymentInstructions());
-      if (plan.intent === "contact")
-        return renderKnowledge(profile.contactInformation, profile.website);
-      if (plan.intent === "hours")
-        return profile.businessHours
-          ? renderKnowledge(profile.businessHours)
-          : templates.missing;
-      const entries = await retrieveKnowledge(plan);
-      if (!entries.length) return templates.missing;
-      const selected = await selectApprovedAction(body, profile, plan, entries);
-      // Second stage cannot expand scope or switch capability, unit or topic.
-      const id = approvedKnowledgeId(plan, selected, entries);
-      const entry = entries.find((e) => e._id === id);
-      if (!entry) return templates.missing;
-      await db
-        .update(careJobs)
-        .set({
-          decision: {
-            scope: plan.scope,
-            intent: plan.intent,
-            action,
-            profileVersion: profile.version,
-            knowledgeId: entry._id,
-            knowledgeVersion: entry.version,
-          },
-        })
-        .where(
-          and(
-            eq(careJobs.id, job.id),
-            eq(careJobs.leaseToken, job.lease_token),
-          ),
-        );
-      return renderKnowledge(entry.approvedAnswer, entry.displayLink);
-    }
-  }
+  const service = profile?.businessUnits.find(
+    (item) => item.unit === option.businessUnit,
+  );
+  if (!profile || !service) return request(job, "handoff", option.businessUnit);
+  return `${renderKnowledge(service.description, profile.website)}\n\nReply MENU to choose another Calacot topic.`;
 }
 
 export async function recordFailureHandoff(job: CareJob) {

@@ -10,6 +10,23 @@ export type StatusEvent = {
 };
 export type SendResult = { ok: true; wamid: string } | { ok: false; uncertain: boolean; code: string };
 export type TemplateComponent = { type: "body"; parameters: { type: "text"; text: string }[] } | { type: "button"; sub_type: "url"; index: "0"; parameters: { type: "text"; text: string }[] };
+export type InteractiveListContent = {
+  type: "list";
+  header?: { type: "text"; text: string };
+  body: { text: string };
+  footer?: { text: string };
+  action: {
+    button: string;
+    sections: {
+      title?: string;
+      rows: { id: string; title: string; description?: string }[];
+    }[];
+  };
+};
 export type SendPayload = {
   messaging_product: "whatsapp"; recipient_type: "individual"; to: string; biz_opaque_callback_data: string;
-} & ({ type: "template"; template: { name: string; language: { code: string }; components: TemplateComponent[] } } | { type: "text"; text: { preview_url: boolean; body: string } });
+} & (
+  | { type: "template"; template: { name: string; language: { code: string }; components: TemplateComponent[] } }
+  | { type: "text"; text: { preview_url: boolean; body: string } }
+  | { type: "interactive"; interactive: InteractiveListContent }
+);

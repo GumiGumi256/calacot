@@ -29,9 +29,11 @@ export default async function KnowledgeManagement() {
       <Link href="/admin/customer-care" className="text-sm underline">
         Back to inbox
       </Link>
-      <h1 className="my-5 text-4xl font-medium">Approved knowledge.</h1>
+      <h1 className="my-5 text-4xl font-medium">Customer care content.</h1>
       <p className="mb-6 text-sm text-muted-foreground">
-        Review, approve and publish answers in{" "}
+        Automated replies use a fixed Calacot menu and the published company
+        profile. Approved knowledge entries below are for staff-assisted replies.
+        Review the company profile in{" "}
         <Link href="/studio" className="underline">
           Sanity Studio
         </Link>
@@ -60,9 +62,15 @@ export default async function KnowledgeManagement() {
             <Input
               name="sourceId"
               required
-              placeholder="Published design, property or designPackage ID"
+              placeholder="Sanity document ID, not its URL"
+              pattern="[a-zA-Z0-9_.-]{1,128}"
+              maxLength={128}
+              title="Use the document ID only: letters, numbers, periods, underscores, or hyphens."
               className="mt-2"
             />
+            <span className="mt-2 block text-xs text-muted-foreground">
+              Copy the document ID from Studio. Do not paste the Studio URL or title.
+            </span>
           </label>
           <label className="block text-sm">
             Business unit
@@ -98,8 +106,8 @@ export default async function KnowledgeManagement() {
         </form>
         <p className="mt-4 text-sm text-muted-foreground">
           Imports descriptions and inclusions only. Prices and availability use
-          live data. Each import creates a separate draft; existing approved
-          answers remain intact.
+          live data. Each import creates a separate draft for staff review;
+          automated menu replies do not use these entries.
         </p>
       </section>
       <section className="mt-6 space-y-3">

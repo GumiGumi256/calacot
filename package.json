@@ -10,7 +10,6 @@
     "test:customer-care": "tsx scripts/verify-customer-care.ts",
     "customer-care:migrate": "tsx scripts/migrate-customer-care.ts",
     "customer-care:worker": "tsx scripts/customer-care-worker.ts",
-    "customer-care:check-model": "tsx scripts/check-customer-care-model.ts",
     "customer-care:diagnose": "tsx scripts/diagnose-customer-care.ts"
   },
   "dependencies": {
@@ -21,7 +20,6 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@google/genai": "^2.26.0",
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^5.4.0",
     "@neondatabase/serverless": "^1.1.0",

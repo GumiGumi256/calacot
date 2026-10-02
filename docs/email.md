@@ -49,7 +49,7 @@ Every new design checkout requires explicit consent to receive transactional Wha
 
 The approved template must match the configured name and language. Its body takes five positional text parameters: customer name, design title, package, formatted amount, purchase reference. URL button 0 must use https://calacot.com/account/designs/{{1}}, with the purchase UUID as its dynamic suffix. Use the corresponding production origin if different. See [Meta's template API reference](https://whatsapp.github.io/WhatsApp-Nodejs-SDK/api-reference/messages/template/).
 
-Configure the app's webhook as https://calacot.com/api/whatsapp/webhook, verify it with WHATSAPP_VERIFY_TOKEN, and subscribe to messages for the configured business account. META_APP_SECRET validates webhook signatures. The callback identifier is the outbound message UUID, allowing receipts to reconcile an uncertain send.
+Configure the app's webhook as https://www.calacot.com/api/whatsapp/webhook, verify it with WHATSAPP_VERIFY_TOKEN, and subscribe to messages for the configured business account. Use the canonical `www` URL directly; the bare domain redirects and should not be used as the callback. META_APP_SECRET validates webhook signatures. The callback identifier is the outbound message UUID, allowing receipts to reconcile an uncertain send.
 
 The admin purchase page shows WhatsApp state and offers a retry. Definite failures without a provider message ID can be claimed again; sent, delivered, read, in-flight and uncertain messages are not automatically resent. For an old uncertain message, inspect Meta delivery logs before changing its status or retrying. Never clear uncertain records in bulk just to force sends.
 

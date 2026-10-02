@@ -1,15 +1,12 @@
 import { loadEnvConfig } from "@next/env";
 import { neon } from "@neondatabase/serverless";
 import { createClient } from "next-sanity";
-import { GoogleGenAI } from "@google/genai";
 
 loadEnvConfig(process.cwd());
 async function main() {
   const env = process.env;
   const required = [
     "DATABASE_URL",
-    "GEMINI_API_KEY",
-    "GEMINI_MODEL",
     "META_APP_SECRET",
     "WHATSAPP_PHONE_NUMBER_ID",
     "WHATSAPP_BUSINESS_ACCOUNT_ID",
@@ -67,20 +64,6 @@ async function main() {
         { perspective: "published" },
       ),
     );
-  }
-  if (env.GEMINI_API_KEY && env.GEMINI_MODEL) {
-    try {
-      await new GoogleGenAI({ apiKey: env.GEMINI_API_KEY }).models.get({
-        model: env.GEMINI_MODEL,
-      });
-      console.log("Gemini model accessible:", true);
-    } catch (error) {
-      const e = error as { status?: number; name?: string };
-      console.log("Gemini model accessible:", false, {
-        status: e.status,
-        name: e.name,
-      });
-    }
   }
 }
 void main().catch(() => {

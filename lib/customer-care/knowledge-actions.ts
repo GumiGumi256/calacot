@@ -17,12 +17,18 @@ function writer() {
 }
 export async function prepareKnowledgeDraft(form: FormData) {
   const actor = await requireAdmin();
-  const sourceId = z
+  const sourceIdResult = z
     .string()
+    .trim()
     .min(1)
     .max(128)
     .regex(/^[a-zA-Z0-9_.-]+$/)
-    .parse(form.get("sourceId"));
+    .safeParse(form.get("sourceId"));
+  if (!sourceIdResult.success)
+    throw new Error(
+      "Enter the Sanity document ID only: use letters, numbers, periods, underscores, or hyphens, not a URL.",
+    );
+  const sourceId = sourceIdResult.data;
   const businessUnit = z.enum(businessUnits).parse(form.get("businessUnit"));
   const topic = z.enum(intents).parse(form.get("topic"));
   const revisionInput = form.get("revisionOf");

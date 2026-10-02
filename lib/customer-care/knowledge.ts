@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { client } from "@/sanity/lib/client";
-import { businessUnits, intents, type Classification } from "./contracts";
+import { businessUnits, intents } from "./contracts";
 import { approvedAnswer, safeLink } from "./render";
 
 const profileSchema = z.object({
@@ -45,29 +45,4 @@ export async function loadCompanyProfile(): Promise<CompanyProfile | null> {
   );
   const parsed = profileSchema.safeParse(value);
   return parsed.success ? parsed.data : null;
-}
-export async function retrieveKnowledge(
-  plan: Classification,
-): Promise<KnowledgeEntry[]> {
-  if (!plan.businessUnit) return [];
-  // Changing facts always use live tools; a stale FAQ can never override pricing or order status.
-  if (
-    [
-      "packages",
-      "design_search",
-      "property_search",
-      "order_status",
-      "support_status",
-    ].includes(plan.intent)
-  )
-    return [];
-  const rows = await client.fetch<unknown[]>(
-    `*[_type == "customerCareKnowledge" && !(_id in path("drafts.**")) && approvalStatus == "approved" && active == true && defined(lastReviewedAt) && businessUnit == $unit && topic == $topic] | order(lastReviewedAt desc)[0...8] {_id,title,businessUnit,topic,approvedAnswer,displayLink,version}`,
-    { unit: plan.businessUnit, topic: plan.intent },
-    options,
-  );
-  return rows.flatMap((row) => {
-    const p = knowledgeSchema.safeParse(row);
-    return p.success ? [p.data] : [];
-  });
 }

@@ -4,7 +4,10 @@ import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/database/db";
 import { careConversations, careJobs } from "@/database/customer-care-schema";
 import { whatsappContacts, whatsappMessages } from "@/database/schema";
-import { sendWhatsAppText } from "@/lib/whatsapp/client";
+import {
+  sendWhatsAppInteractiveList,
+  sendWhatsAppText,
+} from "@/lib/whatsapp/client";
 import { hasServiceWindow, isWhatsAppOptOut } from "@/lib/whatsapp/webhook";
 import {
   claimJobQuery,
@@ -13,6 +16,7 @@ import {
 } from "./queries";
 import { prepareReply, recordFailureHandoff, type CareJob } from "./pipeline";
 import { templates } from "./render";
+import { CARE_MENU_MESSAGE, careMenuPayload } from "./menu";
 
 /** Persistent outbox: never automatically retry an ambiguous external send. */
 export async function deliverCareMessage(
@@ -24,10 +28,14 @@ export async function deliverCareMessage(
     id: string;
     customer_phone: string;
     body: string;
+    message_type: string;
   }>(claimOutboundQuery(id, requireBot, automated));
   const m = result.rows[0];
   if (!m) return;
-  const sent = await sendWhatsAppText(m.customer_phone, m.id, m.body);
+  const sent =
+    m.message_type === "interactive"
+      ? await sendWhatsAppInteractiveList(m.customer_phone, m.id, careMenuPayload)
+      : await sendWhatsAppText(m.customer_phone, m.id, m.body);
   await db
     .update(whatsappMessages)
     .set(
@@ -140,7 +148,7 @@ async function processJob(job: CareJob) {
         dedupeKey,
         customerPhone: job.phone,
         direction: "outbound",
-        messageType: "text",
+        messageType: body === CARE_MENU_MESSAGE ? "interactive" : "text",
         body: body.slice(0, 4096),
         status: "queued",
         eventAt: new Date(),
