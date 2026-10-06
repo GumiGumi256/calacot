@@ -35,7 +35,7 @@ export async function deliverCareMessage(
   }>(claimOutboundQuery(id, requireBot, automated));
   const m = result.rows[0];
   if (!m) return;
-  const menuMode = automated && process.env.CUSTOMER_CARE_MODE === "menu";
+  const menuMode = automated && (process.env.CUSTOMER_CARE_MODE || "menu") === "menu";
   const notificationMode =
     process.env.CUSTOMER_CARE_NOTIFICATION_MODE || "capture";
   if (menuMode && ["capture", "staging"].includes(notificationMode)) {
@@ -168,7 +168,7 @@ async function processJob(job: CareJob) {
     conversation?.mode !== "bot" &&
     !outbound &&
     !(
-      process.env.CUSTOMER_CARE_MODE === "menu" &&
+      (process.env.CUSTOMER_CARE_MODE || "menu") === "menu" &&
       conversation?.mode === "human" &&
       !conversation.assignedTo &&
       message.body?.trim().toLowerCase() === "resume"
@@ -180,14 +180,14 @@ async function processJob(job: CareJob) {
   );
   if (
     count.rows[0]?.count >
-      (process.env.CUSTOMER_CARE_MODE === "menu" ? 60 : 20) &&
+      ((process.env.CUSTOMER_CARE_MODE || "menu") === "menu" ? 60 : 20) &&
     !outbound
   ) {
     await recordFailureHandoff(job);
     return finish(job, "rate_limited");
   }
   if (!outbound) {
-    if (process.env.CUSTOMER_CARE_MODE === "menu") {
+    if ((process.env.CUSTOMER_CARE_MODE || "menu") === "menu") {
       let id: string | null;
       try {
         id = await prepareMenu(job, message.body, message.messageType);

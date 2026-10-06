@@ -17,6 +17,10 @@ export const permissions = [
   "invoices_void",
   "payments_verify",
   "notifications_manage",
+  "leads_read",
+  "leads_write",
+  "payments_read",
+  "expenses_read",
 ] as const;
 export type Permission = (typeof permissions)[number];
 export function roleAllows(role: string | null | undefined, p: Permission) {
@@ -32,6 +36,8 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
       "quotations_edit",
       "quotations_send",
       "invoices_read",
+      "leads_read",
+      "leads_write",
     ],
     "org:finance": [
       "clients_read",
@@ -43,12 +49,17 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
       "invoices_void",
       "payments_verify",
       "notifications_manage",
+      "payments_read",
+      "expenses_read",
     ],
     "org:viewer": [
       "clients_read",
       "projects_read",
       "quotations_read",
       "invoices_read",
+      "leads_read",
+      "payments_read",
+      "expenses_read",
     ],
   };
   return grants[role || ""]?.includes(p) ?? false;

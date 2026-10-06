@@ -15,7 +15,7 @@ import {
   unlinkConversation,
   updateCareRequest,
 } from "@/lib/customer-care/admin-actions";
-import { client } from "@/sanity/lib/client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { hasServiceWindow } from "@/lib/whatsapp/webhook";
@@ -48,7 +48,6 @@ export default async function CustomerCareInbox({
     contactRows,
     requests,
     failures,
-    knowledge,
   ] = await Promise.all([
     db
       .select()
@@ -91,11 +90,6 @@ export default async function CustomerCareInbox({
       .where(sql`${careJobs.state}='dead' OR ${careJobs.errorCode} IS NOT NULL`)
       .orderBy(desc(careJobs.updatedAt))
       .limit(20),
-    client
-      .fetch<
-        { _id: string; title: string }[]
-      >(`*[_type=="customerCareKnowledge" && approvalStatus=="approved" && active==true && defined(lastReviewedAt)] | order(title)[0...100] {_id,title}`, {}, { perspective: "published", useCdn: false, cache: "no-store" })
-      .catch(() => []),
   ]);
   const [selected] = selectedRows;
   const [contact] = contactRows;
@@ -112,12 +106,7 @@ export default async function CustomerCareInbox({
             answers.
           </p>
         </div>
-        <Link
-          href="/admin/customer-care/knowledge"
-          className="text-sm underline"
-        >
-          Manage knowledge
-        </Link>
+
       </div>
       <nav className="my-6 flex gap-4" aria-label="Conversation filter">
         {["all", "bot", "human", "closed"].map((m) => (
@@ -244,24 +233,9 @@ export default async function CustomerCareInbox({
                     <option value="details">Request project details</option>
                     <option value="welcome">Welcome and services</option>
                     <option value="missing">Information unavailable</option>
-                    <option value="knowledge">Approved knowledge answer</option>
                   </select>
                 </label>
-                <label className="block text-sm">
-                  Knowledge entry
-                  <select
-                    name="knowledgeId"
-                    className="mt-2 block w-full rounded-lg border bg-background p-3"
-                    disabled={!canReply}
-                  >
-                    <option value="">Choose an entry</option>
-                    {knowledge.map((k) => (
-                      <option key={k._id} value={k._id}>
-                        {k.title}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+
                 <Button type="submit" disabled={!canReply}>
                   Send reviewed reply
                 </Button>

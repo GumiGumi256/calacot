@@ -13,9 +13,7 @@ import { whatsappContacts, whatsappMessages } from "@/database/schema";
 import { requireAdmin } from "@/lib/design-purchases/permissions";
 import { hasServiceWindow } from "@/lib/whatsapp/webhook";
 import { deliverCareMessage } from "./worker";
-import { knowledgeSchema } from "./knowledge";
-import { renderKnowledge, renderStatic } from "./render";
-import { client } from "@/sanity/lib/client";
+import { renderStatic } from "./render";
 import { revokeLinkQuery } from "./queries";
 
 const phoneSchema = z.string().regex(/^[1-9]\d{7,14}$/);
@@ -64,7 +62,7 @@ export async function sendReviewedReply(form: FormData) {
   const actor = await requireAdmin();
   const phone = phoneSchema.parse(form.get("phone"));
   const template = z
-    .enum(["welcome", "details", "handoff", "missing", "knowledge"])
+    .enum(["welcome", "details", "handoff", "missing"])
     .parse(form.get("template"));
   const [contact] = await db
     .select()
@@ -78,17 +76,7 @@ export async function sendReviewedReply(form: FormData) {
     throw new Error(
       "Reply unavailable: customer opted out or the 24-hour window has ended.",
     );
-  let body: string;
-  if (template === "knowledge") {
-    const id = z.string().min(1).max(128).parse(form.get("knowledgeId"));
-    const row = await client.fetch(
-      `*[_id==$id && _type=="customerCareKnowledge" && approvalStatus=="approved" && active==true && defined(lastReviewedAt)][0]`,
-      { id },
-      { perspective: "published", useCdn: false, cache: "no-store" },
-    );
-    const entry = knowledgeSchema.parse(row);
-    body = renderKnowledge(entry.approvedAnswer, entry.displayLink);
-  } else body = renderStatic(template);
+  const body = renderStatic(template);
   await db
     .update(careConversations)
     .set({ mode: "human", assignedTo: actor, updatedAt: new Date() })

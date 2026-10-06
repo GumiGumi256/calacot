@@ -20,7 +20,6 @@ import {
   purchase,
   documentLink,
 } from "./menu-data";
-import { loadCompanyProfile } from "./knowledge";
 import { renderOrder, renderPayment } from "./render";
 import { paymentInstructions } from "@/lib/company";
 import { salesConfig } from "@/lib/sales/config";
@@ -107,16 +106,8 @@ export async function prepareMenu(
     state = { screen: action! };
   else if (action?.startsWith("service:")) {
     state = { screen: "service", service: action.split(":")[1] };
-    const profile = await loadCompanyProfile();
-    const service = profile?.businessUnits.find(
-      (s) => s.unit === state.service,
-    );
-    text =
-      service?.menuSummary ||
-      (service?.description && service.description.length <= 650
-        ? service.description
-        : null) ||
-      "Approved concise information for this service is not available yet. Our team can help.";
+    const title = services.find(([id]) => id === state.service)?.[1] || "this service";
+    text = `You selected ${title}. Choose Start a project to share your requirements, or Talk to our team for assistance.`;
   } else if (action?.startsWith("start:") || action === "start_selected") {
     state = {
       screen: "name",
