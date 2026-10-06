@@ -58,7 +58,7 @@ export default function RootLayout({
         plusJakartaSans.variable,
         outfitHeading.variable,
         "font-sans",
-        // geist.variable,
+       
       )}
     >
       <body className="min-h-full flex flex-col bg-brand-white dark:bg-brand-black">
