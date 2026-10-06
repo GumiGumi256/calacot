@@ -1,3 +1,4 @@
+import { CustomerCareThread } from "@/components/customer-care-thread";
 ﻿import Link from "next/link";
 import { desc, eq, sql } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
@@ -11,7 +12,6 @@ import { whatsappMessages, whatsappContacts } from "@/database/schema";
 import { requireAdmin } from "@/lib/design-purchases/permissions";
 import {
   setConversationMode,
-  sendReviewedReply,
   unlinkConversation,
   updateCareRequest,
 } from "@/lib/customer-care/admin-actions";
@@ -96,14 +96,13 @@ export default async function CustomerCareInbox({
   const canReply =
     !!contact && !contact.optedOutAt && hasServiceWindow(contact.lastInboundAt);
   return (
-    <main className="mx-auto min-h-screen max-w-7xl px-5 pb-20 pt-28 sm:px-8">
+    <main className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
          
           <h1 className="mt-3 text-4xl font-medium">Customer care.</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            Review enquiries, take over conversations, and send reviewed
-            answers.
+            Review enquiries, take over conversations, and reply to customers.
           </p>
         </div>
 
@@ -195,51 +194,12 @@ export default async function CustomerCareInbox({
                   </Button>
                 </form>
               </div>
-              <div
-                className="max-h-[520px] space-y-3 overflow-y-auto rounded-lg bg-muted/30 p-4"
-                aria-label="Conversation messages"
-              >
-                {[...messages].reverse().map((m) => (
-                  <article
-                    key={m.id}
-                    className={`max-w-[90%] rounded-lg border bg-background p-3 ${m.direction === "outbound" ? "ml-auto" : ""}`}
-                  >
-                    <p className="mb-2 text-xs text-muted-foreground">
-                      {m.direction === "inbound" ? "Customer" : "Calacot"} Â·{" "}
-                      {m.eventAt.toISOString()} Â· {m.status || m.messageType}
-                    </p>
-                    <p className="whitespace-pre-wrap break-words text-sm">
-                      {m.body || `[${m.rawMessageType || m.messageType}]`}
-                    </p>
-                    {m.errorCode && (
-                      <p className="mt-2 text-xs text-destructive">
-                        {m.errorCode}
-                      </p>
-                    )}
-                  </article>
-                ))}
-              </div>
-              <form action={sendReviewedReply} className="mt-5 space-y-3">
-                <input type="hidden" name="replyId" value={randomUUID()} />
-                <input type="hidden" name="phone" value={selected.phone} />
-                <label className="block text-sm">
-                  Reviewed response
-                  <select
-                    name="template"
-                    className="mt-2 block w-full rounded-lg border bg-background p-3"
-                    disabled={!canReply}
-                  >
-                    <option value="handoff">Personal assistance</option>
-                    <option value="details">Request project details</option>
-                    <option value="welcome">Welcome and services</option>
-                    <option value="missing">Information unavailable</option>
-                  </select>
-                </label>
-
-                <Button type="submit" disabled={!canReply}>
-                  Send reviewed reply
-                </Button>
-              </form>
+              <CustomerCareThread key={selected.phone} phone={selected.phone} canReply={canReply}
+                blockedReason={contact?.optedOutAt ? "This customer has opted out of WhatsApp messages." : "The 24-hour reply window is closed. Wait for a new customer message."}
+                replyId={randomUUID()}
+                messages={[...messages].reverse().map((m) => ({ id: m.id, direction: m.direction,
+                  body: m.body, messageType: m.messageType, status: m.status, errorCode: m.errorCode,
+                  eventAt: m.eventAt.toISOString() }))} />
               <h3 className="mb-3 mt-7 font-medium">Support requests</h3>
               {requests.map((r) => (
                 <div key={r.id} className="mb-3 rounded-lg border p-3">

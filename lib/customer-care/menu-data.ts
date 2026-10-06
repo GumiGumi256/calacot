@@ -18,6 +18,14 @@ export async function identity(
     : null;
 }
 export async function verificationLink(phone: string) {
+  const base = new URL(
+    process.env.CALACOT_APP_URL || "https://www.calacot.com",
+  );
+  if (
+    base.protocol !== "https:" &&
+    process.env.CUSTOMER_CARE_NOTIFICATION_MODE !== "capture"
+  )
+    throw new Error("care_link_configuration");
   const count = await db.execute<{ count: number }>(
     sql`SELECT count(*)::int AS count FROM care_link_tokens WHERE phone=${phone} AND expires_at>now()-interval '15 minutes'`,
   );
@@ -27,14 +35,6 @@ export async function verificationLink(phone: string) {
   await db.execute(
     sql`INSERT INTO care_link_tokens(hash,phone,expires_at) VALUES(${createHash("sha256").update(token).digest("hex")},${phone},now()+interval '15 minutes')`,
   );
-  const base = new URL(
-    process.env.CALACOT_APP_URL || "https://www.calacot.com",
-  );
-  if (
-    base.protocol !== "https:" &&
-    process.env.CUSTOMER_CARE_NOTIFICATION_MODE !== "capture"
-  )
-    throw new Error("care_link_configuration");
   return `Verify ownership by signing into your Calacot account and approving this WhatsApp link. A typed reference or email cannot verify ownership.\n${new URL(`/account/customer-care/link?token=${token}`, base)}`;
 }
 export type Quote = {

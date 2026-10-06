@@ -54,8 +54,14 @@ export function parseWhatsAppWebhook(
   const messages: InboundMessage[] = [];
   const statuses: StatusEvent[] = [];
   let ignored = 0;
+  const ignoredReasons: Record<string, number> = {};
+  const mismatchedBusinessAccountIds: string[] = [];
+  const ignore = (reason: string) => {
+    ignored++;
+    ignoredReasons[reason] = (ignoredReasons[reason] || 0) + 1;
+  };
   const parsed = envelopeSchema.safeParse(payload);
-  if (!parsed.success) return { messages, statuses, ignored: 1 };
+  if (!parsed.success) return { messages, statuses, ignored: 1, ignoredReasons: { invalid_envelope: 1 }, mismatchedBusinessAccountIds };
   const timestamp = (s: string) => {
     const date = new Date(Number(s) * 1000);
     return Number.isFinite(date.getTime()) &&
@@ -65,12 +71,14 @@ export function parseWhatsAppWebhook(
   };
   for (const entry of parsed.data.entry) {
     if (entry.id !== config.businessAccountId) {
-      ignored++;
+      if (/^\d{1,32}$/.test(entry.id) && mismatchedBusinessAccountIds.length < 5)
+        mismatchedBusinessAccountIds.push(entry.id);
+      ignore("business_account_mismatch");
       continue;
     }
     for (const change of entry.changes) {
       if (change.field !== "messages") {
-        ignored++;
+        ignore("unsubscribed_event_field");
         continue;
       }
       const value = valueSchema.safeParse(change.value);
@@ -78,19 +86,19 @@ export function parseWhatsAppWebhook(
         !value.success ||
         value.data.metadata.phone_number_id !== config.phoneNumberId
       ) {
-        ignored++;
+        ignore(value.success ? "phone_number_mismatch" : "invalid_event_value");
         continue;
       }
       for (const raw of value.data.messages ?? []) {
         const m = inboundSchema.safeParse(raw);
         if (!m.success) {
-          ignored++;
+          ignore("invalid_inbound_message");
           continue;
         }
         const phone = normalizeWhatsAppPhone(m.data.from);
         const at = timestamp(m.data.timestamp);
         if (!phone || !at) {
-          ignored++;
+          ignore(!phone ? "invalid_sender_phone" : "invalid_message_timestamp");
           continue;
         }
         const type =
@@ -120,13 +128,13 @@ export function parseWhatsAppWebhook(
       for (const raw of value.data.statuses ?? []) {
         const s = statusSchema.safeParse(raw);
         if (!s.success) {
-          ignored++;
+          ignore("invalid_delivery_status");
           continue;
         }
         const phone = normalizeWhatsAppPhone(s.data.recipient_id);
         const at = timestamp(s.data.timestamp);
         if (!phone || !at) {
-          ignored++;
+          ignore(!phone ? "invalid_recipient_phone" : "invalid_status_timestamp");
           continue;
         }
         const callback = z.uuid().safeParse(s.data.biz_opaque_callback_data);
@@ -143,7 +151,7 @@ export function parseWhatsAppWebhook(
       }
     }
   }
-  return { messages, statuses, ignored };
+  return { messages, statuses, ignored, ignoredReasons, mismatchedBusinessAccountIds };
 }
 
 export function hasServiceWindow(

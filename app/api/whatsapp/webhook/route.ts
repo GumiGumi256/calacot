@@ -60,6 +60,8 @@ export async function POST(request: Request) {
   if (events.ignored)
     console.warn("whatsapp_webhook_unknown_format", {
       ignored: events.ignored,
+      reasons: events.ignoredReasons,
+      receivedBusinessAccountIds: events.mismatchedBusinessAccountIds,
     });
 
   try {

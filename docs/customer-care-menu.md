@@ -4,6 +4,14 @@ The customer-care worker now supports a deterministic nested menu. No model gene
 
 ## Setup
 
+The customer-care inbox displays the latest 80 messages in a shadcn message scroller and refreshes every 15 seconds. Staff can send a text reply of up to 4,096 characters. Sending takes over the conversation, clears the menu session, and pauses automated replies until staff resume the bot. The server checks administrator access, opt-out and the 24-hour reply window; repeated submissions reuse their saved message ID. Provider acceptance, delivery, failure and uncertain delivery remain visible in the thread. Do not repeat an uncertain send without checking WhatsApp.
+
+For delivery troubleshooting, run `npx tsx scripts/check-whatsapp-delivery.ts`. The read-only check verifies the public webhook challenge, attempts to read Meta app subscriptions and reports aggregate message outcomes without customer message content. Production `whatsapp_webhook_unknown_format` warnings now include rejection counts for account mismatch, number mismatch, invalid payloads and unsupported fields. No Gemini credentials are used by this menu assistant.
+
+The scheduled worker runner reads exactly `CUSTOMER_CARE_WORKER_URL=https://www.calacot.com/api/customer-care/worker`. A misspelled variable or HTTP URL prevents that runner from invoking the worker. Setting the variable alone does not create a scheduler.
+
+Private quotation and purchase requests require a linked account before database records are returned. In live/staging mode, `CALACOT_APP_URL` must use HTTPS so the verification link is reachable by the customer. Invalid verification configuration or a lookup/document preparation failure commits a deduplicated human handoff and a plain-text acknowledgement through the same leased outbox. Staff can inspect the request in the inbox; customer replies never contain internal error details. No-result lookups return an explicit message with a team-assistance option.
+
 1. Review and apply the additive active Drizzle migrations `0002_care_menu_state`, `0003_care_capture_status`, and `0004_care_menu_commands` with `npx drizzle-kit migrate`. They add persistent state and invoker commands to the existing unified database. They have been tested locally but have not been applied to production during this refactor. `customer-care:migrate` is the historical installer, not the command for this new history.
 2. Configure the menu rollout separately from sales notifications:
 

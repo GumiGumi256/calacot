@@ -62,7 +62,7 @@ export async function sendReviewedReply(form: FormData) {
   const actor = await requireAdmin();
   const phone = phoneSchema.parse(form.get("phone"));
   const template = z
-    .enum(["welcome", "details", "handoff", "missing"])
+    .enum(["welcome", "details", "handoff", "missing", "custom"])
     .parse(form.get("template"));
   const [contact] = await db
     .select()
@@ -76,10 +76,14 @@ export async function sendReviewedReply(form: FormData) {
     throw new Error(
       "Reply unavailable: customer opted out or the 24-hour window has ended.",
     );
-  const body = renderStatic(template);
+  const body = template === "custom"
+    ? z.string().trim().min(1).max(4096).parse(form.get("body"))
+    : renderStatic(template);
   await db
     .update(careConversations)
-    .set({ mode: "human", assignedTo: actor, updatedAt: new Date() })
+    .set({ mode: "human", assignedTo: actor, menuState: {},
+      sessionRevision: sql`${careConversations.sessionRevision}+1`,
+      sessionExpiresAt: null, updatedAt: new Date() })
     .where(eq(careConversations.phone, phone));
   const id = z.uuid().parse(form.get("replyId"));
   const [inserted] = await db
@@ -105,6 +109,35 @@ export async function sendReviewedReply(form: FormData) {
   });
   await deliverCareMessage(id);
   refresh();
+}
+export async function sendCareReply(
+  _previous: { ok: boolean; message: string },
+  form: FormData,
+): Promise<{ ok: boolean; message: string }> {
+  await requireAdmin();
+  const parsed = z.object({ phone: phoneSchema, replyId: z.uuid(),
+    body: z.string().trim().min(1).max(4096) }).safeParse({
+    phone: form.get("phone"), replyId: form.get("replyId"), body: form.get("body"),
+  });
+  if (!parsed.success) return { ok: false, message: "Enter a reply of 1–4,096 characters." };
+  const [contact] = await db.select().from(whatsappContacts)
+    .where(eq(whatsappContacts.phone, parsed.data.phone));
+  if (!contact || contact.optedOutAt || !hasServiceWindow(contact.lastInboundAt))
+    return { ok: false, message: "Replies require a customer message within the last 24 hours and no opt-out." };
+  form.set("template", "custom");
+  try {
+    await sendReviewedReply(form);
+    const [message] = await db.select().from(whatsappMessages)
+      .where(eq(whatsappMessages.id, parsed.data.replyId));
+    if (message && ["sent", "delivered", "read"].includes(message.status || ""))
+      return { ok: true, message: "Reply submitted to WhatsApp. Delivery status appears below the message." };
+    return { ok: false, message: message?.status === "uncertain"
+      ? "Delivery is uncertain. Check WhatsApp before sending another reply."
+      : `Reply was not confirmed. Check the message status${message?.errorCode ? ` (${message.errorCode})` : ""}.` };
+  } catch {
+    refresh();
+    return { ok: false, message: "Reply could not be confirmed. Check the conversation before trying again." };
+  }
 }
 export async function unlinkConversation(form: FormData) {
   const actor = await requireAdmin();

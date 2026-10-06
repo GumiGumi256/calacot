@@ -383,6 +383,11 @@ async function main() {
       { phoneNumberId: "number", businessAccountId: "business" },
     );
     assert.equal(parsed.messages[0].type, "unknown");
+    const mismatch = parseWhatsAppWebhook({ object: "whatsapp_business_account", entry: [{ id: "other-business", changes: [] }] }, { phoneNumberId: "number", businessAccountId: "business" });
+    assert.deepEqual(mismatch.ignoredReasons, { business_account_mismatch: 1 });
+    const numberMismatch = parseWhatsAppWebhook({ object: "whatsapp_business_account", entry: [{ id: "business", changes: [{ field: "messages", value: { metadata: { phone_number_id: "other-number" } } }] }] }, { phoneNumberId: "number", businessAccountId: "business" });
+    assert.deepEqual(numberMismatch.ignoredReasons, { phone_number_mismatch: 1 });
+
     const interactive = parseWhatsAppWebhook(
       {
         object: "whatsapp_business_account",

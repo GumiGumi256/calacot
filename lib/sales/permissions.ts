@@ -82,6 +82,7 @@ export async function staffContext(required?: Permission) {
   return {
     organizationId: configured,
     actor: session.userId,
+    role: session.orgRole,
     permissions: grants,
   };
 }

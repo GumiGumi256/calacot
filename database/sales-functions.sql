@@ -284,6 +284,8 @@ BEGIN
   IF NOT FOUND OR i.status<>'issued' THEN RAISE EXCEPTION 'invoice_unavailable'; END IF;
   IF p->>'command'='submit' THEN
     pid:=gen_random_uuid();
+    PERFORM pg_advisory_xact_lock(hashtextextended(org||'/payment/'||i.client_id::text||'/'||lower(p->>'reference'),0));
+    IF NOT EXISTS(SELECT 1 FROM payments WHERE organization_id=org AND idempotency_key=p->>'key') AND EXISTS(SELECT 1 FROM payments WHERE organization_id=org AND client_id=i.client_id AND currency=i.currency AND lower(reference)=lower(p->>'reference') AND amount=(p->>'amount')::numeric AND status<>'rejected') THEN RAISE EXCEPTION 'duplicate_payment'; END IF;
     INSERT INTO payments(id,organization_id,client_id,amount,currency,method,reference,idempotency_key,received_at) VALUES(pid,org,i.client_id,(p->>'amount')::numeric,i.currency,p->>'method',p->>'reference',p->>'key',(p->>'receivedAt')::timestamptz) ON CONFLICT(organization_id,idempotency_key) DO NOTHING;
     SELECT id INTO pid FROM payments WHERE organization_id=org AND idempotency_key=p->>'key' AND client_id=i.client_id AND currency=i.currency;
     IF pid IS NULL THEN RAISE EXCEPTION 'payment_key_conflict'; END IF;

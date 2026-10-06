@@ -197,18 +197,29 @@ async function processJob(job: CareJob) {
             ? `${e.message} ${e.cause instanceof Error ? e.cause.message : ""}`
             : "";
         if (
-          !/care_state_conflict|care_review_expired|care_identity_required|quotation_not_confirmable|stale_version|eligible_project_required/.test(
+          /care_state_conflict|care_review_expired|care_identity_required|quotation_not_confirmable|stale_version|eligible_project_required/.test(
             detail,
           )
-        )
-          throw e;
-        // A newer version/session must be reviewed afresh; never silently accept it.
-        id = await prepareMenu(
-          job,
-          "menu",
-          "text",
-          "This quotation or verification changed, or your review expired. Please review the quotation again before confirming.",
-        );
+        ) {
+          // A newer version/session must be reviewed afresh; never silently accept it.
+          id = await prepareMenu(
+            job,
+            "menu",
+            "text",
+            "This quotation or verification changed, or your review expired. Please review the quotation again before confirming.",
+          );
+        } else {
+          // Commit the fallback and staff request through the same leased,
+          // deduplicated outbox. Never expose provider/database errors.
+          console.error("customer_care_menu_lookup_failed", { code: "menu_preparation_failed" });
+          id = await prepareMenu(
+            job,
+            null,
+            "unknown",
+            "I couldn't load your information right now. Your request has been passed to the Calacot team for personal assistance.",
+            "menu_lookup_failed",
+          );
+        }
       }
       if (!id) return finish(job, "obsolete_or_human");
       [outbound] = await db
@@ -257,6 +268,9 @@ async function processJob(job: CareJob) {
   }
   await deliverCareMessage(
     outbound.id,
+    // Menu commits use text only for handoffs. Allow the acknowledgement
+    // after that atomic commit switches the conversation to human mode.
+    !((process.env.CUSTOMER_CARE_MODE || "menu") === "menu" && outbound.messageType === "text") &&
     outbound.body !== templates.handoff &&
       outbound.body !== templates.failure &&
       !(

@@ -17,6 +17,7 @@ import { salesConfig } from "./config";
 import { totals, scaled } from "./money";
 import { pickers } from "./reads";
 import { headers } from "next/headers";
+import { currentUser } from "@clerk/nextjs/server";
 const json = (value: unknown) => sql`${JSON.stringify(value)}::jsonb`;
 const messages: Record<string, string> = {
   organization_setup_required: "Your Clerk organization has no company record in the database. Restore the organization setup before creating clients.",
@@ -37,6 +38,13 @@ const messages: Record<string, string> = {
     "Sync your staff membership before verifying ledger payments.",
   allocation_exceeds_balance: "Allocation exceeds the invoice balance.",
   allocation_exceeds_funds: "Allocation exceeds available payment funds.",
+  duplicate_payment:
+    "A payment with this reference and amount is already recorded for this client. Verify the existing one instead of recording it again.",
+  payment_key_conflict: "This payment key was already used for a different payment. Refresh and try again.",
+  invoice_unavailable: "This invoice is not issued or no longer available.",
+  payment_unavailable: "Select a payment that belongs to this invoice's client and currency.",
+  payment_rejected: "This payment was rejected and cannot be allocated.",
+  verification_evidence_required: "Enter the verification evidence before verifying a payment.",
   credit_requires_unallocated_balance:
     "Credit amount exceeds the unallocated balance, or this invoice requires a refund process.",
 };
@@ -64,6 +72,12 @@ async function mutation<T>(
         ok: false as const,
         error: "Too many changes. Wait a minute and try again.",
       };
+    if (permission === "payments_verify") {
+      const user = await currentUser();
+      await db.execute(
+        sql`INSERT INTO staff_memberships(organization_id,clerk_user_id,display_name,email,clerk_role,status,last_synced_at) VALUES(${ctx.organizationId},${ctx.actor},${user?.fullName ?? null},${user?.primaryEmailAddress?.emailAddress ?? null},${ctx.role},'active',now()) ON CONFLICT(organization_id,clerk_user_id) DO UPDATE SET display_name=EXCLUDED.display_name,email=EXCLUDED.email,clerk_role=EXCLUDED.clerk_role,status='active',last_synced_at=now(),updated_at=now()`,
+      );
+    }
     const value = await fn(ctx, correlation);
     for (const route of [
       "clients",
@@ -83,14 +97,20 @@ async function mutation<T>(
           .slice(0, 4)
           .join("; "),
       };
-    const code =
+    const text =
       e instanceof Error
-        ? Object.keys(messages).find((k) => e.message.includes(k))
-        : undefined;
+        ? `${e.message} ${e.cause instanceof Error ? e.cause.message : ""}`
+        : "";
+    const code = Object.keys(messages).find((k) => text.includes(k));
     console.error("sales_mutation_failed", {
       correlation,
       permission,
       code: code || "validation_or_database",
+      detail: e instanceof Error ? e.message.split("\n")[0] : String(e),
+      cause:
+        e instanceof Error && e.cause instanceof Error
+          ? e.cause.message
+          : undefined,
     });
     return {
       ok: false as const,

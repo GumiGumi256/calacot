@@ -30,6 +30,7 @@ export async function prepareMenu(
   body: string | null,
   type: string,
   notice?: string,
+  failureReason?: string,
 ) {
   const [conversation] = await db
     .select()
@@ -84,11 +85,12 @@ export async function prepareMenu(
     command = { kind: "resume" };
     action = "main";
   }
-  if (expired) {
+  if (expired && !failureReason) {
     state = { screen: "main" };
     text = WELCOME;
     action = action === "main" ? "main" : null;
   }
+  if (failureReason) action = "team";
   if (action === "main" || action === "cancel") {
     state = { screen: "main" };
     text =
@@ -97,7 +99,7 @@ export async function prepareMenu(
         : WELCOME;
   } else if (action === "back")
     state = { ...state, screen: parent(state.screen), versionId: undefined };
-  else if (action === "team") handoff("customer_requested");
+  else if (action === "team") handoff(failureReason || "customer_requested");
   else if (
     ["services", "start", "quotes", "invoices", "purchases"].includes(
       action || "",

@@ -44,7 +44,8 @@ export default function Footer() {
   const pathname = usePathname();
   const currentYear = new Date().getFullYear();
 
-  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+  const [first, second] = pathname.split("/").filter(Boolean);
+  if (first === "admin" || second === "admin") {
     return null;
   }
 

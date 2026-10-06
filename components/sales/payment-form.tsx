@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { paymentCommand } from "@/lib/sales/actions";
 import { Button } from "@/components/ui/button";
@@ -25,33 +25,57 @@ export function PaymentForm({
     evidence: "",
   });
   const [key, setKey] = useState("");
+  const inFlight = useRef(false);
   const update = (k: keyof typeof form, v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
+  const run = async (requestKey: string) => {
+    if (form.command === "verify" && !form.paymentId) {
+      setMessage("Select the payment to verify first.");
+      return;
+    }
+    const r = await paymentCommand({
+      ...form,
+      invoiceId,
+      paymentId: form.paymentId || undefined,
+      key: requestKey,
+      receivedAt: form.receivedAt
+        ? new Date(form.receivedAt).toISOString()
+        : new Date().toISOString(),
+    });
+    if (r.ok) {
+      setMessage(
+        form.command === "submit"
+          ? "Payment submitted for verification. Invoice is not marked paid. Use �Verify and allocate payment� next."
+          : "Verified payment allocated.",
+      );
+      setKey("");
+      setForm((f) => ({
+        ...f,
+        paymentId: "",
+        amount: "",
+        reference: "",
+        receivedAt: "",
+        evidence: "",
+      }));
+      router.refresh();
+    } else setMessage(r.error);
+  };
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        if (inFlight.current) return;
+        inFlight.current = true;
         const requestKey = key || crypto.randomUUID();
         setKey(requestKey);
         start(async () => {
-          const r = await paymentCommand({
-            ...form,
-            invoiceId,
-            paymentId: form.paymentId || undefined,
-            key: requestKey,
-            receivedAt: form.receivedAt
-              ? new Date(form.receivedAt).toISOString()
-              : new Date().toISOString(),
-          });
-          if (r.ok) {
-            setMessage(
-              form.command === "submit"
-                ? "Payment submitted for verification. Invoice is not marked paid."
-                : "Verified payment allocated.",
-            );
-            setKey("");
-            router.refresh();
-          } else setMessage(r.error);
+          try {
+            await run(requestKey);
+          } catch {
+            setMessage("Could not save the payment. Please try again.");
+          } finally {
+            inFlight.current = false;
+          }
         });
       }}
     >

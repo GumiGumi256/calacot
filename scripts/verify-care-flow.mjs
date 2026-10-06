@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import assert from "node:assert/strict";
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
+import { PgDialect } from "drizzle-orm/pg-core";
 await mkdir("tmp/care-test", { recursive: true });
 await build({
   entryPoints: ["lib/customer-care/worker.ts"],
@@ -259,12 +260,59 @@ try {
   process.env.CUSTOMER_CARE_SEND_ALLOWLIST = phone;
   await send("menu");
   assert.equal(sends, 1, "Allowlisted staging should use existing transport");
+  const latestReply = async () => (
+    await pg.query("SELECT body,status,message_type FROM whatsapp_messages WHERE direction='outbound' ORDER BY created_at DESC LIMIT 1")
+  ).rows[0];
+  // Actual owned database records return status; a newer other customer's
+  // purchase must never appear in the linked customer's response.
+  const ownedReference = "CAL-DES-AAAAAAAAAAAAAAAA";
+  for (const [owner, reference] of [[user, ownedReference], ["other_owner", "CAL-DES-BBBBBBBBBBBBBBBB"]]) {
+    await pg.query("INSERT INTO design_purchases(clerk_user_id,customer_name,customer_email,customer_phone,sanity_design_id,design_slug,design_title,sanity_package_id,package_name,package_includes,amount,purchase_reference,invoice_number) VALUES($1,'Fixture','fixture@example.test',$2,'design','fixture','Fixture design','package','Fixture package','[]',100,$3,$3)", [owner, phone, reference]);
+  }
+  await choose("purchases");
+  await choose("purchase_latest");
+  assert.match((await latestReply()).body, new RegExp(ownedReference));
+  assert.doesNotMatch((await latestReply()).body, /BBBBBBBBBBBBBBBB/);
+  // A lookup outage must commit a staff request and actually deliver the
+  // handoff acknowledgement after the conversation switches to human.
+  const execute = globalThis.__careDb.execute.bind(globalThis.__careDb);
+  globalThis.__careDb.execute = (query) => {
+    if (new PgDialect().sqlToQuery(query).sql.includes("FROM design_purchases"))
+      throw new Error("simulated_private_lookup_failure");
+    return execute(query);
+  };
+  const handoffCount = (await pg.query("SELECT count(*)::int AS n FROM care_requests WHERE kind='handoff'")).rows[0].n;
+  await choose("purchase_latest");
+  globalThis.__careDb.execute = execute;
+  assert.equal((await state()).mode, "human");
+  assert.equal((await latestReply()).status, "sent");
+  assert.match((await latestReply()).body, /passed to the Calacot team/);
+  assert.doesNotMatch((await latestReply()).body, /simulated_private_lookup_failure/);
+  assert.equal((await pg.query("SELECT count(*)::int AS n FROM care_requests WHERE kind='handoff'")).rows[0].n, handoffCount + 1);
+  await runCareWorker(1);
+  assert.equal((await pg.query("SELECT count(*)::int AS n FROM care_requests WHERE kind='handoff'")).rows[0].n, handoffCount + 1);
+  await send("resume");
+  await pg.query("UPDATE care_conversations SET clerk_user_id=NULL,linked_until=NULL WHERE phone=$1", [phone]);
+  await choose("quotes");
+  process.env.CALACOT_APP_URL = "http://example.test";
+  const tokensBefore = (await pg.query("SELECT count(*)::int AS n FROM care_link_tokens")).rows[0].n;
+  await choose("quote_latest");
+  assert.equal((await state()).mode, "human");
+  assert.equal((await latestReply()).status, "sent");
+  assert.equal((await pg.query("SELECT count(*)::int AS n FROM care_link_tokens")).rows[0].n, tokensBefore);
+  process.env.CALACOT_APP_URL = "https://example.test";
+  await send("resume");
+  await choose("purchases");
+  await choose("purchase_latest");
+  assert.equal((await state()).menu_state.screen, "verification");
+  assert.match((await latestReply()).body, /https:\/\/example.test\/account\/customer-care\/link/);
+  const beforeOptOut = sends;
   await pg.query(
     "UPDATE whatsapp_contacts SET opted_out_at=now() WHERE phone=$1",
     [phone],
   );
   await send("menu");
-  assert.equal(sends, 1, "Opt-out prevents further sends");
+  assert.equal(sends, beforeOptOut, "Opt-out prevents further sends");
   console.log(
     "PASS: actual worker handles nested services/enquiry, verification, private quote outcomes, generic-yes rejection, expiry, invoice/purchase options, handoff/resume, capture, staging allowlist and opt-out with mocked providers.",
   );
