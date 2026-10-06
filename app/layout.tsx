@@ -62,7 +62,15 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col bg-brand-white dark:bg-brand-black">
-        <ClerkProvider>
+        <ClerkProvider
+        appearance={
+          {
+            variables: {
+              colorPrimary: 'var(--color-brand-primary)'
+            }
+          }
+        }
+        >
           <SiteStructuredData />
           <ThemeProvider
             attribute="class"
