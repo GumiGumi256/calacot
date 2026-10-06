@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { useAuth } from "@clerk/nextjs";
 import {
   LayoutDashboardIcon,
   UsersIcon,
@@ -78,6 +79,7 @@ const data = {
     { title: "Search", url: "/admin/search", icon: <SearchIcon /> },
   ],
   documents: [
+    { name: "Delivery operations", url: "/admin/deliveries", icon: <MessageSquareIcon /> },
     { name: "Documents", url: "/admin/documents", icon: <FileIcon /> },
     { name: "Reports", url: "/admin/reports", icon: <FileChartColumnIcon /> },
     {
@@ -89,6 +91,11 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { orgSlug } = useAuth();
+  const scopedItems = <T extends { url: string }>(items: T[]) => items.map(item => ({
+    ...item,
+    url: orgSlug && item.url.startsWith("/admin") ? `/${encodeURIComponent(orgSlug)}${item.url}` : item.url,
+  }));
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -138,12 +145,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavItems title="Sales & Clients" items={data.sales} />
-        <NavItems title="Finance" items={data.finance} />
-        <NavItems title="Operations" items={data.operations} />
-        <NavItems title="Documents" items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={scopedItems(data.navMain)} />
+        <NavItems title="Sales & Clients" items={scopedItems(data.sales)} />
+        <NavItems title="Finance" items={scopedItems(data.finance)} />
+        <NavItems title="Operations" items={scopedItems(data.operations)} />
+        <NavItems title="Documents" items={scopedItems(data.documents)} />
+        <NavSecondary items={scopedItems(data.navSecondary)} className="mt-auto" />
       </SidebarContent>
 
       <SidebarFooter>

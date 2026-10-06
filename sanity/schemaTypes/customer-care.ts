@@ -77,6 +77,20 @@ export const customerCareCompanyProfile = defineType({
                     "Use reviewed plain text without links",
                 ),
             },
+            {
+              name: "menuSummary",
+              title: "Approved WhatsApp menu summary",
+              description:
+                "Concise service information for the menu assistant. No invented prices, availability or dates. Publish with the approved company profile.",
+              type: "text",
+              validation: (R) =>
+                R.max(650).custom(
+                  (v) =>
+                    !v ||
+                    approvedAnswer.safeParse(v).success ||
+                    "Use reviewed plain text without embedded URLs",
+                ),
+            },
           ],
         },
       ],

@@ -1,11 +1,17 @@
 import { sql } from "drizzle-orm";
 
 /** Replays are safe. Enqueue all previously committed inbound records to heal a partial webhook write. */
-export function enqueueQuery(wamid: string) {
+export function enqueueQuery(
+  wamid: string,
+  organizationId: string | null = null,
+  businessAccountId: string | null = null,
+) {
   return sql`WITH conversation AS (
-    INSERT INTO care_conversations(phone,updated_at)
-    SELECT customer_phone,event_at FROM whatsapp_messages WHERE wamid=${wamid} AND direction='inbound'
-    ON CONFLICT(phone) DO UPDATE SET updated_at=greatest(care_conversations.updated_at,excluded.updated_at)
+    INSERT INTO care_conversations(phone,updated_at,organization_id,business_account_id)
+    SELECT customer_phone,event_at,${organizationId},${businessAccountId} FROM whatsapp_messages WHERE wamid=${wamid} AND direction='inbound'
+    ON CONFLICT(phone) DO UPDATE SET updated_at=greatest(care_conversations.updated_at,excluded.updated_at),
+      organization_id=coalesce(care_conversations.organization_id,excluded.organization_id),
+      business_account_id=coalesce(care_conversations.business_account_id,excluded.business_account_id)
   ) SELECT 1`;
 }
 export function insertJobQuery(wamid: string) {
@@ -57,6 +63,8 @@ export function claimOutboundQuery(
       AND EXISTS(SELECT 1 FROM care_conversations conv WHERE conv.phone=m.customer_phone AND conv.mode<>'closed'
         AND (${!automated} OR conv.assigned_to IS NULL))
       AND (${!requireBot} OR EXISTS(SELECT 1 FROM care_conversations conv WHERE conv.phone=m.customer_phone AND conv.mode='bot'))
+      AND (${!automated} OR NOT EXISTS(SELECT 1 FROM care_jobs j WHERE j.decision->>'outboundId'=m.id::text AND j.decision->>'verifiedUser' IS NOT NULL)
+        OR EXISTS(SELECT 1 FROM care_jobs j JOIN care_conversations conv ON conv.phone=j.phone WHERE j.decision->>'outboundId'=m.id::text AND j.decision->>'verifiedUser'=conv.clerk_user_id AND conv.linked_until>now()))
     RETURNING m.id,m.customer_phone,m.body,m.message_type`;
 }
 

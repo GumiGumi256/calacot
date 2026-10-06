@@ -1,0 +1,5 @@
+import {build} from "esbuild";
+import {mkdir} from "node:fs/promises";
+await mkdir("tmp/sales-test",{recursive:true});
+await build({entryPoints:["lib/sales/worker.ts"],outfile:"tmp/sales-test/worker.cjs",bundle:true,platform:"node",format:"cjs",packages:"external",plugins:[{name:"isolated-sales-adapters",setup(b){b.onResolve({filter:/^server-only$/},()=>({path:"empty",namespace:"sales-test"}));b.onResolve({filter:/^@\/database\/db$/},()=>({path:"database",namespace:"sales-test"}));b.onResolve({filter:/^@\/lib\/email\/client$/},()=>({path:"email",namespace:"sales-test"}));b.onResolve({filter:/^@\/lib\/whatsapp\/client$/},()=>({path:"whatsapp",namespace:"sales-test"}));b.onLoad({filter:/.*/,namespace:"sales-test"},args=>({contents:args.path==="empty"?"":args.path==="database"?"export const db=globalThis.__salesTestDb;":args.path==="email"?"export function getEmailClient(){return globalThis.__salesTestEmail;}":"export async function sendWhatsAppTemplate(...args){return globalThis.__salesTestWhatsApp(...args);}"}));}}]});
+console.log("Isolated worker bundle ready; database and provider adapters injected only for tests.");

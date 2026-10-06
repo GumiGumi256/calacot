@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/database/db";
@@ -29,6 +29,9 @@ export async function setConversationMode(form: FormData) {
     .set({
       mode,
       assignedTo: mode === "human" ? actor : null,
+      sessionRevision: sql`${careConversations.sessionRevision}+1`,
+      menuState: {},
+      sessionExpiresAt: null,
       updatedAt: new Date(),
     })
     .where(eq(careConversations.phone, phone));
@@ -49,14 +52,12 @@ export async function updateCareRequest(form: FormData) {
     .where(eq(careRequests.id, id))
     .returning();
   if (row)
-    await db
-      .insert(careAudit)
-      .values({
-        actor,
-        phone: row.phone,
-        action: "request_updated",
-        details: { id, status },
-      });
+    await db.insert(careAudit).values({
+      actor,
+      phone: row.phone,
+      action: "request_updated",
+      details: { id, status },
+    });
   refresh();
 }
 export async function sendReviewedReply(form: FormData) {
@@ -108,14 +109,12 @@ export async function sendReviewedReply(form: FormData) {
     .onConflictDoNothing()
     .returning();
   if (!inserted) return refresh();
-  await db
-    .insert(careAudit)
-    .values({
-      actor,
-      phone,
-      action: "reviewed_reply",
-      details: { messageId: id, template },
-    });
+  await db.insert(careAudit).values({
+    actor,
+    phone,
+    action: "reviewed_reply",
+    details: { messageId: id, template },
+  });
   await deliverCareMessage(id);
   refresh();
 }

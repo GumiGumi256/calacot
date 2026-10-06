@@ -1,0 +1,3 @@
+# External scheduler example: invoke every minute; server worker leases permit overlapping invocations.
+# Run with the deployment's Node environment and secrets; no client messages are sent in capture mode.
+* * * * * cd /app/calacot-website && npm run sales:worker

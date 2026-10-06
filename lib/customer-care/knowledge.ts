@@ -13,7 +13,14 @@ const profileSchema = z.object({
   website: z.string().transform(safeLink),
   contactInformation: approvedAnswer,
   businessUnits: z.array(
-    z.object({ unit: z.enum(businessUnits), description: approvedAnswer }),
+    z.object({
+      unit: z.enum(businessUnits),
+      description: approvedAnswer,
+      menuSummary: approvedAnswer
+        .refine((v) => v.length <= 650)
+        .nullable()
+        .optional(),
+    }),
   ),
   brandPositioning: z.literal("We sell possibility."),
   communicationGuidelines: z.string().max(2400),

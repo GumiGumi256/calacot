@@ -48,10 +48,11 @@ export default async function AccountLink({
       {link && valid ? (
         <>
           <p className="mb-6 text-sm text-muted-foreground">
-            Allow WhatsApp +{link.phone} to check order status from your
-            signed-in Calacot account for 24 hours. Approve only if this is your
-            WhatsApp conversation. You can send “unlink account” there to revoke
-            access.
+            Allow WhatsApp +{link.phone} to view quotations and invoices, review
+            and explicitly confirm quotations, and check design purchases from
+            your signed-in Calacot account for 24 hours. Approve only if this is
+            your WhatsApp conversation. You can send “unlink account” there to
+            revoke access.
           </p>
           <form action={approveAccountLink}>
             <input type="hidden" name="token" value={valid} />
@@ -61,7 +62,7 @@ export default async function AccountLink({
       ) : (
         <p className="text-sm">
           {result === "linked"
-            ? "Your account is linked. Return to WhatsApp and send your Calacot purchase reference."
+            ? "Your account is linked. Return to WhatsApp and choose ‘I've linked my account’, then select the service you need."
             : "This link has expired or has already been used. Request a new link in your WhatsApp conversation."}
         </p>
       )}

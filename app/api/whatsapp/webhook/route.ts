@@ -1,4 +1,5 @@
 import { db } from "@/database/db";
+import { sql } from "drizzle-orm";
 import { getWebhookConfig } from "@/lib/whatsapp/config";
 import { recordInboundQuery, recordStatusQuery } from "@/lib/whatsapp/queries";
 import {
@@ -74,12 +75,22 @@ export async function POST(request: Request) {
         });
       }
       if (process.env.CUSTOMER_CARE_ENABLED === "true") {
-        await db.execute(enqueueQuery(message.wamid));
+        await db.execute(
+          enqueueQuery(
+            message.wamid,
+            process.env.CALACOT_CLERK_ORG_ID || null,
+            config.businessAccountId,
+          ),
+        );
         await db.execute(insertJobQuery(message.wamid));
       }
     }
 
     for (const status of events.statuses) {
+      // Persist sales events before acknowledgement, including events arriving before the provider ID write.
+      await db.execute(
+        sql`INSERT INTO sales_webhook_inbox(id,provider,payload) VALUES(${`whatsapp/${status.wamid}/${status.status}/${status.timestamp.toISOString()}`},'whatsapp',${JSON.stringify(status)}::jsonb) ON CONFLICT(id) DO NOTHING`,
+      );
       await db.execute(recordStatusQuery(status));
     }
 
@@ -100,8 +111,10 @@ export async function POST(request: Request) {
     }
 
     return new Response("EVENT_RECEIVED", { status: 200 });
-  } catch (error) {
-    console.error("whatsapp_webhook_persistence_failed", error);
+  } catch {
+    console.error("whatsapp_webhook_persistence_failed", {
+      code: "database_write_failed",
+    });
     return new Response("Please retry", { status: 503 });
   }
 }

@@ -1,5 +1,6 @@
 import "server-only";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
+import { staffContext } from "@/lib/sales/permissions";
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
@@ -14,10 +15,13 @@ export async function requireUser(returnBackUrl = "/account/designs") {
   return session.userId;
 }
 export const isAdmin = cache(
-  async () => (await currentUser())?.publicMetadata.role === "admin",
+  async () => {
+    const s = await auth();
+    return !!process.env.CALACOT_CLERK_ORG_ID && s.orgId === process.env.CALACOT_CLERK_ORG_ID && s.orgRole === "org:admin";
+  },
 );
 export async function requireAdmin() {
-  const userId = await requireUser("/admin/design-purchases");
+  const { actor: userId } = await staffContext();
   if (!(await isAdmin())) notFound();
   return userId;
 }

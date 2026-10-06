@@ -1,15 +1,11 @@
-import "dotenv/config";
+import { config } from "dotenv";
 import { defineConfig } from "drizzle-kit";
-
-if (!process.env.DATABASE_URL_UNPOOLED) {
-  throw new Error("DATABASE_URL_UNPOOLED is not set in the .env file");
-}
-
+config({path:[".env.local",".env"],quiet:true});
+const url=process.env.DATABASE_URL_UNPOOLED||process.env.DATABASE_URL;
+if(!url)throw new Error("Application database connection missing");
 export default defineConfig({
-  schema: ["./database/schema/index.ts", "./database/customer-care-schema.ts"],
-  out: "./drizzle", // Your migrations folder
-  dialect: "postgresql",
-  dbCredentials: {
-    url: process.env.DATABASE_URL_UNPOOLED,
-  },
+  schema:["./database/schema/index.ts","./database/customer-care-schema.ts"],
+  out:"./drizzle-current",
+  dialect:"postgresql",
+  dbCredentials:{url},
 });

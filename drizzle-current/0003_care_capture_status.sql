@@ -1,0 +1,2 @@
+ALTER TABLE "whatsapp_messages" DROP CONSTRAINT "whatsapp_messages_status_check";--> statement-breakpoint
+ALTER TABLE "whatsapp_messages" ADD CONSTRAINT "whatsapp_messages_status_check" CHECK ("whatsapp_messages"."status" is null or "whatsapp_messages"."status" in ('queued', 'captured', 'sending', 'sent', 'delivered', 'read', 'failed', 'uncertain'));

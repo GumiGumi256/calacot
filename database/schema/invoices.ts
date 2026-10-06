@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   foreignKey,
+  uniqueIndex,
   check,
   integer,
   date,
@@ -25,6 +26,7 @@ import { clients } from "./clients";
 import { quotationVersions } from "./quotations";
 import { projects } from "./projects";
 import { services } from "./services";
+import type { DocumentSnapshot } from "../../lib/sales/document-model";
 
 export const invoices = pgTable(
   "invoices",
@@ -36,6 +38,9 @@ export const invoices = pgTable(
     clientId: uuid("client_id").notNull(),
     projectId: uuid("project_id"),
     quotationVersionId: uuid("quotation_version_id"),
+    billingPurpose: text("billing_purpose"),
+    billingScheduleId: uuid("billing_schedule_id"),
+    documentSnapshot: jsonb("document_snapshot").$type<DocumentSnapshot>(),
     number: text("number"), // Null for drafts; issue atomically with documentCounters.
     status: text("status", { enum: ["draft", "issued", "void"] })
       .notNull()
@@ -72,6 +77,8 @@ export const invoices = pgTable(
   },
   (t) => [
     unique("invoices_org_id_uq").on(t.organizationId, t.id),
+    foreignKey({ name: "invoices_project_client_fk", columns: [t.organizationId, t.projectId, t.clientId], foreignColumns: [projects.organizationId, projects.id, projects.clientId] }).onDelete("restrict"),
+    uniqueIndex("invoices_billing_purpose_uq").on(t.organizationId, t.quotationVersionId, t.billingPurpose).where(sql`${t.quotationVersionId} is not null and ${t.billingPurpose} is not null`),
     unique("invoices_org_client_currency_uq").on(
       t.organizationId,
       t.id,

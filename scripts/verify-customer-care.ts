@@ -138,6 +138,7 @@ async function main() {
       await pg.exec(await readFile(`drizzle/${file}.sql`, "utf8"));
     // Additive migration can be safely re-applied to a populated database.
     await pg.exec(await readFile("drizzle/0007_customer_care.sql", "utf8"));
+    await pg.exec(await readFile("drizzle-current/0002_care_menu_state.sql", "utf8"));
     const phone = "256772123456",
       secondPhone = "256772123457";
     const inbound = {
@@ -416,7 +417,7 @@ async function main() {
       },
       { phoneNumberId: "number", businessAccountId: "business" },
     );
-    assert.equal(interactive.messages[0].body, "Architecture & design");
+    assert.equal(interactive.messages[0].body, "architecture");
     // A crashed final claim creates a visible staff request and does not strand later work.
     await pg.query(
       "UPDATE care_jobs SET attempts=5,lease_until=now()-interval '1 second' WHERE id=$1",

@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "/api/sales/*": ["./public/calacot-logo.png", "./node_modules/next/dist/compiled/@vercel/og/Geist-Regular.ttf"],
+  },
   async headers() {
     return [{ source: "/account/customer-care/:path*", headers: [
       { key: "Referrer-Policy", value: "no-referrer" },

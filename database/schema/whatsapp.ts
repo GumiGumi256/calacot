@@ -58,6 +58,7 @@ export const whatsappMessages = pgTable(
     status: text("status", {
       enum: [
         "queued",
+        "captured",
         "sending",
         "sent",
         "delivered",
@@ -108,7 +109,7 @@ export const whatsappMessages = pgTable(
 
     check(
       "whatsapp_messages_status_check",
-      sql`${table.status} is null or ${table.status} in ('queued', 'sending', 'sent', 'delivered', 'read', 'failed', 'uncertain')`,
+      sql`${table.status} is null or ${table.status} in ('queued', 'captured', 'sending', 'sent', 'delivered', 'read', 'failed', 'uncertain')`,
     ),
   ],
 );

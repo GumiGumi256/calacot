@@ -25,6 +25,8 @@ export const clients = pgTable(
       .default("individual"),
     displayName: text("display_name").notNull(),
     legalName: text("legal_name"),
+    tradingName: text("trading_name"),
+    department: text("department", { enum: ["estates", "architecture", "painting", "interiors", "tech"] }),
     clerkUserId: text("clerk_user_id"), // Customer identity, never a staff-role grant.
     taxIdentifier: text("tax_identifier"),
     billingAddress: jsonb("billing_address").$type<{
@@ -39,6 +41,8 @@ export const clients = pgTable(
   (t) => [
     unique("clients_org_id_uq").on(t.organizationId, t.id),
     allowed("clients_kind_check", t.kind, ["individual", "company"]),
+    allowed("clients_department_check", t.department, ["estates", "architecture", "painting", "interiors", "tech"]),
+    index("clients_org_department_idx").on(t.organizationId, t.department),
     uniqueIndex("clients_clerk_org_uq")
       .on(t.organizationId, t.clerkUserId)
       .where(sql`${t.clerkUserId} is not null`),
@@ -60,6 +64,8 @@ export const clientContacts = pgTable(
     phone: text("phone"), // Normalize to international form in the service layer.
     jobTitle: text("job_title"),
     isPrimary: boolean("is_primary").notNull().default(false),
+    whatsappConsentAt: instant("whatsapp_consent_at"),
+    whatsappConsentSource: text("whatsapp_consent_source"),
     ...timestamps(),
   },
   (t) => [

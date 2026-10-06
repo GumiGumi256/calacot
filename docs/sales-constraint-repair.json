@@ -1,0 +1,237 @@
+[
+  {
+    "table": "staff_memberships",
+    "name": "staff_memberships_org_id_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "staff_memberships",
+    "name": "staff_memberships_clerk_org_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "client_contacts",
+    "name": "client_contacts_org_id_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "client_contacts",
+    "name": "client_contacts_clientId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "clients",
+    "name": "clients_org_id_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "opportunities",
+    "name": "opportunities_clientId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "opportunities",
+    "name": "opportunities_ownerId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "opportunity_activities",
+    "name": "opportunity_activities_org_id_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "opportunity_activities",
+    "name": "opportunity_activities_actorId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "quotation_items",
+    "name": "quotation_items_org_id_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "quotation_items",
+    "name": "quotation_items_position_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "quotation_items",
+    "name": "quotation_items_quotationVersionId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "quotation_payment_schedules",
+    "name": "quotation_payment_schedules_org_id_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "quotation_payment_schedules",
+    "name": "quotation_payment_schedules_position_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "quotation_payment_schedules",
+    "name": "quotation_payment_schedules_quotationVersionId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "quotation_versions",
+    "name": "quotation_versions_org_id_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "quotation_versions",
+    "name": "quotation_versions_quotationId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "quotations",
+    "name": "quotations_org_id_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "quotations",
+    "name": "quotations_number_org_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "quotations",
+    "name": "quotations_clientId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "project_members",
+    "name": "project_members_org_id_uq",
+    "kind": "unique"
+  },
+  {
+    "table": "project_members",
+    "name": "project_members_staffId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "projects",
+    "name": "projects_clientId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "projects",
+    "name": "projects_quotationVersionId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "projects",
+    "name": "projects_managerId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "task_comments",
+    "name": "task_comments_authorId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "tasks",
+    "name": "tasks_assigneeId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "tasks",
+    "name": "tasks_createdById_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "invoices",
+    "name": "invoices_clientId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "invoices",
+    "name": "invoices_quotationVersionId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "payment_allocation_reversals",
+    "name": "payment_allocation_reversals_organization_id_organizations_id_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "payment_refunds",
+    "name": "payment_refunds_processedById_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "payments",
+    "name": "payments_clientId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "payments",
+    "name": "payments_confirmedById_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "expenses",
+    "name": "expenses_approvedById_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "properties",
+    "name": "properties_ownerClientId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "properties",
+    "name": "properties_managerId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "properties",
+    "name": "properties_verifiedById_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "property_commissions",
+    "name": "property_commissions_payerClientId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "property_viewings",
+    "name": "property_viewings_advisorId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "document_links",
+    "name": "document_links_clientId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "document_links",
+    "name": "document_links_quotationVersionId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "conversation_messages",
+    "name": "conversation_messages_whatsapp_message_id_whatsapp_messages_id_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "conversations",
+    "name": "conversations_clientId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "conversations",
+    "name": "conversations_assignedToId_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "crm_source_links",
+    "name": "crm_source_links_real_estate_enquiry_id_real_estate_enquiries_id_fk",
+    "kind": "foreign key"
+  },
+  {
+    "table": "crm_source_links",
+    "name": "crm_source_links_clientId_fk",
+    "kind": "foreign key"
+  }
+]

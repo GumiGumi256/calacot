@@ -22,6 +22,14 @@ export const careConversations = pgTable(
     linkedUntil: timestamp("linked_until", { withTimezone: true }),
     businessUnit: text("business_unit"),
     assignedTo: text("assigned_to"),
+    organizationId: text("organization_id"),
+    businessAccountId: text("business_account_id"),
+    menuState: jsonb("menu_state").notNull().default({}),
+    sessionRevision: integer("session_revision").notNull().default(0),
+    sessionExpiresAt: timestamp("session_expires_at", { withTimezone: true }),
+    lastProcessedAt: timestamp("last_processed_at", { withTimezone: true }),
+    lastProcessedMessageId: uuid("last_processed_message_id"),
+    handoffReason: text("handoff_reason"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

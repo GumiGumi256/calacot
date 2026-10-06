@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { requireAdmin } from "@/lib/design-purchases/permissions";
+import { staffContext } from "@/lib/sales/permissions";
+import { SalesSetupState } from "@/lib/sales/setup-state";
+import { requireUser } from "@/lib/design-purchases/permissions";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -10,7 +12,11 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireAdmin();
+  if (!process.env.CALACOT_CLERK_ORG_ID?.trim()) {
+    await requireUser("/admin/clients");
+    return <SalesSetupState />;
+  }
+  await staffContext();
   return (
     <SidebarProvider
       style={

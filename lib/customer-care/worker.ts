@@ -13,10 +13,13 @@ import {
   claimJobQuery,
   claimOutboundQuery,
   reapDeadJobsQuery,
+  revokeLinkQuery,
 } from "./queries";
 import { prepareReply, recordFailureHandoff, type CareJob } from "./pipeline";
 import { templates } from "./render";
 import { CARE_MENU_MESSAGE, careMenuPayload } from "./menu";
+import { prepareMenu } from "./menu-flow";
+import { mkdir, writeFile } from "node:fs/promises";
 
 /** Persistent outbox: never automatically retry an ambiguous external send. */
 export async function deliverCareMessage(
@@ -32,12 +35,52 @@ export async function deliverCareMessage(
   }>(claimOutboundQuery(id, requireBot, automated));
   const m = result.rows[0];
   if (!m) return;
+  const menuMode = automated && process.env.CUSTOMER_CARE_MODE === "menu";
+  const notificationMode =
+    process.env.CUSTOMER_CARE_NOTIFICATION_MODE || "capture";
+  if (menuMode && ["capture", "staging"].includes(notificationMode)) {
+    await mkdir("tmp/customer-care-capture", { recursive: true });
+    await writeFile(
+      `tmp/customer-care-capture/${m.id}.json`,
+      JSON.stringify({
+        type: m.message_type,
+        body: m.message_type === "interactive" ? JSON.parse(m.body) : m.body,
+      }),
+    );
+  }
+  if (menuMode && notificationMode === "capture") {
+    await db
+      .update(whatsappMessages)
+      .set({ status: "captured", updatedAt: new Date() })
+      .where(
+        and(
+          eq(whatsappMessages.id, m.id),
+          eq(whatsappMessages.status, "sending"),
+        ),
+      );
+    return;
+  }
+  if (
+    menuMode &&
+    ((notificationMode === "staging" &&
+      !(process.env.CUSTOMER_CARE_SEND_ALLOWLIST || "")
+        .split(",")
+        .map((p) => p.trim().replace(/^\+/, ""))
+        .includes(m.customer_phone)) ||
+      !["staging", "live", "capture"].includes(notificationMode))
+  ) {
+    await db
+      .update(whatsappMessages)
+      .set({ status: "failed", errorCode: "care_recipient_not_allowed" })
+      .where(eq(whatsappMessages.id, m.id));
+    return;
+  }
   const sent =
     m.message_type === "interactive"
       ? await sendWhatsAppInteractiveList(
           m.customer_phone,
           m.id,
-          careMenuPayload,
+          m.body.startsWith("{") ? JSON.parse(m.body) : careMenuPayload,
         )
       : await sendWhatsAppText(m.customer_phone, m.id, m.body);
   await db
@@ -91,6 +134,14 @@ async function processJob(job: CareJob) {
   )
     return finish(job, "contact_not_eligible");
   const dedupeKey = `care/${job.id}`;
+  if (
+    conversation?.mode === "human" &&
+    message.messageType === "text" &&
+    /^(unlink|unlink account)$/i.test(message.body?.trim() || "")
+  ) {
+    await db.execute(revokeLinkQuery(job.phone));
+    return finish(job, "account_unlinked");
+  }
   let [outbound] = await db
     .select()
     .from(whatsappMessages)
@@ -113,57 +164,105 @@ async function processJob(job: CareJob) {
     return finish(job, "delivery_uncertain");
   }
   if (outbound && outbound.status !== "queued") return finish(job);
-  if (conversation?.mode !== "bot" && !outbound)
+  if (
+    conversation?.mode !== "bot" &&
+    !outbound &&
+    !(
+      process.env.CUSTOMER_CARE_MODE === "menu" &&
+      conversation?.mode === "human" &&
+      !conversation.assignedTo &&
+      message.body?.trim().toLowerCase() === "resume"
+    )
+  )
     return finish(job, "human_control");
   const count = await db.execute<{ count: number }>(
     sql`SELECT count(*)::int AS count FROM whatsapp_messages WHERE customer_phone=${job.phone} AND direction='inbound' AND event_at>now()-interval '5 minutes'`,
   );
-  if (count.rows[0]?.count > 20 && !outbound) {
+  if (
+    count.rows[0]?.count >
+      (process.env.CUSTOMER_CARE_MODE === "menu" ? 60 : 20) &&
+    !outbound
+  ) {
     await recordFailureHandoff(job);
     return finish(job, "rate_limited");
   }
   if (!outbound) {
-    let body: string;
-    try {
-      body = await prepareReply(job, message.body, message.messageType);
-    } catch {
-      // Fail closed. No provider error, prompt, model result or customer content reaches the recipient.
-      body = templates.failure;
-      await recordFailureHandoff(job);
+    if (process.env.CUSTOMER_CARE_MODE === "menu") {
+      let id: string | null;
+      try {
+        id = await prepareMenu(job, message.body, message.messageType);
+      } catch (e) {
+        const detail =
+          e instanceof Error
+            ? `${e.message} ${e.cause instanceof Error ? e.cause.message : ""}`
+            : "";
+        if (
+          !/care_state_conflict|care_review_expired|care_identity_required|quotation_not_confirmable|stale_version|eligible_project_required/.test(
+            detail,
+          )
+        )
+          throw e;
+        // A newer version/session must be reviewed afresh; never silently accept it.
+        id = await prepareMenu(
+          job,
+          "menu",
+          "text",
+          "This quotation or verification changed, or your review expired. Please review the quotation again before confirming.",
+        );
+      }
+      if (!id) return finish(job, "obsolete_or_human");
+      [outbound] = await db
+        .select()
+        .from(whatsappMessages)
+        .where(eq(whatsappMessages.id, id));
+    } else {
+      let body: string;
+      try {
+        body = await prepareReply(job, message.body, message.messageType);
+      } catch {
+        // Fail closed. No provider error, prompt, model result or customer content reaches the recipient.
+        body = templates.failure;
+        await recordFailureHandoff(job);
+      }
+      // Staff may take over while content is loading. A handoff performed by this job is permitted.
+      const [current] = await db
+        .select()
+        .from(careConversations)
+        .where(eq(careConversations.phone, job.phone));
+      if (
+        current?.mode !== "bot" &&
+        body !== templates.handoff &&
+        body !== templates.failure
+      )
+        return finish(job, "human_control");
+      const lease = await db.execute(
+        sql`SELECT id FROM care_jobs WHERE id=${job.id}::uuid AND lease_token=${job.lease_token}::uuid AND lease_until>now()`,
+      );
+      if (!lease.rows.length) return;
+      [outbound] = await db
+        .insert(whatsappMessages)
+        .values({
+          dedupeKey,
+          customerPhone: job.phone,
+          direction: "outbound",
+          messageType: body === CARE_MENU_MESSAGE ? "interactive" : "text",
+          body: body.slice(0, 4096),
+          status: "queued",
+          eventAt: new Date(),
+        })
+        .onConflictDoNothing()
+        .returning();
+      if (!outbound) return finish(job);
     }
-    // Staff may take over while Gemini is running. A handoff performed by this job is permitted.
-    const [current] = await db
-      .select()
-      .from(careConversations)
-      .where(eq(careConversations.phone, job.phone));
-    if (
-      current?.mode !== "bot" &&
-      body !== templates.handoff &&
-      body !== templates.failure
-    )
-      return finish(job, "human_control");
-    const lease = await db.execute(
-      sql`SELECT id FROM care_jobs WHERE id=${job.id}::uuid AND lease_token=${job.lease_token}::uuid AND lease_until>now()`,
-    );
-    if (!lease.rows.length) return;
-    [outbound] = await db
-      .insert(whatsappMessages)
-      .values({
-        dedupeKey,
-        customerPhone: job.phone,
-        direction: "outbound",
-        messageType: body === CARE_MENU_MESSAGE ? "interactive" : "text",
-        body: body.slice(0, 4096),
-        status: "queued",
-        eventAt: new Date(),
-      })
-      .onConflictDoNothing()
-      .returning();
-    if (!outbound) return finish(job);
   }
   await deliverCareMessage(
     outbound.id,
-    outbound.body !== templates.handoff && outbound.body !== templates.failure,
+    outbound.body !== templates.handoff &&
+      outbound.body !== templates.failure &&
+      !(
+        outbound.body?.startsWith("{") &&
+        JSON.parse(outbound.body).body.text === templates.handoff
+      ),
     true,
   );
   const [sent] = await db
@@ -171,6 +270,40 @@ async function processJob(job: CareJob) {
     .from(whatsappMessages)
     .where(eq(whatsappMessages.id, outbound.id));
   if (sent?.status === "uncertain" || sent?.status === "failed") {
+    if (
+      sent.status === "failed" &&
+      /^(http_429|meta_130429|meta_131048|meta_131056)$/.test(
+        sent.errorCode || "",
+      ) &&
+      job.attempts < 5
+    ) {
+      await db
+        .update(whatsappMessages)
+        .set({ status: "queued" })
+        .where(
+          and(
+            eq(whatsappMessages.id, sent.id),
+            eq(whatsappMessages.status, "failed"),
+          ),
+        );
+      await db
+        .update(careJobs)
+        .set({
+          state: "queued",
+          leaseUntil: null,
+          availableAt: new Date(
+            Date.now() + Math.min(300000, 5000 * 2 ** job.attempts),
+          ),
+          errorCode: "provider_rate_limited",
+        })
+        .where(
+          and(
+            eq(careJobs.id, job.id),
+            eq(careJobs.leaseToken, job.lease_token),
+          ),
+        );
+      return;
+    }
     await recordFailureHandoff(job);
     return finish(
       job,

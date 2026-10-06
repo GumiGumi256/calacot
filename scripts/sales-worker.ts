@@ -1,0 +1,2 @@
+import "dotenv/config";
+async function main(){const origin=process.env.CALACOT_APP_URL||"http://localhost:3000",secret=process.env.SALES_WORKER_SECRET;if(!secret||secret.length<32)throw new Error("Configure SALES_WORKER_SECRET");const r=await fetch(new URL("/api/sales/worker",origin),{method:"POST",headers:{Authorization:`Bearer ${secret}`},signal:AbortSignal.timeout(60000)});if(!r.ok)throw new Error(`Worker returned ${r.status}`);console.log(await r.json());}main().catch(()=>{console.error("sales_worker_trigger_failed");process.exitCode=1;});
