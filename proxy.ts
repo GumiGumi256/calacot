@@ -22,11 +22,11 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.rewrite(destination, { request: { headers } });
   }
 
-  if (legacy || (pathname === '/' && session.userId)) {
+  if (legacy) {
     if (!session.userId) return session.redirectToSignIn({ returnBackUrl: request.url });
     const destination = request.nextUrl.clone();
     if (session.orgId && session.orgSlug) {
-      destination.pathname = `/${encodeURIComponent(session.orgSlug)}${legacy ? pathname : '/admin'}`;
+      destination.pathname = `/${encodeURIComponent(session.orgSlug)}${pathname}`;
     } else {
       destination.pathname = '/auth/redirect';
       destination.search = '';

@@ -1,0 +1,11 @@
+{
+  "name": "calacot-customer-care-scheduler",
+  "main": "worker.mjs",
+  "account_id": "55d48ef7e326d2f25455491b531f4e66",
+  "compatibility_date": "2026-10-14",
+  "workers_dev": false,
+  "triggers": { "crons": ["* * * * *"] },
+  "vars": { "CUSTOMER_CARE_WORKER_URL": "https://www.calacot.com/api/customer-care/worker" },
+  "observability": { "enabled": true, "traces": { "enabled": true } }
+  // CUSTOMER_CARE_WORKER_SECRET is a Cloudflare secret binding.
+}

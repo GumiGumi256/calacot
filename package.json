@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:customer-care": "tsx scripts/verify-customer-care.ts && tsx scripts/verify-care-menu.ts && node scripts/verify-care-flow.mjs && node scripts/verify-care-replies.mjs",
+    "test:customer-care": "tsx scripts/verify-customer-care.ts && tsx scripts/verify-care-menu.ts && node scripts/verify-care-flow.mjs && node scripts/verify-care-replies.mjs && node scripts/verify-care-worker.mjs",
     "test:customer-care:postgres": "tsx scripts/verify-care-menu.ts --postgres",
     "customer-care:migrate": "tsx scripts/migrate-customer-care.ts",
     "customer-care:worker": "tsx scripts/customer-care-worker.ts",

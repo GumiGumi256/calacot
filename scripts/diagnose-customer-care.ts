@@ -13,6 +13,13 @@ async function main() {
     "WHATSAPP_ACCESS_TOKEN",
   ];
   console.log("Feature enabled:", env.CUSTOMER_CARE_ENABLED === "true");
+  console.log("Reply mode:", env.CUSTOMER_CARE_MODE || "menu", "Delivery mode:", env.CUSTOMER_CARE_NOTIFICATION_MODE || "capture");
+  try {
+    const target = new URL(env.CUSTOMER_CARE_WORKER_URL || "");
+    console.log("Worker target:", target.origin + target.pathname);
+  } catch {
+    console.log("Worker target: missing or invalid URL");
+  }
   console.log(
     "Missing configuration:",
     required.filter((k) => !env[k]?.trim()),
@@ -35,6 +42,12 @@ async function main() {
         ),
       );
     if (tables[0]?.jobs) {
+      console.log("Menu database functions:", await db.query(
+        "SELECT proname FROM pg_proc WHERE proname IN ('care_menu_commit','care_customer_confirm')",
+      ));
+      console.log("Conversation handling:", await db.query(
+        "SELECT mode,count(*)::int AS count,count(*) FILTER (WHERE assigned_to IS NOT NULL)::int AS assigned FROM care_conversations GROUP BY mode",
+      ));
       console.log(
         "Queue totals:",
         await db.query(

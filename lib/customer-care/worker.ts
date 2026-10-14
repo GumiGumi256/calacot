@@ -20,6 +20,7 @@ import { templates } from "./render";
 import { CARE_MENU_MESSAGE, careMenuPayload } from "./menu";
 import { prepareMenu } from "./menu-flow";
 import { mkdir, writeFile } from "node:fs/promises";
+import { careFailureCode } from "./errors";
 
 /** Persistent outbox: never automatically retry an ambiguous external send. */
 export async function deliverCareMessage(
@@ -351,7 +352,12 @@ export async function runCareWorker(limit = 3) {
     if (!job) break;
     try {
       await processJob(job);
-    } catch {
+    } catch (error) {
+      console.error("customer_care_job_failed", {
+        jobId: job.id,
+        attempt: job.attempts,
+        code: careFailureCode(error),
+      });
       await db
         .update(careJobs)
         .set({

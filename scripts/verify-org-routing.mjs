@@ -21,13 +21,15 @@ assert.deepEqual(globalThis.__organizationSync.organizationSyncOptions.organizat
 const session = {userId:"user_test", orgId:"org_test", orgSlug:"calacot", redirectToSignIn: () => NextResponse.redirect("https://example.test/sign-in")};
 const request = (path, headers) => new NextRequest(`https://example.test${path}`, {headers});
 globalThis.__routingSession = session;
-assert.equal((await proxy(request("/"))).headers.get("location"), "https://example.test/calacot/admin");
+assert.equal((await proxy(request("/"))).status, 200);
+assert.equal((await proxy(request("/"))).headers.get("location"), null);
 assert.equal((await proxy(request("/admin/clients?page=2"))).headers.get("location"), "https://example.test/calacot/admin/clients?page=2");
 assert.equal((await proxy(request("/calacot/admin"))).headers.get("x-middleware-rewrite"), "https://example.test/admin/dashboard");
 assert.equal((await proxy(request("/calacot/admin/clients?page=2"))).headers.get("x-middleware-rewrite"), "https://example.test/admin/clients?page=2");
 assert.equal((await proxy(request("/other/admin"))).status, 404);
 assert.equal((await proxy(request("/api/sales/worker", {"x-calacot-org-slug":"spoofed"}))).headers.get("x-middleware-request-x-calacot-org-slug"), null);
 globalThis.__routingSession = {...session, orgId:null, orgSlug:null};
+assert.equal((await proxy(request("/"))).headers.get("location"), null);
 assert.equal((await proxy(request("/admin/clients"))).headers.get("location"), "https://example.test/auth/redirect?returnTo=%2Fadmin%2Fclients");
 assert.equal((await proxy(request("/calacot/admin"))).status, 404);
 globalThis.__routingSession = {...session, userId:null, orgId:null, orgSlug:null};
