@@ -8,11 +8,13 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { organizations } from "./organization";
 
 export const realEstateEnquiries = pgTable(
   "real_estate_enquiries",
   {
     id: uuid("id").primaryKey(),
+    organizationId: text("organization_id").references(() => organizations.id),
 
     payloadHash: text("payload_hash").notNull(),
 
@@ -111,6 +113,7 @@ export const realEstateEnquiries = pgTable(
 
 export const propertyLeads = pgTable("property_leads", {
   id: uuid("id").defaultRandom().primaryKey(),
+  organizationId: text("organization_id").references(() => organizations.id),
 
   submissionType: text("submission_type", {
     enum: ["individual", "development"],

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import type { Entity, ListRow, QueryState } from "@/lib/sales/contracts";
 import type { Permission } from "@/lib/sales/permissions";
 import { ClientForm } from "./client-form";
+import { ProjectSheet } from "./project-sheet";
 const statuses: Record<Entity, string[]> = {
   clients: ["active", "archived"],
   projects: ["planned", "active", "on_hold", "completed", "cancelled"],
@@ -42,12 +43,14 @@ export function EntityList({
   total,
   query,
   permissions,
+  projectSheet,
 }: {
   entity: Entity;
   rows: ListRow[];
   total: number;
   query: QueryState;
   permissions: Permission[];
+  projectSheet?: { initialOpen: boolean; selectedClient?: { id: string; name: string } };
 }) {
   const router = useRouter(),
     path = usePathname();
@@ -131,9 +134,7 @@ export function EntityList({
             <ClientForm />
           )}
           {entity === "projects" && permissions.includes("projects_write") && (
-            <Button render={<Link href="/admin/projects/new" />}>
-              Create planned project
-            </Button>
+            <ProjectSheet initialOpen={projectSheet?.initialOpen ?? false} selectedClient={projectSheet?.selectedClient} />
           )}
           {entity === "quotations" &&
             permissions.includes("quotations_create") && (

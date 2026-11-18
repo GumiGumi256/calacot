@@ -4,7 +4,7 @@ import {
   getOwnedDesignPurchase,
 } from "@/lib/design-purchases/permissions";
 import { canAccessDesign, formatAmount } from "@/lib/design-purchases/model";
-import { paymentInstructions, purchaseWhatsAppUrl } from "@/lib/company";
+import { approvedPaymentInstructions, purchaseWhatsAppUrl } from "@/lib/company";
 import { PurchaseSummary } from "@/components/architecture/purchase-summary";
 import {
   PaymentReferenceForm,
@@ -21,7 +21,7 @@ export default async function DesignPurchasePage({
   const { purchaseId } = await params;
   const userId = await requireUser(`/account/designs/${purchaseId}`);
   const p = await getOwnedDesignPurchase(purchaseId, userId);
-  const instructions = paymentInstructions();
+  const instructions = await approvedPaymentInstructions();
   const mobile =
     instructions.mobile?.currency === p.currency ? instructions.mobile : null;
   const bank =

@@ -15,13 +15,18 @@ export function FilterBar({
   fields,
   values,
   reset,
+  hidden,
 }: {
   fields: FilterField[];
   values: Record<string, string>;
   reset: string;
+  hidden?: Record<string, string>;
 }) {
   return (
     <form method="get" className="flex flex-wrap items-end gap-4">
+      {Object.entries(hidden ?? {}).filter(([, v]) => v).map(([k, v]) => (
+        <input key={k} type="hidden" name={k} value={v} />
+      ))}
       {fields.map((f) => (
         <div key={f.name} className="flex flex-col gap-2">
           <Label htmlFor={`f-${f.name}`}>{f.label}</Label>

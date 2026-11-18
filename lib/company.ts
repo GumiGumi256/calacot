@@ -43,3 +43,18 @@ export function purchaseUrl(id: string) {
     origin,
   ).toString();
 }
+
+/**
+ * Phase 1E: payment instructions approved in company settings (two-person approval) take
+ * precedence; with no saved settings the deployment configuration above is used unchanged.
+ * Issued quotation/invoice snapshots already contain the instructions in force when issued.
+ */
+export async function approvedPaymentInstructions(org?: string | null) {
+  const organizationId = org || process.env.CALACOT_CLERK_ORG_ID?.trim();
+  if (!organizationId) return paymentInstructions();
+  const { db } = await import("@/database/db");
+  const { sql } = await import("drizzle-orm");
+  const r = await db.execute<{ payment: { bank: ReturnType<typeof paymentInstructions>["bank"]; mobile: ReturnType<typeof paymentInstructions>["mobile"] } | null }>(sql`SELECT settings->'payment' AS payment FROM company_settings_versions WHERE organization_id=${organizationId} AND status='approved' ORDER BY version DESC LIMIT 1`);
+  const saved = r.rows[0]?.payment;
+  return saved ? { bank: saved.bank ?? null, mobile: saved.mobile ?? null } : paymentInstructions();
+}

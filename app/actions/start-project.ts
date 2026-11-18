@@ -15,6 +15,7 @@ export async function createProjectLead(data: StartProjectFormData) {
       .insert(leads)
       .values({
         type: "project_request",
+        organizationId: process.env.CALACOT_CLERK_ORG_ID?.trim() || null,
         fullName: validatedData.fullName,
         email: validatedData.email,
         phone: validatedData.phone,

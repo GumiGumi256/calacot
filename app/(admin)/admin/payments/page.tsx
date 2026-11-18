@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { readPayments, type SearchParams } from "@/lib/admin/reads";
+import { receivablesOverview } from "@/lib/finance/receivables";
 import { label, paymentMethods, paymentStatuses } from "@/lib/admin/options";
+import { ReceivablesPanel } from "@/components/finance/receivables-panel";
 import {
   FilterBar,
   Pager,
@@ -24,20 +27,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+const statusLabels: Record<string, string> = { submitted: "Awaiting verification", confirmed: "Confirmed", rejected: "Rejected" };
+
 export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const data = await readPayments(await searchParams);
+  const [data, overview] = await Promise.all([readPayments(await searchParams), receivablesOverview("payments_read")]);
   return (
     <main className="flex flex-col gap-6 p-4 md:p-6">
+      <ReceivablesPanel data={overview} focus="payments" />
       <Card>
         <CardHeader>
           <CardTitle>Payments</CardTitle>
           <CardDescription>
-            Received payments and how much of each has been allocated to invoices.
-            Verify payments from the invoice page.
+            Received customer payments and how much of each has been allocated to invoices.
+            Verify and allocate payments from the invoice page.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
@@ -60,10 +66,11 @@ export default async function Page({
                 <TableRow>
                   <TableHead>Receipt</TableHead>
                   <TableHead>Client</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Allocated</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Reference</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="text-right">Allocated</TableHead>
+                  <TableHead className="text-right">Unallocated</TableHead>
+                  <TableHead>Invoices</TableHead>
+                  <TableHead>Method / reference</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Received</TableHead>
                 </TableRow>
@@ -71,7 +78,7 @@ export default async function Page({
               <TableBody>
                 {data.rows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center">
+                    <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
                       No payments match these filters.
                     </TableCell>
                   </TableRow>
@@ -79,14 +86,21 @@ export default async function Page({
                 {data.rows.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell>{p.receipt_number ?? "Pending"}</TableCell>
-                    <TableCell className="font-medium">{p.client}</TableCell>
-                    <TableCell>{fmtMoney(p.currency, p.amount)}</TableCell>
-                    <TableCell>{fmtMoney(p.currency, p.allocated)}</TableCell>
-                    <TableCell className="capitalize">{label(p.method)}</TableCell>
-                    <TableCell>{p.reference ?? "—"}</TableCell>
+                    <TableCell className="font-medium">
+                      {data.canSeeClients ? <Link className="underline-offset-4 hover:underline" href={`/admin/clients/${p.client_id}`}>{p.client}</Link> : p.client}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">{fmtMoney(p.currency, p.amount)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{fmtMoney(p.currency, p.allocated)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{p.status === "confirmed" ? fmtMoney(p.currency, p.unallocated) : "-"}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className="capitalize">
-                        {p.status}
+                      {p.invoices.length === 0 ? <span className="text-muted-foreground">None</span> : p.invoices.map((i, n) => (
+                        <span key={i.id}>{n > 0 && ", "}{data.canSeeInvoices ? <Link className="underline-offset-4 hover:underline" href={`/admin/invoices/${i.id}`}>{i.number ?? "Draft"}</Link> : i.number ?? "Draft"}</span>
+                      ))}
+                    </TableCell>
+                    <TableCell><span className="capitalize">{label(p.method)}</span><div className="text-xs text-muted-foreground break-all">{p.reference ?? "No reference"}</div></TableCell>
+                    <TableCell>
+                      <Badge variant={p.status === "rejected" ? "destructive" : p.status === "confirmed" ? "default" : "secondary"}>
+                        {statusLabels[p.status] ?? p.status}
                       </Badge>
                     </TableCell>
                     <TableCell>{fmtDate(p.received_at)}</TableCell>

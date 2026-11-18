@@ -45,7 +45,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const [first, second] = pathname.split("/").filter(Boolean);
-  if (first === "admin" || second === "admin") {
+  if (first === "admin" || second === "admin" || first === "access-pending") {
     return null;
   }
 

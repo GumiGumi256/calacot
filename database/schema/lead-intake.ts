@@ -1,7 +1,13 @@
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { date, index, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { organizations, staffMemberships } from "./organization";
 
 export const leads = pgTable("leads", {
   id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: text("organization_id").references(() => organizations.id),
+  assignedStaffId: uuid("assigned_staff_id").references(() => staffMemberships.id),
+  division: text("division"),
+  followUpOn: date("follow_up_on"),
+  followUpNotes: text("follow_up_notes"),
 
   // Distinguishes form origin
 
@@ -54,3 +60,13 @@ export const leads = pgTable("leads", {
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const leadActivity = pgTable("lead_activity", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: text("organization_id").notNull().references(() => organizations.id),
+  leadId: uuid("lead_id").notNull().references(() => leads.id),
+  actor: text("actor").notNull(),
+  action: text("action").notNull(),
+  changes: jsonb("changes").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, table => [index("lead_activity_lead_idx").on(table.organizationId, table.leadId, table.createdAt)]);

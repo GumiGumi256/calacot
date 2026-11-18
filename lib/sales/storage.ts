@@ -9,6 +9,7 @@ async function objectRequest(
   method: "PUT" | "GET",
   key: string,
   body?: Buffer,
+  contentType = "application/pdf",
 ) {
   if (!process.env.SALES_STORAGE_ENDPOINT) throw new Error("storage_configuration");
   const endpoint = new URL(process.env.SALES_STORAGE_ENDPOINT || "");
@@ -45,7 +46,7 @@ async function objectRequest(
       "x-amz-content-sha256": payload,
       "x-amz-date": date,
       Authorization: `AWS4-HMAC-SHA256 Credential=${keyId}/${scope}, SignedHeaders=${signed}, Signature=${signature}`,
-      ...(method === "PUT" ? { "Content-Type": "application/pdf" } : {}),
+      ...(method === "PUT" ? { "Content-Type": contentType } : {}),
     },
     body: body ? new Uint8Array(body) : undefined,
     signal: AbortSignal.timeout(20000),
@@ -82,4 +83,20 @@ export async function loadPdf(key: string) {
   return localEnabled()
     ? readFile(localPath(key))
     : Buffer.from(await (await objectRequest("GET", key)).arrayBuffer());
+}
+/** Private evidence objects (Phase 1D expense receipts). Same adapter, never public. */
+export async function storePrivateObject(key: string, bytes: Buffer, contentType: string) {
+  if (bytes.length > 10 * 1024 * 1024) throw new Error("document_size_limit");
+  if (localEnabled()) {
+    const path = localPath(key);
+    await mkdir(dirname(path), { recursive: true });
+    await writeFile(path, bytes, { flag: "wx" }).catch(
+      (e: NodeJS.ErrnoException) => {
+        if (e.code !== "EEXIST") throw e;
+      },
+    );
+  } else await objectRequest("PUT", key, bytes, contentType);
+}
+export async function loadPrivateObject(key: string) {
+  return loadPdf(key);
 }

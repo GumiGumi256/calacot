@@ -1,0 +1,32 @@
+﻿import { readFile } from "node:fs/promises";
+import { PGlite } from "@electric-sql/pglite";
+import assert from "node:assert/strict";
+async function main() {
+ const pg = new PGlite();
+ const journal = JSON.parse(await readFile("drizzle-current/meta/_journal.json", "utf8"));
+ for (const entry of journal.entries) for (const part of (await readFile(`drizzle-current/${entry.tag}.sql`, "utf8")).split("--> statement-breakpoint")) if(part.trim()) await pg.exec(part);
+ await pg.exec(`INSERT INTO organizations(id,name,legal_name) VALUES('a','A','A'),('b','B','B');
+ INSERT INTO staff_memberships(id,organization_id,clerk_user_id,status) VALUES('00000000-0000-4000-8000-000000000001','a','staff','active'),('00000000-0000-4000-8000-000000000002','b','other','active');
+ INSERT INTO leads(id,organization_id,type,full_name,email,phone,service,status) VALUES('10000000-0000-4000-8000-000000000001','a','project_request','Example','example@example.test','+256700000000','architecture','qualified'),('10000000-0000-4000-8000-000000000002',null,'scheduled_call','Unknown','unknown@example.test','+256700000001','architecture','new');`);
+ const lead='10000000-0000-4000-8000-000000000001';
+ const update={status:'qualified',notes:'note',division:'architecture',assignedStaffId:'00000000-0000-4000-8000-000000000001',followUpOn:'2027-01-01',followUpNotes:'Call'};
+ await pg.query('SELECT lead_update($1,$2,$3,$4::jsonb)', ['a','staff',lead,JSON.stringify(update)]);
+ await pg.query('SELECT lead_update($1,$2,$3,$4::jsonb)', ['a','staff',lead,JSON.stringify({...update,assignedStaffId:'',followUpOn:'2027-02-01'})]);
+ assert.equal((await pg.query<{follow_up_on:string}>('SELECT follow_up_on::text FROM leads WHERE id=$1',[lead])).rows[0].follow_up_on,'2027-02-01');
+ await assert.rejects(pg.query('SELECT lead_update($1,$2,$3,$4::jsonb)', ['b','other',lead,JSON.stringify(update)]));
+ await assert.rejects(pg.query('SELECT lead_update($1,$2,$3,$4::jsonb)', ['a','staff',lead,JSON.stringify({...update,assignedStaffId:'00000000-0000-4000-8000-000000000002'})]));
+ await assert.rejects(pg.query('SELECT lead_update($1,$2,$3,$4::jsonb)', ['a','staff','10000000-0000-4000-8000-000000000002',JSON.stringify(update)]));
+ const data={kind:'individual',displayName:'Example',legalName:'',tradingName:'',department:'architecture',taxIdentifier:'',billingAddress:{line1:'',city:'',country:''},contacts:[{name:'Example',email:'example@example.test',phone:'+256700000000',isPrimary:true}]};
+ const convert=()=>pg.query<{id:string}>('SELECT lead_convert($1,$2,$3,$4,$5::jsonb,$6) AS id',['a','staff',lead,null,JSON.stringify(data),'test']);
+ const first=(await convert()).rows[0].id; assert.equal((await convert()).rows[0].id,first);
+ await pg.exec(`INSERT INTO leads(id,organization_id,type,full_name,email,phone,service,status) VALUES('10000000-0000-4000-8000-000000000003','a','scheduled_call','Existing','existing@example.test','+256700000002','architecture','qualified');`);
+ const linked=await pg.query<{id:string}>('SELECT lead_convert($1,$2,$3,$4,$5::jsonb,$6) AS id',['a','staff','10000000-0000-4000-8000-000000000003',first,'null','test']);
+ assert.equal(linked.rows[0].id,first);
+ await pg.exec(`INSERT INTO leads(id,organization_id,type,full_name,email,phone,service,status) VALUES('10000000-0000-4000-8000-000000000004','a','scheduled_call','Example','example@example.test','+256700000000','architecture','qualified');`);
+ await assert.rejects(pg.query('SELECT lead_convert($1,$2,$3,$4,$5::jsonb,$6)',['a','staff','10000000-0000-4000-8000-000000000004',null,JSON.stringify(data),'test']), /client_matches_changed/);
+ await assert.rejects(pg.query('SELECT lead_convert($1,$2,$3,$4,$5::jsonb,$6)',['b','other',lead,first,'null','test']));
+ assert.equal((await pg.query<{n:number}>("SELECT count(*)::int AS n FROM clients WHERE organization_id='a'")).rows[0].n,1);
+ assert((await pg.query<{n:number}>("SELECT count(*)::int AS n FROM lead_activity WHERE organization_id='a'")).rows[0].n>=4);
+ await pg.close(); console.log('PASS: active migration history, scoped assignment, unknown ownership denial, activity and idempotent conversion on disposable PGlite.');
+}
+main().catch(e=>{console.error(e);process.exitCode=1;});

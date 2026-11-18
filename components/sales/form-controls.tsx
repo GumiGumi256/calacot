@@ -19,6 +19,9 @@ export function TextField({
   type = "text",
   required = false,
   hint,
+  placeholder,
+  min,
+  max,
 }: {
   label: string;
   value: string;
@@ -27,8 +30,12 @@ export function TextField({
   type?: string;
   required?: boolean;
   hint?: string;
+  placeholder?: string;
+  min?: string;
+  max?: string;
 }) {
   const id = useId();
+  const hintId = hint ? `${id}-hint` : undefined;
   return (
     <Field>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
@@ -39,6 +46,8 @@ export function TextField({
           onChange={(e) => onChange(e.target.value)}
           required={required}
           maxLength={10000}
+          placeholder={placeholder}
+          aria-describedby={hintId}
         />
       ) : (
         <Input
@@ -48,9 +57,13 @@ export function TextField({
           onChange={(e) => onChange(e.target.value)}
           required={required}
           maxLength={1000}
+          placeholder={placeholder}
+          min={min}
+          max={max}
+          aria-describedby={hintId}
         />
-      )}{" "}
-      {hint && <FieldDescription>{hint}</FieldDescription>}
+      )}
+      {hint && <FieldDescription id={hintId}>{hint}</FieldDescription>}
     </Field>
   );
 }
@@ -59,13 +72,18 @@ export function ChoiceField({
   value,
   onChange,
   options,
+  placeholder = "Select…",
+  hint,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: { value: string; label: string }[];
+  placeholder?: string;
+  hint?: string;
 }) {
   const id = useId();
+  const hintId = hint ? `${id}-hint` : undefined;
   return (
     <Field>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
@@ -74,8 +92,8 @@ export function ChoiceField({
         onValueChange={(v) => onChange(v || "")}
         items={options}
       >
-        <SelectTrigger id={id}>
-          <SelectValue placeholder="Select…" />
+        <SelectTrigger id={id} className="w-full" aria-describedby={hintId}>
+          <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
@@ -87,6 +105,7 @@ export function ChoiceField({
           </SelectGroup>
         </SelectContent>
       </Select>
+      {hint && <FieldDescription id={hintId}>{hint}</FieldDescription>}
     </Field>
   );
 }

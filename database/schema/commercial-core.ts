@@ -2,6 +2,7 @@ import type { PgTableExtraConfigValue } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import {
   foreignKey,
+  boolean,
   date,
   check,
   uniqueIndex,
@@ -405,6 +406,13 @@ export const projectMilestones = pgTable(
       .references(() => organizations.id),
     projectId: uuid("project_id").notNull(),
     title: text("title").notNull(),
+    deliverable: text("deliverable"),
+    responsibleStaffId: uuid("responsible_staff_id"),
+    mandatory: boolean("mandatory").notNull().default(true),
+    completionEvidence: text("completion_evidence"),
+    reviewFeedback: text("review_feedback"),
+    reviewedBy: text("reviewed_by"),
+    reviewedAt: instant("reviewed_at"),
     position: integer("position").notNull(),
     status: text("status", {
       enum: [
@@ -435,6 +443,13 @@ export const projectMilestones = pgTable(
       t.projectId,
       projects.organizationId,
       projects.id,
+    ),
+    scopedForeignKey(
+      "project_milestones_responsible_staff_fk",
+      t.organizationId,
+      t.responsibleStaffId,
+      staffMemberships.organizationId,
+      staffMemberships.id,
     ),
     allowed("project_milestones_status_check", t.status, [
       "pending",

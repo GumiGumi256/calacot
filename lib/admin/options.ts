@@ -21,6 +21,7 @@ export const paymentMethods = [
 export const expenseStatuses = [
   "draft",
   "submitted",
+  "returned",
   "approved",
   "paid",
   "rejected",

@@ -26,6 +26,7 @@ export async function submitPropertyLead(
 
   try {
     const [saved] = await db.insert(propertyLeads).values({
+      organizationId: process.env.CALACOT_CLERK_ORG_ID?.trim() || null,
       submissionType: values.submissionType,
       propertyType: values.propertyType,
       location: values.location,

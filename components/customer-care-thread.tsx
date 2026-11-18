@@ -1,52 +1,42 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { Fragment, useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { RefreshCw, Send } from "lucide-react";
+import { AlertCircle, Check, CheckCheck, Clock, List, Lock, RefreshCw, SendHorizontal } from "lucide-react";
 import { sendCareReply } from "@/lib/customer-care/admin-actions";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
-import { Message, MessageContent, MessageHeader, MessageFooter } from "@/components/ui/message";
-import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import { MessageScrollerProvider, MessageScroller, MessageScrollerViewport,
   MessageScrollerContent, MessageScrollerItem, MessageScrollerButton } from "@/components/ui/message-scroller";
+import { dayKey, dayLabel, parseMessage, timeOfDay } from "@/components/customer-care/format";
+import { cn } from "@/lib/utils";
 
 export type InboxMessage = {
   id: string; direction: string; body: string | null; messageType: string;
   status: string | null; errorCode: string | null; eventAt: string;
 };
 
-function messageText(message: InboxMessage, history: InboxMessage[]) {
-  if (message.direction === "inbound" && message.messageType === "interactive") {
-    for (const previous of [...history].reverse()) {
-      if (previous.direction !== "outbound" || previous.messageType !== "interactive") continue;
-      try {
-        const menu = JSON.parse(previous.body || "");
-        for (const section of menu.action?.sections || []) {
-          const option = section.rows?.find((row: { id: string; title: string }) => row.id === message.body);
-          if (option) return option.title;
-        }
-      } catch { /* Older menu messages may contain plain text. */ }
-    }
-    return "Menu option selected";
+function StatusTick({ status }: { status: string | null }) {
+  switch (status) {
+    case "read":
+      return <CheckCheck aria-label="Read" className="size-4 text-brand-accent dark:text-brand-primary" />;
+    case "delivered":
+      return <CheckCheck aria-label="Delivered" className="size-4 opacity-60" />;
+    case "sent":
+      return <Check aria-label="Sent" className="size-4 opacity-60" />;
+    case "failed":
+    case "uncertain":
+      return <AlertCircle aria-label={status === "failed" ? "Failed" : "Delivery uncertain"} className="size-3.5 text-destructive" />;
+    default:
+      return <Clock aria-label={status || "Queued"} className="size-3 opacity-60" />;
   }
-  if (message.messageType === "interactive" && message.body?.startsWith("{")) {
-    try {
-      const menu = JSON.parse(message.body);
-      const options = menu.action?.sections?.flatMap((s: { rows?: { title: string }[] }) =>
-        s.rows?.map((r) => r.title) || []) || [];
-      return [menu.body?.text, ...options.map((t: string) => `• ${t}`)].filter(Boolean).join("\n");
-    } catch { /* Display saved text when it is not a menu payload. */ }
-  }
-  return message.body || `[${message.messageType} message]`;
 }
 
-export function CustomerCareThread({ phone, messages, canReply, blockedReason, replyId: initialId }: {
+export function CustomerCareThread({ phone, messages, canReply, blockedReason, replyId: initialId, header }: {
   phone: string; messages: InboxMessage[]; canReply: boolean; blockedReason: string; replyId: string;
+  header?: React.ReactNode;
 }) {
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
   const [refreshing, startRefresh] = useTransition();
   const [draft, setDraft] = useState("");
   const [replyId, setReplyId] = useState(initialId);
@@ -65,61 +55,139 @@ export function CustomerCareThread({ phone, messages, canReply, blockedReason, r
     }, 15000);
     return () => clearInterval(timer);
   }, [router]);
+
   return (
-    <div className="flex min-w-0 flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-xs text-muted-foreground">Latest 80 messages · Updates every 15 seconds</p>
-        <Button variant="outline" size="sm" disabled={refreshing} onClick={() => startRefresh(() => router.refresh())}>
-          <RefreshCw data-icon="inline-start" /> Refresh
+    <div className="flex h-full min-h-0 min-w-0 flex-col">
+      <div className="flex items-center gap-2 border-b bg-card px-3 py-2 sm:px-4">
+        <div className="min-w-0 flex-1">{header}</div>
+        <Button variant="ghost" size="icon-sm" disabled={refreshing} aria-label="Refresh conversation"
+          title="Refresh (auto-updates every 15 seconds)" onClick={() => startRefresh(() => router.refresh())}>
+          <RefreshCw className={cn(refreshing && "animate-spin")} />
         </Button>
       </div>
+
       <MessageScrollerProvider autoScroll defaultScrollPosition="end">
-        <MessageScroller className="h-[440px] rounded-lg border bg-muted/20 sm:h-[520px]" aria-label="WhatsApp conversation">
+        <MessageScroller className="care-wallpaper min-h-0 flex-1" aria-label="WhatsApp conversation">
           <MessageScrollerViewport>
-            <MessageScrollerContent className="gap-4 p-4">
-              {messages.length === 0 && <p className="py-12 text-center text-sm text-muted-foreground">No messages in this conversation yet.</p>}
-              {messages.map((m) => {
+            <MessageScrollerContent className="gap-1 px-3 py-4 sm:px-[6%]">
+              <p className="mx-auto mb-3 flex max-w-sm items-center gap-1.5 rounded-lg bg-brand-primary/25 px-3 py-1.5 text-center text-[11px] leading-snug text-foreground/80 shadow-xs dark:bg-brand-primary/15">
+                <Lock className="size-3 shrink-0" />
+                Showing the latest 80 messages. New messages appear automatically.
+              </p>
+              {messages.length === 0 && (
+                <p className="mx-auto mt-10 rounded-lg bg-card px-4 py-2 text-sm text-muted-foreground shadow-xs">
+                  No messages in this conversation yet.
+                </p>
+              )}
+              {messages.map((m, index) => {
                 const outgoing = m.direction === "outbound";
-                return <MessageScrollerItem key={m.id} messageId={m.id}>
-                  <Message align={outgoing ? "end" : "start"}>
-                    <MessageContent className="max-w-[90%] sm:max-w-[80%]">
-                      <MessageHeader>{outgoing ? "Calacot" : "Customer"}</MessageHeader>
-                      <Bubble align={outgoing ? "end" : "start"} variant={outgoing ? "default" : "secondary"}>
-                        <BubbleContent className="whitespace-pre-wrap break-words">{messageText(m, messages)}</BubbleContent>
-                      </Bubble>
-                      <MessageFooter className="flex-wrap gap-2">
-                        <time dateTime={m.eventAt}>{new Date(m.eventAt).toLocaleString("en-GB", { timeZone: "Africa/Kampala", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time>
-                        {outgoing && <Badge variant={m.status === "failed" || m.status === "uncertain" ? "destructive" : "outline"}>{m.status || "queued"}</Badge>}
-                        {m.errorCode && <span className="text-destructive">{m.errorCode}</span>}
-                      </MessageFooter>
-                    </MessageContent>
-                  </Message>
-                </MessageScrollerItem>;
+                const date = new Date(m.eventAt);
+                const previous = messages[index - 1];
+                const newDay = !previous || dayKey(new Date(previous.eventAt)) !== dayKey(date);
+                const firstInGroup = newDay || previous.direction !== m.direction;
+                const { text, options } = parseMessage(m, messages.slice(0, index));
+                const failed = m.status === "failed" || m.status === "uncertain";
+                return (
+                  <Fragment key={m.id}>
+                    {newDay && (
+                      <div className="sticky top-2 z-10 my-2 flex justify-center">
+                        <span className="rounded-lg bg-card px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground shadow-xs">
+                          {dayLabel(date)}
+                        </span>
+                      </div>
+                    )}
+                    <MessageScrollerItem messageId={m.id}
+                      className={cn("flex", outgoing ? "justify-end" : "justify-start", firstInGroup && "mt-2")}>
+                      <div className={cn(
+                        "relative max-w-[85%] rounded-lg text-sm shadow-xs sm:max-w-[65%]",
+                        outgoing
+                          ? "bg-[color-mix(in_oklch,var(--color-brand-primary)_32%,white)] text-brand-black dark:bg-[color-mix(in_oklch,var(--color-brand-primary)_22%,var(--color-brand-black))] dark:text-foreground"
+                          : "bg-card text-card-foreground",
+                        firstInGroup && (outgoing ? "rounded-tr-none" : "rounded-tl-none"),
+                        failed && "ring-1 ring-destructive/50",
+                      )}>
+                        {firstInGroup && (
+                          <span aria-hidden className={cn(
+                            "absolute top-0 size-2.5",
+                            outgoing
+                              ? "-right-2 bg-[color-mix(in_oklch,var(--color-brand-primary)_32%,white)] [clip-path:polygon(0_0,100%_0,0_100%)] dark:bg-[color-mix(in_oklch,var(--color-brand-primary)_22%,var(--color-brand-black))]"
+                              : "-left-2 bg-card [clip-path:polygon(0_0,100%_0,100%_100%)]",
+                          )} />
+                        )}
+                        <span className="sr-only">{outgoing ? "Calacot:" : "Customer:"}</span>
+                        <div className="px-2.5 pb-1.5 pt-1.5">
+                          {text && (
+                            <span className="whitespace-pre-wrap break-words">
+                              {text}
+                              {/* Spacer so the timestamp never overlaps the last line. */}
+                              <span aria-hidden className={cn("inline-block", outgoing ? "w-[4.5rem]" : "w-11")} />
+                            </span>
+                          )}
+                          <span className="float-right -mb-1 ml-2 mt-1.5 flex items-center gap-1 text-[10.5px] leading-none text-foreground/50">
+                            <time dateTime={m.eventAt}>{timeOfDay(date)}</time>
+                            {outgoing && <StatusTick status={m.status} />}
+                          </span>
+                        </div>
+                        {options.length > 0 && (
+                          <ul className="border-t border-foreground/10">
+                            {options.map((option) => (
+                              <li key={option} className="flex items-center justify-center gap-2 border-b border-foreground/10 px-3 py-2 text-center text-[13px] font-medium text-brand-accent last:border-b-0 dark:text-brand-primary">
+                                <List className="size-3.5 shrink-0" />{option}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {(failed || m.errorCode) && (
+                          <p className="border-t border-destructive/20 px-2.5 py-1 text-[11px] text-destructive">
+                            {m.status === "uncertain" ? "Delivery uncertain" : "Not delivered"}{m.errorCode ? ` · ${m.errorCode}` : ""}
+                          </p>
+                        )}
+                      </div>
+                    </MessageScrollerItem>
+                  </Fragment>
+                );
               })}
             </MessageScrollerContent>
           </MessageScrollerViewport>
           <MessageScrollerButton />
         </MessageScroller>
       </MessageScrollerProvider>
-      <form action={action}>
-        <input type="hidden" name="phone" value={phone} />
-        <input type="hidden" name="replyId" value={replyId} />
-        <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor="care-reply">Reply to customer</FieldLabel>
-            <Textarea id="care-reply" name="body" value={draft} onChange={(e) => setDraft(e.target.value)}
-              placeholder="Write your reply…" rows={3} required maxLength={4096} disabled={!canReply || pending} />
-            <FieldDescription>{canReply ? "Sending a reply takes over this conversation and pauses the assistant." : blockedReason}</FieldDescription>
-          </Field>
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-xs text-muted-foreground">{draft.length.toLocaleString()} / 4,096</span>
-            <Button type="submit" disabled={!canReply || pending || !draft.trim()}>
-              <Send data-icon="inline-start" /> {pending ? "Sending…" : "Send reply"}
+
+      <div className="border-t bg-muted/60 px-3 py-2.5 sm:px-4">
+        {canReply ? (
+          <form ref={formRef} action={action} className="flex items-end gap-2">
+            <input type="hidden" name="phone" value={phone} />
+            <input type="hidden" name="replyId" value={replyId} />
+            <label htmlFor="care-reply" className="sr-only">Reply to customer</label>
+            <textarea id="care-reply" name="body" value={draft} rows={1} required maxLength={4096} disabled={pending}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  if (draft.trim() && !pending) formRef.current?.requestSubmit();
+                }
+              }}
+              placeholder="Type a message"
+              aria-describedby="care-reply-hint"
+              className="field-sizing-content max-h-40 min-h-11 flex-1 resize-none rounded-3xl border-0 bg-card px-4 py-2.5 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-brand-primary disabled:opacity-60" />
+            <Button type="submit" size="icon" aria-label={pending ? "Sending" : "Send reply"}
+              disabled={pending || !draft.trim()}
+              className="shrink-0 rounded-full bg-brand-primary text-brand-black hover:bg-brand-primary/85">
+              <SendHorizontal />
             </Button>
-          </div>
-          {state.message && <p role="status" className="text-sm">{state.message}</p>}
-        </FieldGroup>
-      </form>
+          </form>
+        ) : (
+          <p className="flex items-center justify-center gap-2 rounded-lg bg-card px-4 py-3 text-center text-sm text-muted-foreground">
+            <Lock className="size-4 shrink-0" /> {blockedReason}
+          </p>
+        )}
+        <div id="care-reply-hint" className="mt-1.5 flex min-h-4 items-center justify-between gap-3 px-2 text-[11px] text-muted-foreground">
+          <span role="status" className={cn(state.message && !state.ok && "text-destructive")}>
+            {state.message || (canReply ? "Enter to send · Shift+Enter for a new line · Replying takes over from the assistant" : "")}
+          </span>
+          {canReply && draft.length > 3500 && <span>{draft.length.toLocaleString()} / 4,096</span>}
+        </div>
+      </div>
     </div>
   );
 }

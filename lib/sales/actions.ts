@@ -5,7 +5,7 @@ import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { db } from "@/database/db";
-import { paymentInstructions } from "@/lib/company";
+import { approvedPaymentInstructions } from "@/lib/company";
 import {
   clientSchema,
   projectSchema,
@@ -17,9 +17,12 @@ import { salesConfig } from "./config";
 import { totals, scaled } from "./money";
 import { pickers } from "./reads";
 import { headers } from "next/headers";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser, clerkClient } from "@clerk/nextjs/server";
 const json = (value: unknown) => sql`${JSON.stringify(value)}::jsonb`;
 const messages: Record<string, string> = {
+  manager_unavailable: "The selected project manager is unavailable or could not be verified. Refresh staff and try again.",
+  client_matches_changed: "Possible client matches changed. Check the matches again before creating a client.",
+  client_review_required: "Review the possible matches and confirm that this is a distinct client.",
   organization_setup_required: "Your Clerk organization has no company record in the database. Restore the organization setup before creating clients.",
   staging_recipient_not_allowed:"This recipient is outside the staging send allowlist.",
   deposit_tax_policy_required:"Deposit billing for taxable quotations needs an approved allocation policy. Use full billing or obtain finance configuration approval.",
@@ -34,6 +37,7 @@ const messages: Record<string, string> = {
   schedule_total_mismatch: "Payment schedule must equal the quotation total.",
   allocated_invoice_requires_credit_process:
     "This invoice has financial allocations. Use a reviewed credit/refund process.",
+  division_disabled: "That division is not currently enabled in company settings. Choose an enabled division.",
   staff_mirror_required_for_ledger:
     "Sync your staff membership before verifying ledger payments.",
   allocation_exceeds_balance: "Allocation exceeds the invoice balance.",
@@ -120,20 +124,37 @@ async function mutation<T>(
     };
   }
 }
-export async function saveClient(input: unknown) {
+export async function saveClient(input: unknown, review?: { reviewedClientIds: string[]; confirmDistinct: boolean }) {
   return mutation("clients_write", async (ctx, c) => {
     const p = clientSchema.parse(input);
     const organization = await db.execute(sql`SELECT id FROM organizations WHERE id=${ctx.organizationId}`);
     if (!organization.rows.length) throw new Error("organization_setup_required");
     const r = await db.execute<{ id: string }>(
-      sql`SELECT sales_client(${ctx.organizationId},${ctx.actor},${json(p)},${c}) AS id`,
+      sql`SELECT sales_client(${ctx.organizationId},${ctx.actor},${json({ ...p, ...z.object({ reviewedClientIds: z.array(z.uuid()).max(1000), confirmDistinct: z.boolean() }).parse(review ?? { reviewedClientIds: [], confirmDistinct: false }) })},${c}) AS id`,
     );
     return r.rows[0].id;
   });
 }
+export async function previewClientMatches(input: unknown) {
+  const ctx = await staffContext("clients_read");
+  if (!ctx.permissions.includes("clients_write")) throw new Error("Client write permission required");
+  const p = clientSchema.parse(input);
+  const r = await db.execute<{ id: string; name: string }>(sql`SELECT id,display_name AS name FROM clients WHERE organization_id=${ctx.organizationId} AND id=ANY(client_possible_matches(${ctx.organizationId},${json(p)})) ORDER BY id LIMIT 1001`);
+  if (r.rows.length > 1000) throw new Error("Too many possible matches; refine the details.");
+  return r.rows;
+}
 export async function saveProject(input: unknown) {
   return mutation("projects_write", async (ctx, c) => {
     const p = projectSchema.parse(input);
+    if (p.managerId) {
+      const staff = await db.execute<{clerk_user_id:string}>(sql`SELECT clerk_user_id FROM staff_memberships WHERE organization_id=${ctx.organizationId} AND id=${p.managerId}::uuid AND status='active'`);
+      if (!staff.rows[0]) throw new Error("manager_unavailable");
+      try {
+        const clerk = await clerkClient();
+        const members = await clerk.organizations.getOrganizationMembershipList({organizationId:ctx.organizationId,userId:[staff.rows[0].clerk_user_id],limit:1});
+        if (!members.data.some(m=>m.organization.id===ctx.organizationId && m.publicUserData?.userId===staff.rows[0].clerk_user_id)) throw new Error("manager_unavailable");
+      } catch { throw new Error("manager_unavailable"); }
+    }
     const r = await db.execute<{ id: string }>(
       sql`SELECT sales_project(${ctx.organizationId},${ctx.actor},${json(p)},${c}) AS id`,
     );
@@ -205,7 +226,7 @@ export async function quotationCommand(input: unknown) {
     )
       throw new Error("acceptance_evidence_required");
     const logo = await readFile(`${process.cwd()}/public/calacot-logo.png`);
-    const approved = paymentInstructions();
+    const approved = await approvedPaymentInstructions(ctx.organizationId);
     const instructions = [
       approved.bank
         ? `Bank: ${approved.bank.name}; account ${approved.bank.number}; ${approved.bank.account}; ${approved.bank.currency}${approved.bank.swift ? `; SWIFT ${approved.bank.swift}` : ""}`

@@ -16,6 +16,7 @@ export async function createScheduledCallLead(data: ScheduleCallFormData) {
       .insert(leads)
       .values({
         type: "scheduled_call",
+        organizationId: process.env.CALACOT_CLERK_ORG_ID?.trim() || null,
         service: validatedData.service,
         fullName: validatedData.fullName,
         email: validatedData.email,

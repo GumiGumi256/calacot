@@ -43,10 +43,33 @@ export const staffMemberships = pgTable(
       .notNull()
       .default("active"),
     lastSyncedAt: instant("last_synced_at"),
+    // Phase 1E operational profile. Never used to grant access: Clerk membership is authoritative;
+    // `suspended` only ever denies (checked in staffContext).
+    jobTitle: text("job_title"),
+    responsibilities: text("responsibilities"),
+    profileVersion: integer("profile_version").notNull().default(1),
+    suspendedAt: instant("suspended_at"),
+    suspendedBy: text("suspended_by"),
+    suspensionReason: text("suspension_reason"),
+    // Administrator-controlled approval for Clerk `org:member` users (Staff/Employee role).
+    // Only narrows access: unapproved members receive no permissions.
+    employeeEligibility: text("employee_eligibility", { enum: ["pending", "approved", "revoked"] }).notNull().default("pending"),
+    eligibilityDecidedBy: text("eligibility_decided_by"),
+    eligibilityDecidedAt: instant("eligibility_decided_at"),
     ...timestamps(),
   },
   (t) => [
     unique("staff_memberships_org_id_uq").on(t.organizationId, t.id),
+    check(
+      "staff_memberships_suspension_check",
+      sql`${t.status} <> 'suspended' or ${t.suspendedAt} is null or nullif(trim(${t.suspensionReason}), '') is not null`,
+    ),
+    check("staff_memberships_profile_version_check", sql`${t.profileVersion} > 0`),
+    allowed("staff_memberships_eligibility_check", t.employeeEligibility, ["pending", "approved", "revoked"]),
+    check(
+      "staff_memberships_eligibility_decision_check",
+      sql`${t.employeeEligibility} = 'pending' or (${t.eligibilityDecidedBy} is not null and ${t.eligibilityDecidedAt} is not null)`,
+    ),
     allowed("staff_memberships_status_check", t.status, [
       "active",
       "suspended",

@@ -18,3 +18,5 @@ export * from "./communications";
 export * from "./legacy-links";
 export * from "./system";
 export * from "./sales-delivery";
+export * from "./finance";
+export * from "./administration";

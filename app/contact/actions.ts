@@ -12,7 +12,7 @@ import { db } from "@/database/db";
 export async function submitEstateEnquiry(input: unknown): Promise<SubmitEnquiryResult> {
   return saveEnquiry(input, {
     async insertIfAbsent(record) {
-      const rows = await db.insert(realEstateEnquiries).values(record)
+      const rows = await db.insert(realEstateEnquiries).values({ ...record, organizationId: process.env.CALACOT_CLERK_ORG_ID?.trim() || null })
         .onConflictDoNothing({ target: realEstateEnquiries.id })
         .returning({ id: realEstateEnquiries.id });
       if (rows.length === 1) {

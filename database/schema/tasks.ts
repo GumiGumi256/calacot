@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   foreignKey,
+  boolean,
   check,
   index,
   unique,
@@ -27,6 +28,7 @@ export const tasks = pgTable(
     assigneeId: uuid("assignee_id"),
     createdById: uuid("created_by_id"),
     title: text("title").notNull(),
+    mandatory: boolean("mandatory").notNull().default(true),
     description: text("description"),
     status: text("status", {
       enum: ["todo", "in_progress", "blocked", "completed", "cancelled"],

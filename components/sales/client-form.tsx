@@ -6,7 +6,7 @@ import PhoneInput, { type Value } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { z } from "zod";
 import { clientSchema, divisions } from "@/lib/sales/contracts";
-import { saveClient, duplicateClients } from "@/lib/sales/actions";
+import { saveClient, previewClientMatches } from "@/lib/sales/actions";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Field, FieldLabel, FieldGroup, FieldSet, FieldLegend } from "@/components/ui/field";
@@ -22,12 +22,14 @@ export function ClientForm({ initial }: { initial?: ClientInput }) {
   const [pending, start] = useTransition();
   const [message, setMessage] = useState("");
   const [duplicates, setDuplicates] = useState<{id: string; name: string}[]>([]);
+  const [reviewed, setReviewed] = useState<string | null>(null);
+  const [confirmDistinct, setConfirmDistinct] = useState(false);
   const [form, setForm] = useState<ClientInput>(initial || {
     kind: "individual", displayName: "", legalName: "", tradingName: "", taxIdentifier: "",
     billingAddress: {line1: "", city: "", country: ""},
     contacts: [{name: "", email: "", phone: "", isPrimary: true}],
   });
-  const update = (key: keyof ClientInput, value: unknown) => setForm(f => ({...f, [key]: value}));
+  const update = (key: keyof ClientInput, value: unknown) => { setReviewed(null); setConfirmDistinct(false); setForm(f => ({...f, [key]: value})); };
   const updateContact = (index: number, key: "name" | "email" | "phone", value: string) =>
     update("contacts", form.contacts.map((c, i) => i === index ? {...c, [key]: value} : c));
   const clientName = form.kind === "company" ? form.tradingName?.trim() || form.legalName.trim() : form.displayName.trim();
@@ -43,9 +45,11 @@ export function ClientForm({ initial }: { initial?: ClientInput }) {
         const payload = {...form, displayName: clientName, contacts: form.contacts.map(c => form.kind === "individual" && c.isPrimary ? {...c, name: clientName} : c)};
         const parsed = clientSchema.safeParse(payload);
         if (!parsed.success) {setMessage(parsed.error.issues[0]?.message || "Check the client details."); return;}
+        if (!initial && reviewed !== JSON.stringify(parsed.data)) { setMessage("Check possible matches before saving."); return; }
+        if (!initial && duplicates.length > 0 && !confirmDistinct) { setMessage("Confirm this is a distinct client after reviewing the matches."); return; }
         start(async () => {
-          const r = await saveClient(payload);
-          if (!r.ok) {setMessage(r.error); return;}
+          const r = await saveClient(payload, { reviewedClientIds: duplicates.map(c => c.id), confirmDistinct });
+          if (!r.ok) {setReviewed(null); setConfirmDistinct(false); setMessage(r.error); return;}
           setOpen(false);
           router.push(`${orgSlug ? "/" + encodeURIComponent(orgSlug) : ""}/admin/clients/${r.value}`);
           router.refresh();
@@ -78,8 +82,8 @@ export function ClientForm({ initial }: { initial?: ClientInput }) {
               {([["line1","Address"],["city","City"],["country","Country"]] as const).map(([key,label]) => <TextField key={key} label={label} value={form.billingAddress[key]} onChange={v => update("billingAddress",{...form.billingAddress,[key]:v})}/>)}
             </FieldGroup>
           </details>
-          <Button type="button" variant="outline" disabled={pending} onClick={() => start(async () => setDuplicates(await duplicateClients(clientName,form.contacts.find(c => c.isPrimary)?.email || "",form.contacts.find(c => c.isPrimary)?.phone || "")))}>Check possible duplicates</Button>
-          {duplicates.length > 0 && <p role="status">Possible matches: {duplicates.map(c => c.name).join(", ")}. Review before saving.</p>}
+          {!initial && <Button type="button" variant="outline" disabled={pending} onClick={() => start(async () => { const payload = {...form, displayName: clientName, contacts: form.contacts.map(c => form.kind === "individual" && c.isPrimary ? {...c, name: clientName} : c)}; const p = clientSchema.safeParse(payload); if (!p.success) { setMessage(p.error.issues[0]?.message || "Check client details."); return; } try { const found = await previewClientMatches(payload); setDuplicates(found); setReviewed(JSON.stringify(p.data)); setConfirmDistinct(false); setMessage(found.length ? "Review possible matches before saving." : "No possible matches found."); } catch { setReviewed(null); setMessage("Could not check possible matches."); } })}>Check possible duplicates</Button>}
+          {!initial && reviewed && duplicates.length > 0 && <div><p role="status">Possible matches: {duplicates.map(c => c.name).join(", ")}.</p><label className="flex gap-2 text-sm"><input type="checkbox" checked={confirmDistinct} onChange={e => setConfirmDistinct(e.target.checked)} /> I reviewed these matches and confirm this is a distinct client.</label></div>}
           <FormMessage>{message}</FormMessage>
           <Button type="submit" disabled={pending}>{pending ? "Saving…" : "Save client"}</Button>
         </FieldGroup>

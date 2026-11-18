@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { staffContext } from "@/lib/sales/permissions";
+import { redirect } from "next/navigation";
+import { staffAccessStatus, staffContext } from "@/lib/sales/permissions";
 import { SalesSetupState } from "@/lib/sales/setup-state";
 import { requireUser } from "@/lib/design-purchases/permissions";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -16,7 +17,11 @@ export default async function AdminLayout({
     await requireUser("/admin/clients");
     return <SalesSetupState />;
   }
-  await staffContext();
+  // Confirmed members without usable access (awaiting approval/role, or paused) get a
+  // friendly holding page instead of a 404. Non-members still receive a plain 404 below.
+  const access = await staffAccessStatus();
+  if (access.kind === "awaiting_assignment" || access.kind === "paused") redirect("/access-pending");
+  const context = await staffContext();
   return (
     <SidebarProvider
       style={
@@ -26,7 +31,7 @@ export default async function AdminLayout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <AppSidebar variant="inset" role={context.role} permissions={context.permissions} />
       <SidebarInset>
         <SiteHeader />
         {children}

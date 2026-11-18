@@ -214,3 +214,17 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--muted-foreground);
   text-wrap: pretty;
 }
+.care-wallpaper {
+  background-color: color-mix(in oklch, var(--color-brand-primary) 9%, var(--color-brand-white));
+  background-image:
+    radial-gradient(color-mix(in oklch, var(--color-brand-accent) 16%, transparent) 1px, transparent 1.5px),
+    radial-gradient(color-mix(in oklch, var(--color-brand-primary) 35%, transparent) 1px, transparent 1.5px);
+  background-size: 22px 22px, 22px 22px;
+  background-position: 0 0, 11px 11px;
+}
+.dark .care-wallpaper {
+  background-color: color-mix(in oklch, var(--color-brand-primary) 4%, var(--color-brand-black));
+  background-image:
+    radial-gradient(color-mix(in oklch, var(--color-brand-primary) 10%, transparent) 1px, transparent 1.5px),
+    radial-gradient(color-mix(in oklch, white 5%, transparent) 1px, transparent 1.5px);
+}

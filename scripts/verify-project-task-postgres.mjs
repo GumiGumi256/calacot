@@ -1,0 +1,26 @@
+﻿import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
+import { AsyncLocalStorage } from "node:async_hooks";
+import { readFile, writeFile } from "node:fs/promises";
+import { createInterface } from "node:readline";
+import { createRequire } from "node:module";
+import { resolve } from "node:path";
+import { build } from "esbuild";
+import pg from "pg";
+import { PgDialect } from "drizzle-orm/pg-core";
+const rl=createInterface({input:process.stdin,terminal:false});
+rl.once("line",async url=>{let a,b,setup;try{
+ const u=new URL(url);if(u.hostname!=="ep-mute-mode-arqh0aim.c-4.us-west-2.aws.neon.tech" || u.pathname!=="/phase1b_stabilization_fixture")throw Error("Refusing non-fixture target");
+ [a,b,setup]=[1,2,3].map(()=>new pg.Client({connectionString:url}));await Promise.all([a.connect(),b.connect(),setup.connect()]);
+ const org="task-fixture-"+randomUUID(),client=randomUUID(),project=randomUUID(),task=randomUUID();
+ await setup.query("INSERT INTO organizations(id,name,legal_name) VALUES($1,$1,$1)",[org]);
+ await setup.query("INSERT INTO clients(id,organization_id,kind,display_name,department) VALUES($1,$2,'individual','Fixture','architecture')",[client,org]);
+ await setup.query("INSERT INTO projects(id,organization_id,client_id,code,name,division,currency) VALUES($1,$2,$3,$4,'Fixture','architecture','UGX')",[project,org,client,'P-'+randomUUID()]);
+ const storage=new AsyncLocalStorage(),dialect=new PgDialect();globalThis.__taskConcurrency={org,storage,dialect};
+ const result=await build({entryPoints:["lib/projects/actions.ts"],bundle:true,platform:"node",format:"cjs",write:false,packages:"external",plugins:[{name:"fixture",setup(builder){builder.onResolve({filter:/^(next\/cache|@\/database\/db|@\/lib\/sales\/permissions|@clerk\/nextjs\/server)$/},({path})=>({path,namespace:"fixture"}));builder.onLoad({filter:/.*/,namespace:"fixture"},({path})=>{const pre="const c=globalThis.__taskConcurrency;";if(path==="next/cache")return {loader:"js",contents:"export function revalidatePath(){}"};if(path.includes("permissions"))return {loader:"js",contents:pre+'export async function staffContext(){return {organizationId:c.org,actor:"fixture"}}'};if(path==="@clerk/nextjs/server")return {loader:"js",contents:'export async function clerkClient(){throw Error("No assignee expected")}' };return {loader:"js",contents:pre+'export const db={execute(q){const s=c.dialect.sqlToQuery(q);return c.storage.getStore().query(s.sql,s.params)}}'};});}}]});
+ const file=resolve("tmp/phase1c-concurrent-actions.cjs");await writeFile(file,result.outputFiles[0].contents);const {createProjectTask}=createRequire(import.meta.url)(file);
+ const form=()=>{const f=new FormData();for(const [k,v] of Object.entries({projectId:project,taskId:task,title:"Concurrent fixture",priority:"normal",assigneeId:"",dueDate:""}))f.set(k,v);return f};
+ await Promise.all([a.query("BEGIN"),b.query("BEGIN")]);const first=await storage.run(a,()=>createProjectTask({},form()));assert.equal(first.ok,true);
+ let completed=false;const second=storage.run(b,()=>createProjectTask({},form())).finally(()=>{completed=true});await new Promise(r=>setTimeout(r,500));assert.equal(completed,false,"second insert must wait for first transaction");await a.query("COMMIT");assert.equal((await second).ok,true);await b.query("COMMIT");
+ const count=await setup.query("SELECT (SELECT count(*)::int FROM tasks WHERE id=$1) tasks,(SELECT count(*)::int FROM audit_logs WHERE organization_id=$2 AND action='task.create') audits",[task,org]);assert.deepEqual(count.rows[0],{tasks:1,audits:1});console.log("PASS: two independent PostgreSQL transactions overlap; task retry waits and produces one task and one audit event.");
+}catch(e){console.error("FAIL:",e.message);process.exitCode=1}finally{for(const c of [a,b,setup])if(c)try{await c.end()}catch{}delete globalThis.__taskConcurrency;rl.close();process.exit(process.exitCode||0)}});

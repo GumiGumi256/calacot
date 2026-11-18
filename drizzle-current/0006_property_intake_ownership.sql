@@ -1,0 +1,4 @@
+ALTER TABLE "property_leads" ADD COLUMN "organization_id" text;--> statement-breakpoint
+ALTER TABLE "real_estate_enquiries" ADD COLUMN "organization_id" text;--> statement-breakpoint
+ALTER TABLE "property_leads" ADD CONSTRAINT "property_leads_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "real_estate_enquiries" ADD CONSTRAINT "real_estate_enquiries_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, index, unique, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { check, index, integer, unique, uniqueIndex, pgTable, text, uuid } from "drizzle-orm/pg-core";
 import {
   allowed,
   currencies,
@@ -35,6 +35,18 @@ export const suppliers = pgTable(
 );
 export type SuppliersRecord = typeof suppliers.$inferSelect;
 
+// "returned" = returned to the requester for correction (Phase 1D). Disbursed and
+// reconciled amounts come from expense_disbursements; approval never disburses money.
+export const expenseStatusValues = [
+  "draft",
+  "submitted",
+  "returned",
+  "approved",
+  "paid",
+  "rejected",
+  "void",
+] as const;
+
 export const expenses = pgTable(
   "expenses",
   {
@@ -52,7 +64,7 @@ export const expenses = pgTable(
     total: money("total").notNull(),
     currency: text("currency", { enum: currencies }).notNull().default("UGX"),
     status: text("status", {
-      enum: ["draft", "submitted", "approved", "paid", "rejected", "void"],
+      enum: expenseStatusValues,
     })
       .notNull()
       .default("draft"),
@@ -62,6 +74,15 @@ export const expenses = pgTable(
     paidAt: instant("paid_at"),
     paymentReference: text("payment_reference"),
     supplierInvoiceReference: text("supplier_invoice_reference"),
+    // Phase 1D request workflow. Nullable for legacy rows created before requester tracking.
+    purpose: text("purpose"),
+    requestedById: uuid("requested_by_id"),
+    submittedAt: instant("submitted_at"),
+    reviewedById: uuid("reviewed_by_id"),
+    reviewedAt: instant("reviewed_at"),
+    reviewNote: text("review_note"),
+    version: integer("version").notNull().default(1),
+    idempotencyKey: text("idempotency_key"),
     ...timestamps(),
   },
   (t) => [
@@ -87,14 +108,39 @@ export const expenses = pgTable(
       staffMemberships.organizationId,
       staffMemberships.id,
     ),
-    allowed("expenses_status_check", t.status, [
-      "draft",
-      "submitted",
-      "approved",
-      "paid",
-      "rejected",
-      "void",
-    ]),
+    allowed("expenses_status_check", t.status, expenseStatusValues),
+    unique("expenses_org_id_currency_uq").on(t.organizationId, t.id, t.currency),
+    scopedForeignKey(
+      "expenses_requestedById_fk",
+      t.organizationId,
+      t.requestedById,
+      staffMemberships.organizationId,
+      staffMemberships.id,
+    ),
+    scopedForeignKey(
+      "expenses_reviewedById_fk",
+      t.organizationId,
+      t.reviewedById,
+      staffMemberships.organizationId,
+      staffMemberships.id,
+    ),
+    check(
+      "expenses_no_self_approval_check",
+      sql`${t.approvedById} is null or ${t.requestedById} is null or ${t.approvedById} <> ${t.requestedById}`,
+    ),
+    check(
+      "expenses_returned_check",
+      sql`${t.status} <> 'returned' or (${t.reviewedById} is not null and ${t.reviewedAt} is not null and nullif(trim(${t.reviewNote}), '') is not null)`,
+    ),
+    check("expenses_version_check", sql`${t.version} > 0`),
+    uniqueIndex("expenses_idempotency_uq")
+      .on(t.organizationId, t.idempotencyKey)
+      .where(sql`${t.idempotencyKey} is not null`),
+    index("expenses_requester_status_idx").on(
+      t.organizationId,
+      t.requestedById,
+      t.status,
+    ),
     allowed("expenses_division_check", t.division, divisions),
     allowed("expenses_currency_check", t.currency, currencies),
     check(

@@ -21,7 +21,7 @@ import {
   documentLink,
 } from "./menu-data";
 import { renderOrder, renderPayment } from "./render";
-import { paymentInstructions } from "@/lib/company";
+import { approvedPaymentInstructions } from "@/lib/company";
 import { salesConfig } from "@/lib/sales/config";
 import type { CareJob } from "./pipeline";
 import { revokeLinkQuery } from "./queries";
@@ -259,7 +259,7 @@ export async function prepareMenu(
           : "No matching issued invoices were found for your account.";
       } else if (action === "pay") {
         state = { screen: "invoices" };
-        text = renderPayment(paymentInstructions()).replace(
+        text = renderPayment(await approvedPaymentInstructions(org)).replace(
           "purchase reference",
           "invoice reference",
         );
