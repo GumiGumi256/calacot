@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { DownloadIcon, PlusIcon } from "lucide-react";
+import { DownloadIcon, PlusIcon, UploadIcon } from "lucide-react";
 import { parseQuery } from "@/lib/sales/contracts";
 import { readList } from "@/lib/sales/reads";
 import { quotationAttention } from "@/lib/sales/attention";
@@ -30,6 +30,7 @@ export default async function Page({
     redirect(`/admin/quotations?${p}`);
   }
   const canCreate = data.permissions.includes("quotations_create");
+  const canImport = canCreate && data.permissions.includes("clients_write") && data.permissions.includes("projects_write");
   const exportHref = `/api/sales/quotations/export?${new URLSearchParams(Object.entries(data.query).map(([k, v]) => [k, String(v)]))}`;
   return (
     <PageContainer>
@@ -37,9 +38,16 @@ export default async function Page({
         title="Quotations"
         description="Prepare, send and track quotations through to confirmation."
         secondaryActions={
-          <Button variant="outline" nativeButton={false} render={<a href={exportHref} />} title="Downloads up to 1,000 matching quotations as CSV">
-            <DownloadIcon /> Export CSV
-          </Button>
+          <>
+            {canImport && (
+              <Button variant="outline" nativeButton={false} render={<Link href="/admin/quotations/import" />} title="Create drafts from a CSV of existing quotations">
+                <UploadIcon /> Import
+              </Button>
+            )}
+            <Button variant="outline" nativeButton={false} render={<a href={exportHref} />} title="Downloads up to 1,000 matching quotations as CSV">
+              <DownloadIcon /> Export CSV
+            </Button>
+          </>
         }
         primaryAction={
           canCreate && (
