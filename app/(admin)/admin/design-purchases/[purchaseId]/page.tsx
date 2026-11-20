@@ -65,7 +65,7 @@ export default async function AdminPurchasePage({
   ];
 
   return (
-    <main className="mx-auto min-h-screen max-w-6xl px-5 pb-24 pt-28 text-foreground sm:px-8">
+    <div className="mx-auto min-h-screen max-w-6xl px-5 pb-24 pt-28 text-foreground sm:px-8">
       {/* Navigation */}
       <Link
         href="/admin/design-purchases"
@@ -173,6 +173,6 @@ export default async function AdminPurchasePage({
           <PurchaseStatus purchase={p} />
         </aside>
       </div>
-    </main>
+    </div>
   );
 }

@@ -44,7 +44,7 @@ export default async function AdminPurchasesPage({
     `/admin/design-purchases?${new URLSearchParams({ ...(status ? { status } : {}), page: String(n) })}`;
 
   return (
-    <main className="mx-auto min-h-screen max-w-7xl px-5 pb-24 pt-28 text-foreground sm:px-8">
+    <div className="mx-auto min-h-screen max-w-7xl px-5 pb-24 pt-28 text-foreground sm:px-8">
      
       <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl">
         Design purchases.
@@ -176,6 +176,6 @@ export default async function AdminPurchasesPage({
           </Link>
         )}
       </nav>
-    </main>
+    </div>
   );
 }

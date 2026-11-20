@@ -27,6 +27,12 @@ const messages: Record<string, string> = {
   staging_recipient_not_allowed:"This recipient is outside the staging send allowlist.",
   deposit_tax_policy_required:"Deposit billing for taxable quotations needs an approved allocation policy. Use full billing or obtain finance configuration approval.",
   draft_conflict: "This draft changed or was finalized. Refresh before saving.",
+  catalogue_item_unavailable: "A selected catalogue item is unavailable. Remove the line or choose another item.",
+  catalogue_item_inactive: "A selected catalogue item has been deactivated. Remove the line or choose an active item.",
+  catalogue_item_mismatch: "Catalogue items must match the quotation's division and currency.",
+  catalogue_unit_mismatch: "A catalogue line's unit cannot be changed. Use a custom line for a different unit.",
+  price_override_not_permitted: "You are not permitted to change catalogue prices. Use the catalogue price or ask an authorized colleague.",
+  services_active_item_uq: "An active catalogue item with this name, unit and currency already exists in this division.",
   eligible_project_required:
     "Select a planned, unarchived project belonging to this client with the same division and currency.",
   quotation_expired: "This quotation has expired. Create a revision.",
@@ -185,7 +191,7 @@ export async function saveQuote(input: unknown) {
       )
         throw new Error("schedule_total_mismatch");
       const r = await db.execute<{ id: string }>(
-        sql`SELECT sales_quote_save(${ctx.organizationId},${ctx.actor},${json({ ...value, ...calculated })},${c}) AS id`,
+        sql`SELECT sales_quote_save(${ctx.organizationId},${ctx.actor},${json({ ...value, ...calculated, allowPriceOverride: ctx.permissions.includes("quotation_price_override") })},${c}) AS id`,
       );
       return r.rows[0].id;
     },

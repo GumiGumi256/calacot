@@ -24,10 +24,11 @@ try {
   const bundle = await build({
     entryPoints: ["app/api/webhooks/clerk/route.ts"], bundle: true, platform: "node", format: "cjs", write: false, packages: "external",
     plugins: [{ name: "isolated", setup(b) {
-      b.onResolve({ filter: /^(server-only|@\/database\/db|@clerk\/nextjs\/server)$/ }, ({ path }) => ({ path, namespace: "test" }));
+      b.onResolve({ filter: /^(server-only|@\/database\/db|@clerk\/nextjs\/server|@\/lib\/sales\/permissions)$/ }, ({ path }) => ({ path, namespace: "test" }));
       b.onLoad({ filter: /.*/, namespace: "test" }, ({ path }) => {
         const g = "const c=globalThis.__hook;";
         if (path === "server-only") return { loader: "js", contents: "" };
+        if (path.includes("permissions")) return { loader: "js", contents: "export function invalidateLiveMembership(){}" };
         if (path === "@clerk/nextjs/server") return { loader: "js", contents: g + "export async function clerkClient(){return {organizations:{async getOrganizationMembershipList({userId}){const data=userId.filter(u=>c.members.has(u)).map(u=>({organization:{id:'a'},role:c.members.get(u),publicUserData:{userId:u,firstName:'N',lastName:null,identifier:u+'@example.test'}}));return {data,totalCount:data.length}}}}}" };
         return { loader: "js", contents: g + "export const db={execute(q){return c.db.execute(q)}}" };
       });

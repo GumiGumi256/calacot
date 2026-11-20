@@ -35,12 +35,12 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const fullyReconciled = status === "paid" && Number(disbursed) > 0 && reconciled === disbursed;
   const ownSubmitted = !!d.me && e.requested_by_id === d.me && status === "submitted";
   return (
-    <main className="flex flex-col gap-4 p-4 md:p-6">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
       <Link href="/admin/expenses" className="text-sm underline-offset-4 hover:underline">Back to expenses</Link>
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-1.5">
-            <CardTitle className="break-words">{String(e.description)}</CardTitle>
+            <CardTitle as="h1" className="break-words">{String(e.description)}</CardTitle>
             <CardDescription>{expenseStatusHelp[status]}</CardDescription>
           </div>
           <ExpenseStatusBadge status={status} reconciled={fullyReconciled} />
@@ -136,6 +136,6 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           ) : <p className="text-sm text-muted-foreground">No workflow history recorded. This expense was created before the Phase 1D workflow.</p>}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

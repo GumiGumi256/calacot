@@ -25,11 +25,11 @@ export default async function Page({ params }: { params: Promise<{ userId: strin
   const live = s.status !== "removed";
   const editable = d.clerkAvailable && !self;
   return (
-    <main className="flex flex-col gap-4 p-4 md:p-6">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
       <Link href="/admin/staff" className="text-sm underline-offset-4 hover:underline">Back to staff</Link>
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
-          <div className="flex flex-col gap-1.5"><CardTitle>{s.name}</CardTitle><CardDescription className="break-all">{s.email}</CardDescription></div>
+          <div className="flex flex-col gap-1.5"><CardTitle as="h1">{s.name}</CardTitle><CardDescription className="break-all">{s.email}</CardDescription></div>
           <Badge variant={s.status === "active" ? "default" : s.status === "suspended" ? "destructive" : "secondary"} className="capitalize">{s.status}</Badge>
         </CardHeader>
         <CardContent className="flex flex-col gap-2 text-sm">
@@ -72,6 +72,6 @@ export default async function Page({ params }: { params: Promise<{ userId: strin
           ) : <p className="text-sm text-muted-foreground">No administrative history recorded yet.</p>}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

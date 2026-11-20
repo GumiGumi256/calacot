@@ -14,11 +14,11 @@ const day = (ms: number | null) => (ms ? new Date(ms).toISOString().slice(0, 10)
 export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const d = await readStaffDirectory(await searchParams);
   return (
-    <main className="flex flex-col gap-4 p-4 md:p-6">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
           <div className="flex flex-col gap-1.5">
-            <CardTitle>Staff</CardTitle>
+            <CardTitle as="h1">Staff</CardTitle>
             <CardDescription>Employees, their roles and access. Clerk is the source of truth for membership and roles; profiles here are for coordination.</CardDescription>
           </div>
           {d.clerkAvailable && <InviteStaff available={d.configuredRoles} actorIsAdmin={d.actorRole === "org:admin"} />}
@@ -69,6 +69,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
           )}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

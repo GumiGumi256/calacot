@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RecordDocuments } from "@/components/documents/record-documents";
 import { clientDetail } from "@/lib/sales/reads";
 import { clientSchema, divisions } from "@/lib/sales/contracts";
 import type { z } from "zod";
@@ -43,10 +44,10 @@ export default async function Page({
     })),
   };
   return (
-    <main className="flex flex-col gap-6 p-4 md:p-6">
+    <div className="flex flex-col gap-6 p-4 md:p-6">
       <Card>
         <CardHeader>
-          <CardTitle>{String(c.display_name)}</CardTitle>
+          <CardTitle as="h1">{String(c.display_name)}</CardTitle>
           <CardDescription>
             {String(c.department || "Department not assigned")} ·{" "}
             {String(c.kind)} · {c.archived_at ? "Archived" : "Active"}
@@ -127,7 +128,8 @@ export default async function Page({
           </CardContent>
         </Card>
       ))}
+      <RecordDocuments type="client" id={id} label={String(d.client.display_name)} />
       <Activity events={d.activity} />
-    </main>
+    </div>
   );
 }

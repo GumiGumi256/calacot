@@ -36,11 +36,11 @@ export default async function Page({
 }) {
   const [data, overview] = await Promise.all([readPayments(await searchParams), receivablesOverview("payments_read")]);
   return (
-    <main className="flex flex-col gap-6 p-4 md:p-6">
+    <div className="flex flex-col gap-6 p-4 md:p-6">
       <ReceivablesPanel data={overview} focus="payments" />
       <Card>
         <CardHeader>
-          <CardTitle>Payments</CardTitle>
+          <CardTitle as="h1">Payments</CardTitle>
           <CardDescription>
             Received customer payments and how much of each has been allocated to invoices.
             Verify and allocate payments from the invoice page.
@@ -118,6 +118,6 @@ export default async function Page({
           />
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

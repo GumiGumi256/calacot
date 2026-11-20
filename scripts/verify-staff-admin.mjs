@@ -364,7 +364,8 @@ try {
     calls = 0;
     await m.staffContext("leads_read");
     await m.staffContext("projects_read");
-    assert.equal(calls, 0, "no Clerk calls for non-sensitive staff pages");
+    // Phase 1F: project managers hold documents_read (sensitive), so they get ONE cached live check.
+    assert(calls <= 1, "at most one cached Clerk call across project-manager pages");
     // Finance pages: one live call, then cached for 30 seconds.
     members.a.set("user_fin3", "org:finance");
     await syncAll();

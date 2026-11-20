@@ -51,6 +51,9 @@ export default async function Page({
             unitPrice: i.unit_price,
             discountAmount: i.discount_amount,
             taxRate: i.tax_rate,
+            catalogueItemId: i.service_id ? String(i.service_id) : "",
+            name: i.item_name ? String(i.item_name) : "",
+            itemType: i.item_type ? String(i.item_type) : "",
           })),
           schedules: d.schedules.map((s) => ({
             label: s.label,
@@ -61,10 +64,10 @@ export default async function Page({
       : undefined;
   const data = initial ? await pickers(String(q.client_id)) : undefined;
   return (
-    <main className="flex flex-col gap-6 p-4 md:p-6">
+    <div className="flex flex-col gap-6 p-4 md:p-6">
       <Card>
         <CardHeader>
-          <CardTitle>
+          <CardTitle as="h1">
             {String(q.number || "Draft")} · {String(q.title)}
           </CardTitle>
           <CardDescription>
@@ -107,6 +110,8 @@ export default async function Page({
               initial={initial}
               pickers={data}
               taxRate={salesConfig().taxRate}
+              lineRefs={d.items.map((i) => (i.catalogue_unit_price ? String(i.catalogue_unit_price) : ""))}
+              can={{ pick: d.permissions.includes("catalogue_read"), override: d.permissions.includes("quotation_price_override"), manage: d.permissions.includes("catalogue_manage") }}
             />
           )}
           <ul>
@@ -135,6 +140,6 @@ export default async function Page({
       </Card>
       <Deliveries rows={d.deliveries} permissions={d.permissions} />
       <Activity events={d.activity} />
-    </main>
+    </div>
   );
 }

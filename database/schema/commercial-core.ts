@@ -210,9 +210,25 @@ export const quotationItems = pgTable(
     subtotal: money("subtotal").notNull(),
     taxAmount: money("tax_amount").notNull().default("0"),
     total: money("total").notNull(),
+    // Catalogue snapshot (quotation enhancement). Null on lines saved before the catalogue.
+    itemName: text("item_name"),
+    itemType: text("item_type"),
+    catalogueUnitPrice: money("catalogue_unit_price"),
+    priceSource: text("price_source", { enum: ["catalogue", "override", "custom"] }),
   },
   (t): PgTableExtraConfigValue[] => [
     unique("quotation_items_org_id_uq").on(t.organizationId, t.id),
+    check(
+      "quotation_items_price_source_check",
+      sql`${t.priceSource} is null
+        or (${t.priceSource} = 'custom' and ${t.serviceId} is null and ${t.catalogueUnitPrice} is null)
+        or (${t.priceSource} = 'catalogue' and ${t.serviceId} is not null and ${t.catalogueUnitPrice} = ${t.unitPrice})
+        or (${t.priceSource} = 'override' and ${t.serviceId} is not null and ${t.catalogueUnitPrice} is not null and ${t.catalogueUnitPrice} <> ${t.unitPrice})`,
+    ),
+    check(
+      "quotation_items_item_type_check",
+      sql`${t.itemType} is null or ${t.itemType} in ('material', 'labour', 'service')`,
+    ),
     scopedForeignKey(
       "quotation_items_quotationVersionId_fk",
       t.organizationId,

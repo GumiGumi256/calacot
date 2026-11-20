@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 export const currencies = ["UGX", "USD"] as const;
+export const catalogueItemTypes = ["material", "labour", "service"] as const;
 export const divisions = [
   "estates",
   "architecture",
@@ -94,6 +95,12 @@ export const quoteSchema = z.object({
         unitPrice: amount,
         discountAmount: amount,
         taxRate: amount,
+        // Item catalogue. A catalogue line names its item; the database resolves the name, unit,
+        // reference price and price source from the organization's catalogue. Custom lines may
+        // carry their own name and type. Older lines have none of these.
+        catalogueItemId: z.union([z.uuid(), z.literal("")]).optional(),
+        name: text(200).optional(),
+        itemType: z.union([z.enum(catalogueItemTypes), z.literal("")]).optional(),
       }),
     )
     .min(1)

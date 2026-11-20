@@ -85,8 +85,8 @@ export async function loadPdf(key: string) {
     : Buffer.from(await (await objectRequest("GET", key)).arrayBuffer());
 }
 /** Private evidence objects (Phase 1D expense receipts). Same adapter, never public. */
-export async function storePrivateObject(key: string, bytes: Buffer, contentType: string) {
-  if (bytes.length > 10 * 1024 * 1024) throw new Error("document_size_limit");
+export async function storePrivateObject(key: string, bytes: Buffer, contentType: string, maxBytes = 10 * 1024 * 1024) {
+  if (bytes.length > maxBytes) throw new Error("document_size_limit");
   if (localEnabled()) {
     const path = localPath(key);
     await mkdir(dirname(path), { recursive: true });

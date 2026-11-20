@@ -47,11 +47,11 @@ function Value({ result, money }: { result: MetricResult; money?: boolean }) {
 
 export default async function DashboardPage() {
   const metrics = await readDashboard();
-  return <main className="flex flex-col gap-6 p-4 md:p-6">
+  return <div className="flex flex-col gap-6 p-4 md:p-6">
     <div><h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1><p className="mt-1 text-sm text-muted-foreground">Current activity across Calacot.</p></div>
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {cards.map(card => <Card key={card.key} className="min-w-0"><CardHeader><CardTitle>{card.title}</CardTitle><CardDescription>{card.description}</CardDescription></CardHeader><CardContent className="space-y-4"><Value result={metrics[card.key]} money={card.money} />{metrics[card.key].state === "ready" && <Link className="inline-block text-sm font-medium underline underline-offset-4" href={card.href}>View {card.title.toLowerCase()}</Link>}</CardContent></Card>)}
     </div>
     <NeedsAttention metrics={metrics} />
-  </main>;
+  </div>;
 }

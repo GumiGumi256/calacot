@@ -92,6 +92,20 @@
       "when": 1795014465807,
       "tag": "0012_staff_eligibility_divisions",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795033593032,
+      "tag": "0013_document_management",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795037250875,
+      "tag": "0014_quotation_item_catalogue",
+      "breakpoints": true
     }
   ]
 }

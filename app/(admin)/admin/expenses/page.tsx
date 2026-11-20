@@ -22,11 +22,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
   const views: ExpenseView[] = data.canAll ? ["mine", ...(data.canReview ? ["review" as const] : []), ...(data.canPay ? ["payable" as const] : []), "all"] : ["mine"];
   const tabHref = (view: ExpenseView) => `?view=${view}`;
   return (
-    <main className="flex flex-col gap-6 p-4 md:p-6">
+    <div className="flex flex-col gap-6 p-4 md:p-6">
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
           <div className="flex flex-col gap-1.5">
-            <CardTitle>Expenses</CardTitle>
+            <CardTitle as="h1">Expenses</CardTitle>
             <CardDescription>Request, review, approve and record payment of company spending. Approval authorizes spending; disbursements record money actually paid.</CardDescription>
           </div>
           {data.canCreate && <Button render={<Link href="/admin/expenses/new" />}>New expense request</Button>}
@@ -119,6 +119,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
           <p className="text-xs text-muted-foreground">Status guide: {expenseStatuses.map((s) => expenseStatusLabels[s]).join(", ")}. Amounts are shown per currency and never combined.</p>
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

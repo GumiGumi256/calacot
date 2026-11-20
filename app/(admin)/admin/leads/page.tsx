@@ -30,10 +30,10 @@ export default async function Page({
   const data = await readLeads(await searchParams);
   const counts = Object.fromEntries(data.stats.map((s) => [s.status, s.count]));
   return (
-    <main className="flex flex-col gap-6 p-4 md:p-6">
+    <div className="flex flex-col gap-6 p-4 md:p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Leads</CardTitle>
+          <CardTitle as="h1">Leads</CardTitle>
           <CardDescription>
             Enquiries from the scheduling, project and contact forms.
           </CardDescription>
@@ -132,6 +132,6 @@ export default async function Page({
           />
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

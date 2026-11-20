@@ -13,7 +13,7 @@ export default async function Page() {
   try { const c = salesConfig(); tax = `${c.taxRate}% approved tax rate; invoices due ${c.dueDays} days after issue; initial billing policy: ${c.policy}`; } catch { /* shown as not configured */ }
   const p = s.proposal;
   return (
-    <main className="flex flex-col gap-4 p-4 md:p-6">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
       {p && (
         <Card className="border-amber-500/50">
           <CardHeader><CardTitle>Payment-instruction change awaiting approval</CardTitle><CardDescription>Proposed {p.proposed_at.slice(0, 16).replace("T", " ")}: {p.note}</CardDescription></CardHeader>
@@ -28,7 +28,7 @@ export default async function Page() {
       )}
       <Card>
         <CardHeader>
-          <CardTitle>Company settings</CardTitle>
+          <CardTitle as="h1">Company settings</CardTitle>
           <CardDescription>Business details used on new documents and customer messages. Changes never alter quotations or invoices already issued. Infrastructure secrets (API keys, database, webhook and provider credentials) are managed in deployment configuration and are never shown here.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
@@ -48,7 +48,7 @@ export default async function Page() {
           ) : <p className="text-sm text-muted-foreground">No settings changes recorded.</p>}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }
 

@@ -16,7 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { TextField, ChoiceField, FormMessage } from "./form-controls";
 import { ProjectForm } from "./project-form";
-type QuoteInput = z.input<typeof quoteSchema>;
+import { QuoteLines, customLine, lineKey, type QuoteLine } from "./quote-lines";
+type QuoteInput = Omit<z.input<typeof quoteSchema>, "items"> & { items: QuoteLine[] };
+export type QuoteCapabilities = { pick: boolean; override: boolean; manage: boolean };
 type Pickers = {
   clients: Record<string, unknown>[];
   projects: Record<string, unknown>[];
@@ -27,10 +29,15 @@ export function QuoteForm({
   initial,
   pickers,
   taxRate,
+  can,
+  lineRefs = [],
 }: {
-  initial?: QuoteInput;
+  initial?: z.input<typeof quoteSchema>;
   pickers: Pickers;
   taxRate: string;
+  can: QuoteCapabilities;
+  /** Catalogue reference price per saved line ("" for custom or older lines). */
+  lineRefs?: string[];
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -40,29 +47,28 @@ export function QuoteForm({
   const [projectOpen, setProjectOpen] = useState(false);
   const [form, setForm] = useState<QuoteInput>(
     () =>
-      initial || {
+      (initial && {
+        ...initial,
+        items: initial.items.map((item, i) => ({
+          ...item,
+          _key: lineKey(),
+          _ref: item.catalogueItemId ? lineRefs[i] || undefined : undefined,
+          _scope: item.catalogueItemId ? `${initial.division}|${initial.currency}` : undefined,
+        })),
+      }) || {
         revision: 0,
         clientId: "",
         projectId: "",
         contactId: "",
         title: "",
-        division: "architecture",
+        division: "painting",
         currency: "UGX",
         scope: "",
         deliverables: [],
         exclusions: [],
         terms: "",
         validUntil: new Date(Date.now() + 30 * 86400000).toISOString(),
-        items: [
-          {
-            description: "",
-            unit: "item",
-            quantity: "1",
-            unitPrice: "0",
-            discountAmount: "0",
-            taxRate,
-          },
-        ],
+        items: [customLine(taxRate)],
         schedules: [{ label: "Full amount", amount: "0", dueAt: "" }],
       },
   );
@@ -195,72 +201,17 @@ export function QuoteForm({
             onChange={(v) => update("exclusions", v.split("\n"))}
             multiline
           />
-          {form.items.map((line, index) => (
-            <FieldSet key={index}>
-              <FieldLegend>Line {index + 1}</FieldLegend>
-              <FieldGroup className="grid gap-3 sm:grid-cols-2">
-                {(
-                  [
-                    ["description", "Description"],
-                    ["unit", "Unit"],
-                    ["quantity", "Quantity"],
-                    ["unitPrice", "Unit price"],
-                    ["discountAmount", "Discount amount"],
-                  ] as const
-                ).map(([k, label]) => (
-                  <TextField
-                    key={k}
-                    label={label}
-                    value={line[k]}
-                    onChange={(v) =>
-                      update(
-                        "items",
-                        form.items.map((l, i) =>
-                          i === index ? { ...l, [k]: v } : l,
-                        ),
-                      )
-                    }
-                  />
-                ))}
-                <p className="text-sm text-muted-foreground">
-                  Approved tax: {taxRate}%
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={form.items.length === 1}
-                  onClick={() =>
-                    update(
-                      "items",
-                      form.items.filter((_, i) => i !== index),
-                    )
-                  }
-                >
-                  Remove line
-                </Button>
-              </FieldGroup>
-            </FieldSet>
-          ))}
-          <Button
-            type="button"
-            variant="outline"
-            disabled={form.items.length >= 100}
-            onClick={() =>
-              update("items", [
-                ...form.items,
-                {
-                  description: "",
-                  unit: "item",
-                  quantity: "1",
-                  unitPrice: "0",
-                  discountAmount: "0",
-                  taxRate,
-                },
-              ])
-            }
-          >
-            Add line
-          </Button>
+          <QuoteLines
+            lines={form.items}
+            onChange={(items) => setForm((f) => ({ ...f, items }))}
+            division={form.division}
+            currency={form.currency}
+            taxRate={taxRate}
+            canOverride={can.override}
+            canManage={can.manage}
+            canPick={can.pick}
+          />
+          <p className="text-sm text-muted-foreground">Approved tax: {taxRate}% on every line.</p>
           <p aria-live="polite">
             Calculated total: {form.currency} {total}. The server independently
             recomputes the total.

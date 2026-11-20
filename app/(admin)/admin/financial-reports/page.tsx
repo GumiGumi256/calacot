@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { MonthlyActivityChart } from "@/components/finance/monthly-activity-chart";
 
 const selectClass = "h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 const divisions = ["estates", "architecture", "painting", "interiors", "tech"];
@@ -59,10 +60,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
   const r = await readFinancialReports(await searchParams);
   const f = r.filters;
   return (
-    <main className="flex flex-col gap-4 p-4 md:p-6">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Financial reports</CardTitle>
+          <CardTitle as="h1">Financial reports</CardTitle>
           <CardDescription>
             Operational reports from invoices, customer payments and expense records. These are not accounting statements or profit figures:
             no general ledger, accrual accounting or revenue-recognition policy is configured. UGX and USD are always reported separately.
@@ -144,24 +145,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
         ) : <Empty>No project invoices or approved project expenses for these filters.</Empty>}
       </Section>
 
-      <Section title="Activity by month" description="Invoices issued, confirmed receipts, approved expenses and disbursements within the period, by Kampala month.">
-        {r.monthly.length ? (
-          <Table>
-            <TableHeader><TableRow><TableHead>Month</TableHead><TableHead>Currency</TableHead><TableHead className="text-right">Invoiced</TableHead><TableHead className="text-right">Confirmed receipts</TableHead><TableHead className="text-right">Approved expenses</TableHead><TableHead className="text-right">Disbursed</TableHead></TableRow></TableHeader>
-            <TableBody>
-              {r.monthly.map((m) => (
-                <TableRow key={`${m.month}-${m.currency}`}>
-                  <TableCell>{m.month}</TableCell><TableCell>{m.currency}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatAmount(m.currency, m.invoiced)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatAmount(m.currency, m.receipts)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatAmount(m.currency, m.approved)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatAmount(m.currency, m.disbursed)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : <Empty />}
-      </Section>
-    </main>
+      {/* Design System V1 Phase 3: chart per currency; the original monthly table sits behind "View as table". */}
+      <MonthlyActivityChart rows={r.monthly} from={f.from} to={f.to} today={r.today} />
+    </div>
   );
 }

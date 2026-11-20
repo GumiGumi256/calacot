@@ -306,7 +306,7 @@ export default async function CustomerCareInbox({
   );
 
   return (
-    <main className="flex h-[calc(100svh-var(--header-height))] min-h-[560px] overflow-hidden border-t bg-background md:h-[calc(100svh-var(--header-height)-1rem)] md:rounded-b-xl">
+    <div className="flex h-[calc(100svh-var(--header-height))] min-h-[560px] overflow-hidden border-t bg-background md:h-[calc(100svh-var(--header-height)-1rem)] md:rounded-b-xl">
       {/* Chat list */}
       <aside aria-label="Conversations"
         className={cn("w-full min-w-0 flex-col border-r bg-card lg:flex lg:w-[360px] lg:shrink-0 xl:w-[400px]", phone ? "hidden" : "flex")}>
@@ -453,6 +453,6 @@ export default async function CustomerCareInbox({
           <ContactInfo conversation={selected} contact={contact} canReply={canReply} requests={requests} />
         </aside>
       )}
-    </main>
+    </div>
   );
 }

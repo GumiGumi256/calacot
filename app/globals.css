@@ -3,6 +3,9 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+/* Design System V1: styles that apply only while an admin page is mounted (data-surface="admin").
+   Scoped from :root so portalled dialogs, sheets and popovers (rendered outside the shell) inherit them. */
+@custom-variant admin (&:where(:root:has([data-surface="admin"]) *));
 
 
 h1, h2, h3, h4, h5, h6 {
@@ -42,11 +45,12 @@ h1, h2, h3, h4, h5, h6 {
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
+    /* Design System V1 chart roles (see docs/design-system, section G3). */
+    --chart-1: var(--chart-primary);
+    --chart-2: var(--chart-money-in);
+    --chart-3: var(--chart-money-out);
+    --chart-4: var(--chart-invoiced);
+    --chart-5: var(--chart-overdue);
     --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
@@ -79,15 +83,11 @@ h1, h2, h3, h4, h5, h6 {
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
     --sidebar: oklch(0.205 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
+    /* Design System V1: brand gold replaces shadcn's default blue (sidebar is admin-only). */
+    --sidebar-primary: var(--color-brand-primary);
+    --sidebar-primary-foreground: var(--color-brand-black);
     --sidebar-accent: oklch(0.269 0 0);
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
@@ -227,4 +227,203 @@ h1, h2, h3, h4, h5, h6 {
   background-image:
     radial-gradient(color-mix(in oklch, var(--color-brand-primary) 10%, transparent) 1px, transparent 1.5px),
     radial-gradient(color-mix(in oklch, white 5%, transparent) 1px, transparent 1.5px);
+}
+
+/* Phase 1F: print-friendly admin reports. */
+@media print {
+  [data-slot="sidebar"], [data-slot="sidebar-gap"], [data-slot="sidebar-container"], [data-slot="sidebar-trigger"], header { display: none !important; }
+  [data-slot="sidebar-wrapper"] { display: block !important; }
+  body { background: #fff !important; color: #000 !important; }
+  table { page-break-inside: auto; } tr { page-break-inside: avoid; }
+}
+
+/* ==========================================================================
+   Calacot Admin Design System V1 (docs/design-system/CALACOT_ADMIN_DESIGN_SYSTEM_V1.md)
+   Brand values above are unchanged. Everything below is derived from them.
+   ========================================================================== */
+
+/* Semantic, chart and elevation tokens (light). Unused by public pages. */
+:root {
+  --success: oklch(0.5 0.13 150);
+  --warning: oklch(0.52 0.12 65);
+  --info: oklch(0.5 0.13 250);
+  --success-soft: color-mix(in oklch, var(--success) 12%, transparent);
+  --warning-soft: color-mix(in oklch, var(--warning) 14%, transparent);
+  --info-soft: color-mix(in oklch, var(--info) 12%, transparent);
+  --destructive-soft: color-mix(in oklch, var(--destructive) 10%, transparent);
+  --destructive-text: oklch(0.5 0.19 27);
+  --neutral-soft: color-mix(in oklch, var(--color-brand-black) 6%, transparent);
+  --success-border: color-mix(in oklch, var(--success) 30%, transparent);
+  --warning-border: color-mix(in oklch, var(--warning) 35%, transparent);
+  --info-border: color-mix(in oklch, var(--info) 30%, transparent);
+  --destructive-border: color-mix(in oklch, var(--destructive) 30%, transparent);
+  --surface-subtle: color-mix(in oklch, var(--color-brand-white), var(--color-brand-black) 3%);
+
+  --chart-primary: oklch(0.64 0.14 80);
+  --chart-muted: oklch(0.89 0.006 285);
+  --chart-money-in: var(--success);
+  --chart-money-out: var(--color-brand-accent);
+  --chart-invoiced: oklch(0.38 0.012 285);
+  --chart-overdue: var(--destructive);
+  --chart-pending: var(--warning);
+  --chart-grid: color-mix(in oklch, var(--color-brand-black) 8%, transparent);
+  --chart-axis: var(--muted-foreground);
+
+  --elevation-1: 0 1px 2px oklch(0.1941 0.012 285.23 / 0.05), 0 1px 1px oklch(0.1941 0.012 285.23 / 0.03);
+  --elevation-2: 0 4px 12px oklch(0.1941 0.012 285.23 / 0.07), 0 1px 3px oklch(0.1941 0.012 285.23 / 0.05);
+  --elevation-3: 0 12px 32px oklch(0.1941 0.012 285.23 / 0.12), 0 2px 6px oklch(0.1941 0.012 285.23 / 0.06);
+
+  /* Control geometry. Public defaults equal the previous hard-coded values. */
+  --control-h: 2.75rem;
+  --control-h-sm: 2.25rem;
+  --control-radius: var(--radius);
+  --btn-radius: 9999px;
+  --btn-h-sm: 2.25rem;
+  --btn-h: 2.75rem;
+  --btn-h-lg: 3rem;
+  --btn-px-sm: 1rem;
+  --btn-px: 1.25rem;
+  --btn-px-lg: 1.75rem;
+}
+
+.dark {
+  --success: oklch(0.78 0.15 150);
+  --warning: oklch(0.83 0.14 80);
+  --info: oklch(0.78 0.1 250);
+  --success-soft: color-mix(in oklch, var(--success) 16%, transparent);
+  --warning-soft: color-mix(in oklch, var(--warning) 16%, transparent);
+  --info-soft: color-mix(in oklch, var(--info) 16%, transparent);
+  --destructive-soft: color-mix(in oklch, var(--destructive) 18%, transparent);
+  --destructive-text: var(--destructive);
+  --neutral-soft: color-mix(in oklch, white 8%, transparent);
+  --surface-subtle: color-mix(in oklch, var(--color-brand-black), white 3%);
+
+  --chart-primary: var(--color-brand-primary);
+  --chart-muted: oklch(0.36 0.01 285);
+  --chart-money-out: color-mix(in oklch, var(--color-brand-accent), white 30%);
+  --chart-invoiced: oklch(0.82 0.01 285);
+  --chart-grid: color-mix(in oklch, white 8%, transparent);
+
+  --elevation-1: 0 1px 2px oklch(0 0 0 / 0.3);
+  --elevation-2: 0 4px 12px oklch(0 0 0 / 0.35), 0 1px 3px oklch(0 0 0 / 0.3);
+  --elevation-3: 0 12px 32px oklch(0 0 0 / 0.5), 0 2px 6px oklch(0 0 0 / 0.35);
+}
+
+/* Admin surfaces: 60% canvas (background), 30% surfaces (card, sidebar), 10% gold accent. */
+:root:has([data-surface="admin"]) {
+  --control-h: 2.25rem;
+  --control-h-sm: 2rem;
+  --control-radius: 0.5rem;
+  --btn-radius: 0.5rem;
+  --btn-h-sm: 2rem;
+  --btn-h: 2.25rem;
+  --btn-h-lg: 2.75rem;
+  --btn-px-sm: 0.75rem;
+  --btn-px: 1rem;
+  --btn-px-lg: 1.25rem;
+}
+@media (pointer: coarse) {
+  :root:has([data-surface="admin"]) {
+    --control-h: 2.75rem;
+    --control-h-sm: 2.5rem;
+    --btn-h-sm: 2.5rem;
+    --btn-h: 2.75rem;
+  }
+}
+:root:not(.dark):has([data-surface="admin"]) {
+  --background: var(--color-brand-white);
+  --card: oklch(1 0 0);
+  --popover: oklch(1 0 0);
+  --ring: oklch(0.62 0.13 85);
+  --sidebar: color-mix(in oklch, var(--color-brand-white), var(--color-brand-black) 4%);
+  --sidebar-accent: color-mix(in oklch, var(--color-brand-white), var(--color-brand-black) 8%);
+  --sidebar-primary: var(--color-brand-primary);
+  --sidebar-primary-foreground: var(--color-brand-black);
+}
+.dark:has([data-surface="admin"]) {
+  --background: var(--color-brand-black);
+  --card: color-mix(in oklch, var(--color-brand-black), white 5%);
+  --popover: color-mix(in oklch, var(--color-brand-black), white 8%);
+  --ring: var(--color-brand-primary);
+  --sidebar: color-mix(in oklch, var(--color-brand-black), black 30%);
+  --sidebar-accent: color-mix(in oklch, var(--color-brand-black), white 7%);
+}
+
+@theme inline {
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-success-soft: var(--success-soft);
+  --color-warning-soft: var(--warning-soft);
+  --color-info-soft: var(--info-soft);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-neutral-soft: var(--neutral-soft);
+  --color-success-border: var(--success-border);
+  --color-warning-border: var(--warning-border);
+  --color-info-border: var(--info-border);
+  --color-destructive-border: var(--destructive-border);
+  --color-destructive-text: var(--destructive-text);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-chart-primary: var(--chart-primary);
+  --color-chart-muted: var(--chart-muted);
+  --color-chart-money-in: var(--chart-money-in);
+  --color-chart-money-out: var(--chart-money-out);
+  --color-chart-invoiced: var(--chart-invoiced);
+  --color-chart-overdue: var(--chart-overdue);
+  --color-chart-pending: var(--chart-pending);
+  --color-chart-grid: var(--chart-grid);
+  --shadow-e1: var(--elevation-1);
+  --shadow-e2: var(--elevation-2);
+  --shadow-e3: var(--elevation-3);
+}
+
+/* Admin type scale. Families are the existing Outfit (--font-heading) and Plus Jakarta Sans (--font-sans). */
+@utility type-page-title {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  @media (width >= 40rem) { font-size: 1.5rem; line-height: 2rem; }
+}
+@utility type-section-title {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+@utility type-card-title {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  font-weight: 600;
+}
+@utility type-body { font-size: 0.875rem; line-height: 1.25rem; font-weight: 400; }
+@utility type-body-strong { font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; }
+@utility type-description { font-size: 0.8125rem; line-height: 1.25rem; color: var(--muted-foreground); }
+@utility type-label { font-size: 0.8125rem; line-height: 1.125rem; font-weight: 500; }
+@utility type-table-head { font-size: 0.75rem; line-height: 1rem; font-weight: 500; color: var(--muted-foreground); }
+@utility type-caption { font-size: 0.75rem; line-height: 1rem; color: var(--muted-foreground); }
+@utility type-metric {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.5rem;
+  line-height: 1.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  @media (width >= 40rem) { font-size: 1.75rem; line-height: 2.125rem; }
+}
+@utility type-metric-sm {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* DataTable background-refresh indicator (motion-reduce users get a static bar). */
+@keyframes table-progress {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(300%); }
 }

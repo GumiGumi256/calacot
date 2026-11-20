@@ -2,7 +2,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
-import { LayoutDashboardIcon, UsersIcon, UserRoundIcon, HeadsetIcon, FileTextIcon, ReceiptIcon, CreditCardIcon, WalletIcon, FolderIcon, ShoppingBagIcon, MessageSquareIcon, ListChecksIcon, ChartColumnIcon, LandmarkIcon, UsersRoundIcon, SettingsIcon } from "lucide-react";
+import { LayoutDashboardIcon, UsersIcon, UserRoundIcon, HeadsetIcon, FileTextIcon, ReceiptIcon, CreditCardIcon, WalletIcon, FolderIcon, ShoppingBagIcon, MessageSquareIcon, ListChecksIcon, ChartColumnIcon, LandmarkIcon, UsersRoundIcon, SettingsIcon, FileStackIcon, ClipboardListIcon, PackageIcon } from "lucide-react";
 import { NavItems } from "@/components/nav-documents";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -13,7 +13,7 @@ import type { Permission } from "@/lib/sales/permissions";
 const icons: Record<string, React.ReactNode> = {
   Dashboard: <LayoutDashboardIcon />, Leads: <UserRoundIcon />, Clients: <UsersIcon />,
   Quotations: <FileTextIcon />, "Customer care": <HeadsetIcon />, Invoices: <ReceiptIcon />,
-  Payments: <CreditCardIcon />, Expenses: <WalletIcon />, "Financial reports": <ChartColumnIcon />, "Payment accounts": <LandmarkIcon />, Staff: <UsersRoundIcon />, "Company settings": <SettingsIcon />, Projects: <FolderIcon />,
+  Payments: <CreditCardIcon />, Expenses: <WalletIcon />, "Financial reports": <ChartColumnIcon />, "Payment accounts": <LandmarkIcon />, Staff: <UsersRoundIcon />, "Company settings": <SettingsIcon />, Documents: <FileStackIcon />, Reports: <ClipboardListIcon />, "Item catalogue": <PackageIcon />, Projects: <FolderIcon />,
   Tasks: <ListChecksIcon />,
   "Design Orders": <ShoppingBagIcon />, "Delivery operations": <MessageSquareIcon />,
 };

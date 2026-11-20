@@ -12,11 +12,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const e = detail.expense;
   if (!detail.can.edit) {
     return (
-      <main className="flex flex-col gap-4 p-4 md:p-6">
+      <div className="flex flex-col gap-4 p-4 md:p-6">
         <h1 className="text-xl font-semibold">This request cannot be edited</h1>
         <p>Only the requester can edit a draft or a request returned for correction.</p>
         <Link href={`/admin/expenses/${id}`} className="underline underline-offset-4">Back to the request</Link>
-      </main>
+      </div>
     );
   }
   const [options, today] = await Promise.all([
@@ -24,7 +24,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     db.execute<{ d: string }>(sql`SELECT finance_kampala_today()::text AS d`).then((r) => r.rows[0].d),
   ]);
   return (
-    <main className="flex flex-col gap-4 p-4 md:p-6">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
       <Link href={`/admin/expenses/${id}`} className="text-sm underline-offset-4 hover:underline">Back to the request</Link>
       <Card>
         <CardHeader>
@@ -48,6 +48,6 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           />
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

@@ -93,6 +93,8 @@ export const financeMessages: Record<string, string> = {
   rate_limited: "Too many changes. Wait a minute and try again.",
   // Phase 1E administration.
   staff_unavailable: "This staff record is unavailable.",
+  archive_reason_required: "Give a reason for archiving (at least 5 characters).",
+  document_unavailable: "This document is unavailable.",
   division_disabled: "That division is not currently enabled in company settings. Choose an enabled division.",
   employee_not_approved: "This employee has not been approved yet.",
   stale_staff_record: "This staff record changed since you opened it. Refresh and try again.",
@@ -115,6 +117,10 @@ export const financeMessages: Record<string, string> = {
   settings_proposal_unavailable: "This proposal is no longer pending.",
   self_approval_denied: "You cannot approve your own payment-instruction change. Another administrator must approve it.",
   origin_denied: "Request origin is not permitted.",
+  catalogue_conflict: "This catalogue item was changed by someone else. Refresh to see the latest version, then reapply your change.",
+  catalogue_item_unavailable: "This catalogue item is unavailable.",
+  services_active_item_uq: "An active catalogue item with this name, unit and currency already exists in this division.",
+  catalogue_invalid: "Check the item name, division, type, unit, category and price.",
 };
 
 // Longest code first so that e.g. invalid_document_type wins over invalid_document.

@@ -15,6 +15,14 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+/** Page headings match the sidebar labels (the real text, not CSS capitalisation). */
+const entityTitles: Record<Entity, string> = {
+  clients: "Clients",
+  projects: "Projects",
+  quotations: "Quotations",
+  invoices: "Invoices",
+  deliveries: "Delivery operations",
+};
 export async function SalesListPage({
   entity,
   searchParams,
@@ -44,11 +52,11 @@ export async function SalesListPage({
     selectedClient = (await db.execute<{id:string;name:string}>(sql`SELECT id,display_name AS name FROM clients WHERE id=${raw.clientId}::uuid AND organization_id=${ctx.organizationId} AND archived_at IS NULL`)).rows[0];
   }
   return (
-    <main className="flex flex-col gap-6 p-4 md:p-6">
+    <div className="flex flex-col gap-6 p-4 md:p-6">
       {before}
       <Card>
         <CardHeader>
-          <CardTitle className="capitalize">{entity}</CardTitle>
+          <CardTitle as="h1">{entityTitles[entity]}</CardTitle>
           <CardDescription>
             {entity === "deliveries"
               ? "Delivery status is separate from acceptance, payment and project execution."
@@ -67,6 +75,6 @@ export async function SalesListPage({
           ))}
         </CardFooter>
       </Card>
-    </main>
+    </div>
   );
 }

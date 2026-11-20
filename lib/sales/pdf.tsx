@@ -149,6 +149,7 @@ export async function renderCommercialPdf(d: DocumentSnapshot, draft = false) {
         {d.items.map((line, i) => (
           <View key={i} wrap={false} style={s.row}>
             <View style={s.description}>
+              {line.name ? <Text style={{ fontSize: 10, color: "#000000" }}>{line.name}</Text> : null}
               <Text>{line.description}</Text>
               <Text>
                 {line.unit} | Discount {line.discountAmount} | Tax{" "}

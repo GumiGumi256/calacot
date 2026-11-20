@@ -27,10 +27,10 @@ export default async function Page({
   const d = await documentDetail("invoices", id),
     i = d.record;
   return (
-    <main className="flex flex-col gap-6 p-4 md:p-6">
+    <div className="flex flex-col gap-6 p-4 md:p-6">
       <Card>
         <CardHeader>
-          <CardTitle>{String(i.number)}</CardTitle>
+          <CardTitle as="h1">{String(i.number)}</CardTitle>
           <CardDescription>
             Lifecycle: {String(i.status)} · {String(i.currency)}{" "}
             {String(i.total)} · Amount due: {String(i.balance)}
@@ -92,6 +92,6 @@ export default async function Page({
       )}
       <Deliveries rows={d.deliveries} permissions={d.permissions} />
       <Activity events={d.activity} />
-    </main>
+    </div>
   );
 }

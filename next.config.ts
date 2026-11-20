@@ -1,7 +1,12 @@
 import { withSentryConfig } from "@sentry/nextjs/config";
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
+  // Pin the root so Turbopack never resolves packages (e.g. tailwindcss) from the parent Desktop folder.
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   outputFileTracingIncludes: {
     "/api/sales/*": ["./public/calacot-logo.png", "./node_modules/next/dist/compiled/@vercel/og/Geist-Regular.ttf"],
   },
