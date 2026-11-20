@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 
 export function AccessPendingActions() {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-3">
       {/* /auth/redirect re-resolves the organization and re-checks access server-side. */}
-      <Button render={<Link href="/auth/redirect" />}>Check again</Button>
+      <Button size="lg" className="rounded-full" nativeButton={false} render={<Link href="/auth/redirect" />}>Check again</Button>
       <SignOutButton redirectUrl="/">
-        <Button type="button" variant="outline">Sign out</Button>
+        <Button type="button" size="lg" variant="outline" className="rounded-full">Sign out</Button>
       </SignOutButton>
     </div>
   );

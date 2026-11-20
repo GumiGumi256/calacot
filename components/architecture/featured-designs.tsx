@@ -42,7 +42,7 @@ export default async function FeaturedDesigns() {
             Great places to live.
           </span>
         </h2>
-        <p className="mx-auto mt-6 max-w-[470px] text-sm leading-[1.8] opacity-65 max-sm:text-[13px]">
+        <p className="mx-auto mt-6 max-w-[470px] text-sm leading-[1.8] text-brand-black-600 dark:text-brand-black-300">
           Explore our featured architectural designs. Considered proportions,
           beautiful details, and room for the way you live.
         </p>
@@ -75,7 +75,7 @@ function FeaturedDesignsMessage({
             thoughtfully designed.
           </span>
         </h2>
-        <p className="mx-auto mt-6 max-w-[470px] text-sm leading-[1.8] opacity-65">
+        <p className="mx-auto mt-6 max-w-[470px] text-sm leading-[1.8] text-brand-black-600 dark:text-brand-black-300">
           {unavailable
             ? "Our design collection is temporarily unavailable. Our team can help you explore the possibilities."
             : "Our next selection of featured designs is on its way. Talk to us about the home you have in mind."}
@@ -94,7 +94,7 @@ function FeaturedDesignsMessage({
 export function FeaturedDesignsLoading() {
   return (
     <div
-      className="grid min-h-[500px] place-items-center text-[13px] opacity-60"
+      className="grid min-h-[500px] place-items-center text-sm text-brand-black-600 dark:text-brand-black-300"
       role="status"
     >
       <span>Loading the selected collection…</span>

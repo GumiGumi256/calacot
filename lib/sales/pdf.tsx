@@ -1,5 +1,6 @@
 import React from "react";
 import type { DocumentSnapshot } from "./document-model";
+import { isAgreedOnApproval } from "./stages";
 /** Node runtime; local embedded branding only. Never fetch caller-supplied asset URLs. */
 export async function renderCommercialPdf(d: DocumentSnapshot, draft = false) {
   const {
@@ -182,15 +183,22 @@ export async function renderCommercialPdf(d: DocumentSnapshot, draft = false) {
               : ""}
           </Text>
         </View>
-        <View style={s.section}>
-          <Text>Agreed payment schedule</Text>
-          {d.schedules.map((stage, i) => (
-            <Text key={i}>
-              {stage.label}: {d.currency} {stage.amount}
-              {stage.dueAt ? ` | ${stage.dueAt.slice(0, 10)}` : ""}
-            </Text>
-          ))}
-        </View>
+        {isAgreedOnApproval(d.schedules) ? (
+          <View style={s.section}>
+            <Text>Payment terms</Text>
+            <Text>To be agreed upon approval of this quotation.</Text>
+          </View>
+        ) : (
+          <View style={s.section}>
+            <Text>Agreed payment schedule</Text>
+            {d.schedules.map((stage, i) => (
+              <Text key={i}>
+                {stage.label}: {d.currency} {stage.amount}
+                {stage.dueAt ? ` | ${stage.dueAt.slice(0, 10)}` : ""}
+              </Text>
+            ))}
+          </View>
+        )}
         <View style={s.section}>
           <Text>Terms</Text>
           <Text>{d.terms}</Text>

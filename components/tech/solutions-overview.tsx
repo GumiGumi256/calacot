@@ -132,7 +132,7 @@ export function SolutionsOverview() {
                       {solution.capabilities.map((capability) => (
                         <div
                           key={capability}
-                          className="flex items-center gap-2 text-xs text-foreground/80"
+                          className="flex items-center gap-2 text-xs text-brand-black-700 dark:text-brand-black-200"
                         >
                           <span className="h-1 w-1 rounded-full bg-primary" />
                           {capability}

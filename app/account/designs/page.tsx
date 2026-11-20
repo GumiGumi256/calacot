@@ -26,7 +26,7 @@ export default async function MyDesignsPage() {
         Your Calacot account
       </p>
       <div className="mt-3 flex flex-wrap items-end justify-between gap-5">
-        <h1 className="text-4xl font-medium tracking-tight sm:text-5xl">
+        <h1 className="section-heading">
           My designs.
         </h1>
         <Link

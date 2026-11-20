@@ -1,31 +1,30 @@
 import type { Metadata } from "next";
+import { PublicIntro } from "@/components/layout/public-intro";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Calacot",
+  title: "Privacy Policy",
   description:
     "Learn how Calacot Group Uganda Limited collects, uses, stores, and protects personal information.",
 };
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="bg-background text-foreground">
-      <div className="mx-auto max-w-4xl px-6 py-20 lg:px-8">
-        <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          Calacot Group Uganda Limited
-        </p>
+    <main aria-labelledby="privacy-title" className="site-container pt-28 pb-(--section-space) md:pt-32">
+      <div className="mx-auto max-w-3xl">
+        <PublicIntro
+          id="privacy-title"
+          eyebrow="Calacot Group Uganda Limited"
+          title="Privacy Policy"
+          description="How we collect, use, store and protect your personal information."
+        >
+          <p className="mt-4 text-sm text-brand-black-600 dark:text-brand-black-300">Last updated: 10 September 2026</p>
+        </PublicIntro>
 
-        <h1 className="text-4xl font-medium tracking-tight sm:text-6xl">
-          Privacy Policy
-        </h1>
-
-        <p className="mt-6 text-sm text-muted-foreground">
-          Last updated: 10 September 2026
-        </p>
-
-        <div className="prose prose-neutral mt-12 max-w-none dark:prose-invert">
+        {/* Long-form legal text. Styled per element because the Tailwind typography plugin is not installed. */}
+        <div className="mt-12 border-t border-brand-black-100 pt-10 text-base leading-7 text-brand-black-700 dark:border-brand-black-800 dark:text-brand-black-200 [&_a]:font-medium [&_a]:text-brand-black [&_a]:underline [&_a]:underline-offset-4 [&_a:hover]:text-brand-primary-800 dark:[&_a]:text-brand-white dark:[&_a:hover]:text-brand-primary [&_h2]:mt-12 [&_h2]:mb-4 [&_h2]:text-2xl [&_h2]:font-medium [&_h2]:tracking-tight [&_h2]:text-brand-black dark:[&_h2]:text-brand-white [&_h2:first-of-type]:mt-10 [&_li]:pl-1 [&_li::marker]:text-brand-primary-700 dark:[&_li::marker]:text-brand-primary [&_p]:mt-4 [&_strong]:font-semibold [&_strong]:text-brand-black dark:[&_strong]:text-brand-white [&_ul]:mt-4 [&_ul]:flex [&_ul]:list-disc [&_ul]:flex-col [&_ul]:gap-2 [&_ul]:pl-6">
           <p>
-            Calacot Group Uganda Limited we
-            respects your privacy. This Privacy Policy explains how we collect,
+            Calacot Group Uganda Limited respects
+            your privacy. This Privacy Policy explains how we collect,
             use, disclose, and protect your personal information when you use
             calacot.com, contact us, request our services, purchase
             architectural designs, or communicate with us through WhatsApp.

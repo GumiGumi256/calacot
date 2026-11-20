@@ -70,7 +70,7 @@ export function CustomerCareThread({ phone, messages, canReply, blockedReason, r
         <MessageScroller className="care-wallpaper min-h-0 flex-1" aria-label="WhatsApp conversation">
           <MessageScrollerViewport>
             <MessageScrollerContent className="gap-1 px-3 py-4 sm:px-[6%]">
-              <p className="mx-auto mb-3 flex max-w-sm items-center gap-1.5 rounded-lg bg-brand-primary/25 px-3 py-1.5 text-center text-[11px] leading-snug text-foreground/80 shadow-xs dark:bg-brand-primary/15">
+              <p className="mx-auto mb-3 flex max-w-sm items-center gap-1.5 rounded-lg bg-brand-primary/25 px-3 py-1.5 text-center text-xs leading-snug text-brand-black-700 dark:text-brand-black-200 shadow-xs dark:bg-brand-primary/15">
                 <Lock className="size-3 shrink-0" />
                 Showing the latest 80 messages. New messages appear automatically.
               </p>
@@ -91,7 +91,7 @@ export function CustomerCareThread({ phone, messages, canReply, blockedReason, r
                   <Fragment key={m.id}>
                     {newDay && (
                       <div className="sticky top-2 z-10 my-2 flex justify-center">
-                        <span className="rounded-lg bg-card px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground shadow-xs">
+                        <span className="rounded-lg bg-card px-3 py-1 type-eyebrow text-muted-foreground shadow-xs">
                           {dayLabel(date)}
                         </span>
                       </div>
@@ -123,7 +123,7 @@ export function CustomerCareThread({ phone, messages, canReply, blockedReason, r
                               <span aria-hidden className={cn("inline-block", outgoing ? "w-[4.5rem]" : "w-11")} />
                             </span>
                           )}
-                          <span className="float-right -mb-1 ml-2 mt-1.5 flex items-center gap-1 text-[10.5px] leading-none text-foreground/50">
+                          <span className="float-right -mb-1 ml-2 mt-1.5 flex items-center gap-1 text-xs leading-none text-brand-black-600 dark:text-brand-black-300">
                             <time dateTime={m.eventAt}>{timeOfDay(date)}</time>
                             {outgoing && <StatusTick status={m.status} />}
                           </span>
@@ -131,14 +131,14 @@ export function CustomerCareThread({ phone, messages, canReply, blockedReason, r
                         {options.length > 0 && (
                           <ul className="border-t border-foreground/10">
                             {options.map((option) => (
-                              <li key={option} className="flex items-center justify-center gap-2 border-b border-foreground/10 px-3 py-2 text-center text-[13px] font-medium text-brand-accent last:border-b-0 dark:text-brand-primary">
+                              <li key={option} className="flex items-center justify-center gap-2 border-b border-foreground/10 px-3 py-2 text-center text-sm font-medium text-brand-accent last:border-b-0 dark:text-brand-primary">
                                 <List className="size-3.5 shrink-0" />{option}
                               </li>
                             ))}
                           </ul>
                         )}
                         {(failed || m.errorCode) && (
-                          <p className="border-t border-destructive/20 px-2.5 py-1 text-[11px] text-destructive">
+                          <p className="border-t border-destructive/20 px-2.5 py-1 text-xs text-destructive">
                             {m.status === "uncertain" ? "Delivery uncertain" : "Not delivered"}{m.errorCode ? ` · ${m.errorCode}` : ""}
                           </p>
                         )}
@@ -181,7 +181,7 @@ export function CustomerCareThread({ phone, messages, canReply, blockedReason, r
             <Lock className="size-4 shrink-0" /> {blockedReason}
           </p>
         )}
-        <div id="care-reply-hint" className="mt-1.5 flex min-h-4 items-center justify-between gap-3 px-2 text-[11px] text-muted-foreground">
+        <div id="care-reply-hint" className="mt-1.5 flex min-h-4 items-center justify-between gap-3 px-2 text-xs text-muted-foreground">
           <span role="status" className={cn(state.message && !state.ok && "text-destructive")}>
             {state.message || (canReply ? "Enter to send · Shift+Enter for a new line · Replying takes over from the assistant" : "")}
           </span>

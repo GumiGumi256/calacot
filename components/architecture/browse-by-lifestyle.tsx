@@ -85,10 +85,10 @@ export default function BrowseByLifestyle() {
               <div className="absolute inset-0 bg-brand-black/35 transition-colors duration-500 group-hover:bg-brand-black/25" />
               <div className="absolute inset-0 bg-linear-to-t from-brand-black/90 via-brand-black/10 to-transparent" />
               <div className="relative flex h-full flex-col justify-between p-5 sm:p-6">
-                <span className="text-[11px] tracking-[.14em] text-brand-black-200">{lifestyle.number}</span>
+                <span className="type-eyebrow text-brand-black-200">{lifestyle.number}</span>
                 <div>
                   <div className="mb-5 flex items-end justify-between gap-3">
-                    <h3 className="max-w-[12rem] text-2xl font-normal leading-[1.02] tracking-[-.04em] sm:text-[27px]">
+                    <h3 className="max-w-[12rem] text-2xl font-normal leading-[1.02] tracking-[-.04em] sm:text-3xl">
                       {lifestyle.title}
                     </h3>
                     <span className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-primary text-brand-black transition-transform duration-500 group-hover:rotate-45">
