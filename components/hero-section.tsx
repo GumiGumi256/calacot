@@ -18,7 +18,7 @@ export default function HeroSection() {
         </div>
 
         <div className="flex flex-col lg:col-span-4 lg:pt-3">
-          <p className="max-w-md text-sm leading-relaxed text-foreground/75 md:text-base">
+          <p className="max-w-md text-sm leading-relaxed text-brand-black-700 dark:text-brand-black-200 md:text-base">
             A home that fits your life. A space with more to offer. A business idea
             put to work. Through design, construction, property and technology,
             we help you take the next step. Tell us what you have in mind.

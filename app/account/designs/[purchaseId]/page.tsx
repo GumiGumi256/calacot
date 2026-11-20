@@ -43,7 +43,7 @@ export default async function DesignPurchasePage({
         <p className="type-eyebrow text-muted-foreground">
           Calacot Architecture
         </p>
-        <h1 className="mt-3 max-w-3xl text-3xl font-medium tracking-tight sm:text-5xl">
+        <h1 className="section-heading mt-4 max-w-3xl">
           {p.purchaseStatus === "cancelled"
             ? "Your request is cancelled."
             : active

@@ -133,13 +133,13 @@ export default function FeaturedDesignCarousel({
                     placeholder={design.imageBlur ? "blur" : "empty"}
                     blurDataURL={design.imageBlur || undefined}
                   />
-                  <span className="absolute left-6 top-6 rounded-full border border-white/35 bg-black/25 px-3 py-2 text-[10px] tracking-[.07em] text-brand-white backdrop-blur-xl max-[640px]:left-3.5 max-[640px]:top-3.5 max-[640px]:text-[9px]">
+                  <span className="absolute left-6 top-6 rounded-full border border-white/35 bg-black/25 px-3 py-2 text-xs tracking-[.07em] text-brand-white backdrop-blur-xl max-[640px]:left-3.5 max-[640px]:top-3.5">
                     {design.status === "coming-soon"
                       ? "Coming soon"
                       : "Featured design"}
                   </span>
                   <span
-                    className="absolute bottom-5 right-6 text-[13px] text-brand-white [text-shadow:0_1px_8px_black]"
+                    className="absolute bottom-5 right-6 text-sm text-brand-white [text-shadow:0_1px_8px_black]"
                     aria-hidden="true"
                   >
                     {String(index + 1).padStart(2, "0")}
@@ -147,7 +147,7 @@ export default function FeaturedDesignCarousel({
                 </div>
                 <div className="grid grid-cols-[1.25fr_1fr] gap-9 pt-[26px] max-[1000px]:gap-6 max-[640px]:grid-cols-1 max-[640px]:gap-[22px] max-[640px]:pt-[22px]">
                   <div>
-                    <p className="type-eyebrow mb-2.5 opacity-55">
+                    <p className="type-eyebrow mb-2.5 text-brand-black-600 dark:text-brand-black-300">
                       {[design.architecturalStyle, design.designType]
                         .filter(Boolean)
                         .join(" / ")}
@@ -156,13 +156,13 @@ export default function FeaturedDesignCarousel({
                       {design.title}
                     </h3>
                     {design.description && (
-                      <p className="mt-[13px] line-clamp-3 max-w-[430px] text-[13px] leading-[1.8] opacity-65">
+                      <p className="mt-3 line-clamp-3 max-w-[430px] text-sm leading-[1.8] text-brand-black-600 dark:text-brand-black-300">
                         {design.description}
                       </p>
                     )}
                   </div>
                   <div className="text-right max-[640px]:border-t max-[640px]:border-black/12 max-[640px]:pt-[18px] max-[640px]:text-left dark:max-[640px]:border-white/12">
-                    <p className="mb-1.5 text-[11px] opacity-55">
+                    <p className="mb-1.5 text-xs text-brand-black-600 dark:text-brand-black-300">
                       {design.startingPrice != null
                         ? "Design packages from"
                         : "Design packages"}
@@ -178,7 +178,7 @@ export default function FeaturedDesignCarousel({
                       )}
                     </p>
                     <ul
-                      className="mt-[15px] flex flex-wrap justify-end gap-x-[15px] gap-y-2 text-[11px] opacity-65 max-[640px]:justify-start max-[640px]:text-xs"
+                      className="mt-[15px] flex flex-wrap justify-end gap-x-[15px] gap-y-2 text-xs text-brand-black-600 dark:text-brand-black-300 max-[640px]:justify-start"
                       aria-label="Design specifications"
                     >
                       {design.bedrooms != null && (

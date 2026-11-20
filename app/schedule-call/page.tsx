@@ -11,7 +11,7 @@ export default async function ScheduleCallPage({
   const { service } = await searchParams;
 
   return (
-    <main className="site-container section-space">
+    <main className="site-container pt-28 pb-(--section-space) md:pt-32">
       <ScheduleCallForm initialService={service} />
     </main>
   );

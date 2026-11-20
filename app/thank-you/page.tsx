@@ -1,8 +1,9 @@
 import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
-import { CheckCircle2Icon, CalendarIcon, BriefcaseIcon, ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, BriefcaseIcon, CalendarIcon, CheckIcon, HomeIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import Image from "next/image";
+import { PublicIntro } from "@/components/layout/public-intro";
+import { cn } from "@/lib/utils";
 
 type PageProps = {
   searchParams: Promise<{ type?: string; service?: string }>;
@@ -12,94 +13,68 @@ export const metadata = pageMetadata("/thank-you");
 
 export default async function ThankYouPage({ searchParams }: PageProps) {
   const { type, service } = await searchParams;
-
   const isScheduledCall = type === "scheduled_call" || type === "call";
 
   const content = isScheduledCall
     ? {
-        title: "Call Request Received!",
+        eyebrow: "Consultation requested",
+        title: "Your call request is in.",
         subtitle: "We've received your preferred time and contact details.",
-        badge: "Consultation Requested",
         Icon: CalendarIcon,
         nextSteps: [
-          "Our team will review your preferred date and time.",
-          "Prepare any specific questions or existing reference materials for our discussion.",
-          "We will contact you to confirm availability before your call.",
+          "Our team reviews your preferred date and time.",
+          "We contact you to confirm availability before the call.",
+          "Have any questions or reference material ready for the conversation.",
         ],
       }
     : {
-        title: "Project Request Received!",
+        eyebrow: "Request submitted",
+        title: "Your project request is in.",
         subtitle: "Thank you for sharing your project details with our team.",
-        badge: "Request Submitted",
         Icon: BriefcaseIcon,
         nextSteps: [
-          "Our project lead will review your scope, budget, and timeline.",
-          "We'll reach out via email or phone to confirm details and provide next steps.",
-          "If urgent, feel free to schedule an immediate call with our team.",
+          "A project lead reviews your scope, budget and timeline.",
+          "We reach out by email or phone to confirm details and next steps.",
+          "If it's urgent, schedule a call with our team straight away.",
         ],
       };
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-4 section-space">
-      <div className="max-w-xl w-full text-center space-y-8">
-        {/* Success Icon */}
-        <div className="relative inline-flex items-center justify-center">
-          <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
-            <CheckCircle2Icon className="h-10 w-10 text-primary" />
-          </div>
-        </div>
+    <main aria-labelledby="thank-you-title" className="site-container flex min-h-[80svh] flex-col justify-center pt-28 pb-(--section-space) md:pt-32">
+      <div className="mx-auto w-full max-w-2xl">
+        <span aria-hidden className="mb-8 flex size-14 items-center justify-center rounded-full bg-brand-primary text-brand-black">
+          <CheckIcon className="size-7" strokeWidth={2.5} />
+        </span>
+        <PublicIntro id="thank-you-title" eyebrow={content.eyebrow} title={content.title} description={content.subtitle} />
 
-        {/* Header Text */}
-        <div className="space-y-2">
-          <span className="inline-block rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-            {content.badge}
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{content.title}</h1>
-          <p className="text-muted-foreground text-lg">{content.subtitle}</p>
-        </div>
-
-        {/* Next Steps Box */}
-        <div className="bg-muted/50 border rounded-xl p-6 text-left space-y-4">
-          <div className="flex items-center gap-2 font-semibold text-sm">
-            <content.Icon className="h-4 w-4 text-primary" />
-            <span>What happens next?</span>
-          </div>
-          <ul className="space-y-3 text-sm text-muted-foreground list-disc list-inside">
+        <section aria-labelledby="next-steps" className="mt-10 rounded-3xl border border-brand-black-100 bg-brand-white p-6 sm:p-8 dark:border-brand-black-800 dark:bg-brand-black-900">
+          <h2 id="next-steps" className="flex items-center gap-2 text-base font-medium text-brand-black dark:text-brand-white">
+            <content.Icon aria-hidden className="size-4 text-brand-primary-700 dark:text-brand-primary" />
+            What happens next
+          </h2>
+          <ol className="mt-5 flex flex-col gap-4">
             {content.nextSteps.map((step, index) => (
-              <li key={index} className="leading-relaxed">
-                <span>{step}</span>
+              <li key={step} className="flex gap-4 text-base leading-7 text-brand-black-700 dark:text-brand-black-200">
+                <span aria-hidden className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-brand-primary-100 text-xs font-semibold text-brand-black dark:bg-brand-primary-900 dark:text-brand-primary">
+                  {index + 1}
+                </span>
+                {step}
               </li>
             ))}
-          </ul>
-        </div>
+          </ol>
+        </section>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-          <Link href="/" className={buttonVariants({ variant: "default", size: "lg" })}>
-            Back to Home
-            <Image 
-            src='/icons/home.svg'
-            alt="Chevron Right"
-            width={16}
-            height={16}
-            
-            />
-            
-            </Link>
-
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link href="/" className={cn(buttonVariants({ size: "lg" }), "rounded-full")}>
+            <HomeIcon aria-hidden /> Back to home
+          </Link>
           {!isScheduledCall && (
-            <Link href={`/schedule-call${service ? `?service=${service}` : ""}`} className={buttonVariants({ variant: "outline", size: "lg" })}>
-                Schedule a Call Now <Image 
-                src='/icons/chevron-right.svg'
-                alt="Chevron Right"
-                width={16}
-                height={16}
-                className="invert"
-                />
-              </Link>
+            <Link href={`/schedule-call${service ? `?service=${encodeURIComponent(service)}` : ""}`} className={cn(buttonVariants({ variant: "outline", size: "lg" }), "rounded-full")}>
+              Schedule a call now <ArrowRightIcon aria-hidden />
+            </Link>
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

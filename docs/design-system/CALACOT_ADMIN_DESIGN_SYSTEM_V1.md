@@ -1038,3 +1038,18 @@ Insight sentences are generated only from computed values, with thresholds that 
 - **Browser:** all 7 pages at 1280px and 375px have exactly one `<h1>`, no skipped heading levels and no horizontal overflow. All images have alt text. (An automated contrast sweep could not read the browser's `lab()` colours, so contrast relies on the token checks.)
 
 **Found, not changed:** the fixed public navbar has no background once the page scrolls, so the Calacot logo can sit over page headings.
+
+### Public utility pages (20 November 2026)
+
+- **New shared pieces:** `components/layout/public-intro.tsx` (eyebrow, `section-heading`, `section-copy`) and `components/layout/auth-shell.tsx` (the sign-in and sign-up frame). `lib/ui/clerk-appearance.ts` gives Clerk's forms the brand font, a gold pill button with dark text and the soft card edge.
+- **Thank-you, privacy policy, access-pending, sign-in and sign-up** now use the public intro and brand shades instead of default grey styling. The thank-you and access-pending steps are numbered on a bordered panel.
+- **The privacy policy had no formatting:** its `prose` classes need the Tailwind typography plugin, which isn't installed. Headings, paragraphs, lists and links are now styled explicitly. Its tab title no longer repeats "| Calacot".
+- **Schedule a call, start a project, thank-you and privacy policy** gained the site navbar (each has a `layout.tsx`) and top spacing for it.
+- **Account pages** use `section-heading` for their `h1`.
+- **Leftovers fixed:** small one-off pixel sizes and see-through text in the architecture carousel and featured designs, browse-by-lifestyle, the designs hero, the home hero, Tech solutions and business transformation (an inverted card), and the customer-care chat thread. Large `rem` display numerals stay as deliberate division styling.
+- **New checks in `test:design-system`:**
+  - Public text has no pixel sizes below 16px and no see-through foreground text.
+  - No `prose` classes.
+  - The utility pages use `PublicIntro` or `AuthShell`.
+  - The four pages above keep the navbar.
+- **Browser:** checked at 1280px and 375px with no overflow. The sign-in form itself wasn't seen, because Clerk doesn't render it for a signed-in user.

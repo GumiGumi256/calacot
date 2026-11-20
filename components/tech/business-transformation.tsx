@@ -94,17 +94,17 @@ export function BusinessTransformation() {
             className="flex min-h-[30rem] flex-col justify-between overflow-hidden rounded-3xl border border-border bg-foreground p-7 text-background md:col-span-2 sm:p-9 lg:col-span-7 lg:row-span-2 lg:min-h-0 lg:p-12"
           >
             <div>
-              <span className="type-eyebrow text-background/50">
+              <span className="type-eyebrow text-brand-black-300 dark:text-brand-black-600">
                 Operational reality
               </span>
 
               <h2 className="mt-8 max-w-3xl text-balance section-heading">
                 Growth gets harder when your business is{" "}
-                <span className="text-background/35">disconnected.</span>
+                <span className="text-brand-black-400 dark:text-brand-black-500">disconnected.</span>
               </h2>
             </div>
 
-            <p className="mt-16 max-w-xl text-base leading-7 text-background/60 sm:text-lg sm:leading-8">
+            <p className="mt-16 max-w-xl text-base leading-7 text-brand-black-200 dark:text-brand-black-700 sm:text-lg sm:leading-8">
               Many businesses do not need another isolated application. They
               need their people, information and daily processes to work as one
               connected operation.

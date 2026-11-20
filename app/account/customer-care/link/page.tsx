@@ -44,7 +44,7 @@ export default async function AccountLink({
       <p className="type-eyebrow text-muted-foreground">
         Calacot customer care
       </p>
-      <h1 className="my-5 text-3xl font-medium">Link your WhatsApp.</h1>
+      <h1 className="section-heading my-5">Link your WhatsApp.</h1>
       {link && valid ? (
         <>
           <p className="mb-6 text-sm text-muted-foreground">

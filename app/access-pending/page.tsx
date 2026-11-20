@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { staffAccessStatus } from "@/lib/sales/permissions";
 import { AccessPendingActions } from "@/components/admin/access-pending-actions";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeftIcon } from "lucide-react";
+import { PublicIntro } from "@/components/layout/public-intro";
 
 export const metadata: Metadata = { title: "Access pending", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -37,26 +38,33 @@ export default async function AccessPendingPage() {
     ? ["Contact a Calacot administrator if you think this is a mistake.", "When access is restored, use “Check again” below. You do not need a new invitation."]
     : ["No action is needed from you. Administrators can see that you are waiting.", "Once access is granted, use “Check again” below, or sign in again later.", "If you were expecting access already, contact the person who invited you."];
   return (
-    <main className="flex min-h-svh items-center justify-center p-4 md:p-6" aria-labelledby="access-pending-title">
-      <Card className="w-full max-w-lg">
-        <CardHeader>
-          <p className="text-sm text-muted-foreground">Hello {name}{email ? ` (${email})` : ""}</p>
-          <CardTitle id="access-pending-title" className="text-xl">{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
-          <section aria-labelledby="access-pending-next">
-            <h2 id="access-pending-next" className="text-sm font-medium">What happens next</h2>
-            <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-              {steps.map((s) => <li key={s}>{s}</li>)}
-            </ol>
-          </section>
-          <AccessPendingActions />
-          <p className="text-xs text-muted-foreground">
-            Looking for your design purchases instead? <Link className="underline underline-offset-4" href="/account/designs">Go to your account</Link>.
-          </p>
-        </CardContent>
-      </Card>
+    <main className="site-container flex min-h-svh flex-col justify-center py-(--section-space)" aria-labelledby="access-pending-title">
+      <div className="mx-auto w-full max-w-2xl">
+        <Link href="/" className="mb-10 inline-flex min-h-11 items-center gap-2 text-sm text-brand-black-600 hover:text-brand-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary dark:text-brand-black-200 dark:hover:text-brand-white">
+          <ArrowLeftIcon aria-hidden className="size-4" /> Back to Calacot
+        </Link>
+        <PublicIntro
+          id="access-pending-title"
+          eyebrow={<>Hello {name}{email ? ` · ${email}` : ""}</>}
+          title={title}
+          description={description}
+        />
+        <section aria-labelledby="access-pending-next" className="mt-10 rounded-3xl border border-brand-black-100 bg-brand-white p-6 sm:p-8 dark:border-brand-black-800 dark:bg-brand-black-900">
+          <h2 id="access-pending-next" className="text-base font-medium text-brand-black dark:text-brand-white">What happens next</h2>
+          <ol className="mt-5 flex flex-col gap-4">
+            {steps.map((s, i) => (
+              <li key={s} className="flex gap-4 text-base leading-7 text-brand-black-700 dark:text-brand-black-200">
+                <span aria-hidden className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-brand-primary-100 text-xs font-semibold text-brand-black dark:bg-brand-primary-900 dark:text-brand-primary">{i + 1}</span>
+                {s}
+              </li>
+            ))}
+          </ol>
+          <div className="mt-8"><AccessPendingActions /></div>
+        </section>
+        <p className="mt-6 text-sm text-brand-black-600 dark:text-brand-black-300">
+          Looking for your design purchases instead? <Link className="font-medium text-brand-black underline underline-offset-4 dark:text-brand-white" href="/account/designs">Go to your account</Link>.
+        </p>
+      </div>
     </main>
   );
 }

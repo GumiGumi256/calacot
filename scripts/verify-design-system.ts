@@ -359,7 +359,7 @@ const publicRoots = [
   "components/architecture", "components/painting", "components/real-estate", "components/tech",
   "components/interior-design", "components/forms", "app/(home)", "app/(real-estate)", "app/(calacot-tech)",
   "app/contact", "app/schedule-call", "app/start-project", "app/thank-you", "app/list-property",
-  "app/privacy-policy", "app/account", "app/access-pending",
+  "app/privacy-policy", "app/account", "app/access-pending", "app/sign-in", "app/sign-up",
 ];
 const publicFiles: string[] = [];
 const walkPublic = (dir: string) => {
@@ -370,7 +370,7 @@ const walkPublic = (dir: string) => {
   }
 };
 publicRoots.forEach(walkPublic);
-["footer", "navbar", "hero-section", "possibility-section", "estates-section", "world-view-section", "construction-process-section", "showcase-slider"].forEach((n) => publicFiles.push(`components/${n}.tsx`));
+["footer", "navbar", "hero-section", "possibility-section", "estates-section", "world-view-section", "construction-process-section", "showcase-slider", "customer-care-thread", "layout/public-intro", "layout/auth-shell"].forEach((n) => publicFiles.push(`components/${n}.tsx`));
 const offenders = (re: RegExp) => publicFiles.filter((f) => re.test(read(f)));
 check("public pages use brand shades, not opacity, for text", () => {
   assert.deepEqual(offenders(/\btext-brand-(black|white)\/\d+/), []);
@@ -386,6 +386,19 @@ check("small uppercase labels use the shared eyebrow style", () => {
     }),
   );
   assert.deepEqual(handRolled, [], "use type-eyebrow");
+});
+check("public text is never smaller than the 12px scale step and never see-through", () => {
+  // Large rem display numerals are deliberate division styling; small one-off pixel sizes are not.
+  assert.deepEqual(offenders(/\btext-\[(?:[0-9]|1[0-5])(?:\.\d+)?px\]/), [], "use text-xs / text-sm / type-eyebrow");
+  assert.deepEqual(offenders(/\btext-(?:foreground|background)\/\d+/), [], "use an onyx shade instead of see-through text");
+});
+check("public pages do not rely on the typography plugin (not installed)", () => {
+  assert.deepEqual(offenders(/\bprose\b/), [], "style long-form text explicitly");
+});
+check("public utility pages use the shared intro and the site navbar", () => {
+  for (const p of ["app/thank-you/page.tsx", "app/privacy-policy/page.tsx", "app/access-pending/page.tsx"]) assert.ok(read(p).includes("<PublicIntro"), `${p} must use PublicIntro`);
+  for (const p of ["app/sign-in/[[...sign-in]]/page.tsx", "app/sign-up/[[...sign-up]]/page.tsx"]) assert.ok(read(p).includes("<AuthShell"), `${p} must use AuthShell`);
+  for (const d of ["schedule-call", "start-project", "thank-you", "privacy-policy"]) assert.ok(read(`app/${d}/layout.tsx`).includes("<Navbar"), `app/${d} needs the site navbar`);
 });
 check("public pages use no off-brand palette colours or hard-coded hex colours", () => {
   assert.deepEqual(offenders(/\b(?:bg|text|border|ring|from|to|via|fill|stroke)-(?:amber|emerald|green|red|blue|yellow|orange|sky|rose|zinc|slate|gray|stone|violet|purple|lime|indigo|teal)-\d{2,3}\b|#[0-9a-fA-F]{6}\b/), []);
