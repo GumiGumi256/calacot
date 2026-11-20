@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { receivablesOverview } from "@/lib/finance/receivables";
 import { formatAmount } from "@/lib/finance/options";
+import { formatDate } from "@/lib/format";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Data = Awaited<ReturnType<typeof receivablesOverview>>;
@@ -11,7 +12,7 @@ export function ReceivablesPanel({ data, focus }: { data: Data; focus: "payments
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{focus === "payments" ? "Collections overview" : "Receivables overview"}</CardTitle>
+        <CardTitle as="h2">{focus === "payments" ? "Collections overview" : "Receivables overview"}</CardTitle>
         <CardDescription>Balances use the existing invoice ledger. Currencies are shown separately and never combined.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -27,7 +28,7 @@ export function ReceivablesPanel({ data, focus }: { data: Data; focus: "payments
             <div key={`p-${p.currency}`} className="rounded-lg border p-3">
               <dt className="text-xs text-muted-foreground">Awaiting verification ({p.currency})</dt>
               <dd className="text-lg font-semibold tabular-nums">{formatAmount(p.currency, p.amount)}</dd>
-              <dd className="text-xs text-muted-foreground">{p.count} payment(s), oldest {p.oldest.slice(0, 10)}</dd>
+              <dd className="text-xs text-muted-foreground">{p.count} payment(s), oldest {formatDate(p.oldest)}</dd>
             </div>
           ))}
           {data.canSeePayments && data.unallocatedTotals.map((u) => (
@@ -39,7 +40,7 @@ export function ReceivablesPanel({ data, focus }: { data: Data; focus: "payments
           ))}
         </dl>
         {exceptions.length > 0 ? (
-          <section aria-labelledby={`${focus}-exceptions`} className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
+          <section aria-labelledby={`${focus}-exceptions`} className="rounded-lg border border-warning-border bg-warning-soft p-3 text-sm">
             <h2 id={`${focus}-exceptions`} className="font-medium">Reconciliation exceptions and pending actions</h2>
             <ul className="mt-1 list-disc pl-5">{exceptions.map((x) => <li key={x.label}><Link className="underline underline-offset-4" href={x.href}>{x.label}</Link></li>)}</ul>
           </section>

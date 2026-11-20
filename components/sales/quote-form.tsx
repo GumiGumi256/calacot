@@ -8,12 +8,15 @@ import { totals } from "@/lib/sales/money";
 import { Button } from "@/components/ui/button";
 import { FieldGroup, FieldSet, FieldLegend } from "@/components/ui/field";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import { useUnsavedChangesGuard } from "@/components/feedback/use-unsaved-changes";
+import { notify } from "@/components/feedback/notify";
+import { formatMoney } from "@/lib/format";
 import { TextField, ChoiceField, FormMessage } from "./form-controls";
 import { ProjectForm } from "./project-form";
 import { QuoteLines, customLine, lineKey, type QuoteLine } from "./quote-lines";
@@ -72,6 +75,10 @@ export function QuoteForm({
         schedules: [{ label: "Full amount", amount: "0", dueAt: "" }],
       },
   );
+  const snapshot = (value: QuoteInput) => JSON.stringify({ ...value, items: value.items.map(({ _key, ...rest }) => (void _key, rest)) });
+  const [baseline, setBaseline] = useState(() => snapshot(form));
+  const dirty = snapshot(form) !== baseline;
+  useUnsavedChangesGuard(dirty && !pending);
   const update = (key: keyof QuoteInput, value: unknown) =>
     setForm((f) => ({ ...f, [key]: value }));
   useEffect(() => {
@@ -102,6 +109,8 @@ export function QuoteForm({
           start(async () => {
             const r = await saveQuote(form);
             if (r.ok) {
+              setBaseline(snapshot(form));
+              notify.success(initial ? "Draft saved" : "Quotation draft created");
               router.push(`/admin/quotations/${r.value}`);
               router.refresh();
             } else setMessage(r.error);
@@ -318,19 +327,31 @@ export function QuoteForm({
             required
           />
           <FormMessage>{message}</FormMessage>
-          <Button type="submit" disabled={pending}>
-            {pending ? "Saving…" : "Save draft"}
-          </Button>
+          {/* Sticky action bar: the total and the save action stay reachable on long quotations. */}
+          <div className="sticky bottom-0 z-10 -mx-(--card-spacing) flex flex-wrap items-center justify-between gap-3 border-t bg-card/95 px-(--card-spacing) py-3 backdrop-blur-sm supports-[backdrop-filter]:bg-card/85">
+            <div className="flex min-w-0 flex-col">
+              <span className="type-caption">Calculated total</span>
+              <span className="type-metric-sm">{formatMoney(form.currency, total === "—" ? null : total)}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {dirty && !pending && <span className="type-caption" role="status">Unsaved changes</span>}
+              <Button type="submit" loading={pending}>
+                {pending ? "Saving…" : "Save draft"}
+              </Button>
+            </div>
+          </div>
         </FieldGroup>
       </form>
-      <Dialog open={projectOpen} onOpenChange={setProjectOpen}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create planned project</DialogTitle>
-            <DialogDescription>
-              Your quotation draft stays open.
-            </DialogDescription>
-          </DialogHeader>
+      {/* A sheet, not a nested dialog: a full project form is too long for a modal (docs C5). */}
+      <Sheet open={projectOpen} onOpenChange={setProjectOpen}>
+        <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-lg">
+          <SheetHeader>
+            <SheetTitle>Create planned project</SheetTitle>
+            <SheetDescription>
+              Your quotation draft stays open behind this panel.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="px-4 pb-6">
           <ProjectForm
             clients={data.clients}
             owners={data.owners}
@@ -351,8 +372,9 @@ export function QuoteForm({
               });
             }}
           />
-        </DialogContent>
-      </Dialog>
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

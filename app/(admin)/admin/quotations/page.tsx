@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { DownloadIcon, PlusIcon } from "lucide-react";
 import { parseQuery } from "@/lib/sales/contracts";
 import { readList } from "@/lib/sales/reads";
+import { quotationAttention } from "@/lib/sales/attention";
+import { AttentionStrip } from "@/components/layout/attention-strip";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageContainer } from "@/components/layout/page-container";
@@ -20,7 +22,8 @@ export default async function Page({
 }) {
   const raw = await searchParams;
   const query = parseQuery(raw);
-  const data = await readList("quotations", query);
+  // The attention check runs in parallel and can fail on its own without breaking the list.
+  const [data, attention] = await Promise.all([readList("quotations", query), quotationAttention()]);
   if (data.query.page !== query.page) {
     const p = new URLSearchParams(Object.entries(raw).filter((v): v is [string, string] => typeof v[1] === "string"));
     p.set("page", String(data.query.page));
@@ -45,6 +48,11 @@ export default async function Page({
             </Button>
           )
         }
+      />
+      <AttentionStrip
+        title="Quotations needing a decision"
+        items={attention.state === "ready" ? attention.items : []}
+        failed={attention.state === "error"}
       />
       <QuotationsTable
         rows={data.rows as QuotationRow[]}

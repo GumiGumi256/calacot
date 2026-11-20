@@ -18,6 +18,7 @@ import { expenseStatuses } from "../lib/finance/options";
 import { monthlySeries, monthRange, monthPeriod, type MonthlyActivityRow } from "../lib/charts/series";
 import { pageWindow, preferenceKey, resolveHidden } from "../components/data-table/preferences";
 import { adminBreadcrumbs, isActivePath } from "../lib/admin/breadcrumbs";
+import { effectiveQuotationStatus } from "../lib/sales/quotation-status";
 
 const root = process.cwd();
 const read = (p: string) => readFileSync(join(root, p), "utf8");
@@ -112,6 +113,9 @@ check("dates use Kampala time", () => {
   assert.equal(formatDate("2026-11-19T22:30:00Z"), "20 Nov 2026");
   assert.match(formatDateTime("2026-11-19T11:05:00Z"), /19 Nov 2026,? 14:05/);
   assert.equal(formatMonth("2026-11"), "Nov 2026");
+  // Postgres text timestamps: space separator and a short "+00" offset.
+  assert.equal(formatDateTime("2026-10-06 06:52:31.904619+00"), formatDateTime("2026-10-06T06:52:31.904Z"));
+  assert.match(formatDateTime("2026-10-06 06:52:31.904619+00"), /6 Oct 2026,? 09:52/);
   assert.equal(formatDate(null), "—");
   assert.equal(formatDate("not a date"), "—");
 });
@@ -197,6 +201,22 @@ check("partial months are flagged at the period edges and for the current month"
 check("drill-down periods are clamped to the report period", () => {
   assert.deepEqual(monthPeriod("2026-09", period), { from: "2026-09-15", to: "2026-09-30" });
   assert.deepEqual(monthPeriod("2026-10", period), { from: "2026-10-01", to: "2026-10-31" });
+});
+
+// 3b2. Workflow derivations moved into lib (Phase 5) ----------------------------------------
+console.log("Workflow rules");
+check("a sent quotation past its validity date is expired; nothing else changes", () => {
+  const now = new Date("2026-11-20T12:00:00Z");
+  assert.equal(effectiveQuotationStatus("sent", "2026-11-19T23:59:59Z", now), "expired");
+  assert.equal(effectiveQuotationStatus("sent", "2026-11-20T12:00:00Z", now), "expired", "expires at the validity instant, like the list query (<= now)");
+  assert.equal(effectiveQuotationStatus("sent", "2026-11-21T00:00:00Z", now), "sent");
+  assert.equal(effectiveQuotationStatus("draft", "2020-01-01", now), "draft");
+  assert.equal(effectiveQuotationStatus("accepted", "2020-01-01", now), "accepted");
+  assert.equal(effectiveQuotationStatus("sent", null, now), "sent");
+  assert.equal(effectiveQuotationStatus("sent", "not a date", now), "sent");
+});
+check("the list query uses the same expiry rule", () => {
+  assert.match(read("lib/sales/queries.ts"), /CASE WHEN v\.status='sent' AND v\.valid_until<=now\(\) THEN 'expired'/);
 });
 
 // 3c. Admin shell (Phase 4) -----------------------------------------------------------------
@@ -326,7 +346,7 @@ adminRoots.forEach(walk);
 const count = (re: RegExp) => files.reduce((n, f) => n + (read(f).match(re)?.length ?? 0), 0);
 // Baselines measured when Phase 2 landed (19 Nov 2026). They may only go down as modules migrate.
 const baselines = {
-  "raw Tailwind palette colours": [/\b(?:bg|text|border|ring|fill|stroke)-(?:amber|emerald|green|red|blue|yellow|orange|sky|rose|zinc|slate|gray|neutral|stone|violet|lime)-\d{2,3}/g, 14],
+  "raw Tailwind palette colours": [/\b(?:bg|text|border|ring|fill|stroke)-(?:amber|emerald|green|red|blue|yellow|orange|sky|rose|zinc|slate|gray|neutral|stone|violet|lime)-\d{2,3}/g, 12],
   "arbitrary font sizes": [/\btext-\[\d+(?:\.\d+)?px\]/g, 9],
   "native <select> elements": [/<select\b/g, 54],
 } as const;

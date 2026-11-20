@@ -48,7 +48,11 @@ type DateInput = string | number | Date | null | undefined;
 const toDate = (value: DateInput) => {
   if (value === null || value === undefined || value === "") return null;
   // A bare ISO date (YYYY-MM-DD) is a calendar date, not a UTC instant: pin it to Kampala noon.
-  const d = typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00+03:00`) : new Date(value);
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) value = `${value}T12:00:00+03:00`;
+  // Postgres text timestamps ("2026-10-06 06:52:31.904619+00") are not reliably parsed by Date:
+  // use a T separator and a full "+00:00" offset.
+  else if (typeof value === "string" && /^\d{4}-\d{2}-\d{2} \d/.test(value)) value = value.replace(" ", "T").replace(/([+-]\d{2})$/, "$1:00");
+  const d = new Date(value);
   return Number.isNaN(d.getTime()) ? null : d;
 };
 

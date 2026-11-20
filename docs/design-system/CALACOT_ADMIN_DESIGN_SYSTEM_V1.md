@@ -880,3 +880,48 @@ Insight sentences are generated only from computed values, with thresholds that 
 - **Item catalogue fails before rendering.** It queries `services.updated_by_clerk_user_id`, which the connected database does not have. The page needs the unapplied migration `drizzle-current/0014_quotation_item_catalogue.sql` from earlier work; it is not a design-system issue.
 - **Most pages still put their title in a card** (marked `as="h1"`). Moving them to `PageHeader`, with primary actions in the header, happens module by module in Phases 5–6.
 - **Design purchases still uses its marketing-style layout** inside the shell (Phase 6).
+
+---
+
+## Phase 5 status (20 November 2026)
+
+**Representative workflows delivered**
+
+| Page | What changed |
+|---|---|
+| Quotations list | **"Quotations needing a decision" strip**, shown only when something is due. It covers sent quotations expiring within 7 days, expired quotations, failed quotation emails and drafts idle for 14+ days. Each item links to the matching filtered list. It is a read-only query over the same `listBase` rows under `quotations_read`, and it degrades to "could not be checked". (`lib/sales/attention.ts`, `components/layout/attention-strip.tsx`) |
+| Quotation detail | **Detail workspace.** The header carries the title, number, revision, status, PDF and the forward action. Below it: the scope with a plain next-step note, the draft editor (drafts only), delivery history and activity; beside it, a summary and a revisions timeline. The expiry rule moved from the page into `lib/sales/quotation-status.ts` and is checked against the list query. |
+| Quotation builder | **`PageHeader`**, plus an **unsaved-changes guard**: a browser prompt on reload or close, and a confirmation before in-app links. A **sticky total and Save bar**, a success toast after the server confirms, and "Create project" moved from a nested dialog into a side sheet. (`components/feedback/use-unsaved-changes.ts`) |
+| Payments | **`PageHeader`**, the collections overview using warning tokens, and the register on the shared `DataTable`, with status chips, filters, mobile cards and row actions. Payments not yet allocated get a "Find invoice to verify" action, which opens the client's issued invoices. (`components/finance/payments-table.tsx`) |
+| Dashboard | **Shared attention strip** (hidden when there is nothing to do) and **six `MetricCard`s** with formatted money, icons and links. Restricted or failed metrics say so, never showing zero. |
+| Expense detail | **`PageHeader`** with status and total, and **"Next step" as an attention card**. On phones it comes first; on wide screens it sits beside the details. Dates use the shared Kampala formatter. |
+
+**Shared improvements made along the way**
+
+- **`TransitionControls`** (quotations, invoices, deliveries, clients):
+  - Plain action names ("Send quotation", "Record acceptance", "Void invoice"…).
+  - One primary action, a Cancel button and a loading state.
+  - A success toast only after the server confirms.
+- **`Activity` and `Deliveries`:**
+  - Plain event names ("Quotation: acceptance recorded").
+  - Kampala-time dates.
+  - Status badges and a timeline layout.
+- **`formatDateTime` parses Postgres text timestamps** (`2026-10-06 06:52:31.904619+00`).
+
+**Verification**
+
+- Typecheck shows 0 errors. Lint shows 0 errors (48 warnings, all already present).
+- `test:design-system` passes, including new checks for the expiry rule and Postgres timestamps. The raw-colour baseline is now 12.
+- `test:sales` and `test:org-routing` pass.
+- **Signed in with live data:**
+  - The dashboard flags 1 customer-care request.
+  - The quotation detail renders `CAL-Q-2026-000001` with its timeline.
+  - Payments shows 2 payments awaiting verification. "Find invoice to verify" resolves to `CAL-I-2026-000001`, and the cards fit at 375px.
+  - The builder guard prompted on a sidebar link after an edit and stayed on the page.
+
+**Limits and findings**
+
+- **The expense detail page was not exercised in a browser.** The database has no expense requests; it is covered by typecheck, lint and the structure checks only.
+- **The quotation email for `CAL-Q-2026-000001` has been Queued since 6 Oct 2026 and never attempted.** The sales outbox worker does not appear to be running against this database. This is operational, not design-system. The attention strip counts failed or blocked deliveries; a "stuck in queue" signal would need a delivery timestamp in the list query.
+- **Browser back/forward is not intercepted** by the unsaved-changes guard, because the App Router has no blocking API for it.
+- **The dashboard has no chart yet.** "Outstanding by age" needs a new aging query, planned with Phase 6 Financial reports.
