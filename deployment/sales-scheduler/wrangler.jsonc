@@ -1,0 +1,11 @@
+{
+  "name": "calacot-sales-scheduler",
+  "main": "worker.mjs",
+  "account_id": "55d48ef7e326d2f25455491b531f4e66",
+  "compatibility_date": "2026-10-14",
+  "workers_dev": false,
+  "triggers": { "crons": ["* * * * *"] },
+  "vars": { "SALES_WORKER_URL": "https://www.calacot.com/api/sales/worker" },
+  "observability": { "enabled": true, "traces": { "enabled": true } }
+  // SALES_WORKER_SECRET is a Cloudflare secret binding.
+}

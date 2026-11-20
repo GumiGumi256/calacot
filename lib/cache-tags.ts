@@ -50,8 +50,10 @@ export function expireAdminData(org?: string | null) {
  * part of the cache key, so results that depend on who is asking (role, permissions, "my" filters)
  * are never shared between people. Only the authorization check itself runs per request.
  */
-export function cacheKeyContext<T extends object>(ctx: T): T {
-  return Object.fromEntries(Object.entries(ctx).filter(([, v]) => typeof v !== "function")) as T;
+export type CacheKeyContext<T> = { [K in keyof T as T[K] extends (...args: never[]) => unknown ? never : K]: T[K] };
+
+export function cacheKeyContext<T extends object>(ctx: T): CacheKeyContext<T> {
+  return Object.fromEntries(Object.entries(ctx).filter(([, v]) => typeof v !== "function")) as CacheKeyContext<T>;
 }
 
 /**

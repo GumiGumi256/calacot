@@ -383,7 +383,11 @@ export const projectMembers = pgTable(
       .notNull()
       .references(() => organizations.id),
     projectId: uuid("project_id").notNull(),
-    staffId: uuid("staff_id").notNull(),
+    staffId: uuid("staff_id"),
+    externalName: text("external_name"),
+    externalCompany: text("external_company"),
+    externalPhone: text("external_phone"),
+    externalEmail: text("external_email"),
     responsibility: text("responsibility"),
     createdAt: instant("created_at").notNull().defaultNow(),
   },
@@ -408,6 +412,7 @@ export const projectMembers = pgTable(
       t.projectId,
       t.staffId,
     ),
+    check("project_members_identity_check", sql`(${t.staffId} is not null and ${t.externalName} is null and ${t.externalCompany} is null and ${t.externalPhone} is null and ${t.externalEmail} is null) or (${t.staffId} is null and nullif(trim(${t.externalName}), '') is not null)`),
     index("project_members_staff_idx").on(t.organizationId, t.staffId),
   ],
 );

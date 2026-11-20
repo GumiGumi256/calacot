@@ -2,6 +2,7 @@ import Link from "next/link";
 import { expenseStatusLabels, formatAmount } from "@/lib/finance/options";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ReactNode } from "react";
 
 type Row = Record<string, unknown>;
 type Summary = { currency: string; requested: string; approved: string; disbursed: string; outstanding: string; reconciled: string };
@@ -15,7 +16,7 @@ const day = (v: unknown) => {
 };
 
 /** Read-only project expenditure. Shown only to staff with expenses_read. */
-export function ProjectExpenses({ projectId, expenses, summary, activity }: { projectId: string; expenses: Row[]; summary: Summary[]; activity: Row[] }) {
+export function ProjectExpenses({ projectId, expenses, summary, activity, createAction }: { projectId: string; expenses: Row[]; summary: Summary[]; activity: Row[]; createAction?: ReactNode }) {
   return (
     <Card className="lg:col-span-2">
       <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
@@ -23,7 +24,7 @@ export function ProjectExpenses({ projectId, expenses, summary, activity }: { pr
           <CardTitle>Project expenditure</CardTitle>
           <CardDescription>Approved spending, recorded payments and evidence. Paying an expense does not change project, milestone or invoice status.</CardDescription>
         </div>
-        <Button variant="outline" size="sm" render={<Link href={`/admin/expenses?view=all&projectId=${projectId}`} />}>View all project expenses</Button>
+        <div className="flex flex-wrap gap-2">{createAction}<Button variant="outline" size="sm" render={<Link href={`/admin/expenses?view=all&projectId=${projectId}`} />}>View all project expenses</Button></div>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {summary.length ? (

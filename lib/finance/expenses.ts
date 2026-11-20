@@ -7,7 +7,7 @@ import { literalSearch, parseQuery } from "@/lib/sales/contracts";
 import { actorStaffId, financeContext } from "./context";
 import { effectiveSettings } from "@/lib/admin/settings";
 import { expenseStatuses, expenseViews, type ExpenseView } from "./options";
-import { cacheKeyContext, adminCache } from "@/lib/cache-tags";
+import { cacheKeyContext, adminCache, type CacheKeyContext } from "@/lib/cache-tags";
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 const one = (raw: SearchParams, k: string) => (typeof raw[k] === "string" ? (raw[k] as string) : "");
@@ -28,14 +28,14 @@ export async function readExpenseList(raw: SearchParams) {
   return cachedReadExpenseList(cacheKeyContext(ctx), raw);
 }
 /** Cached per organization, caller context and inputs; expired on writes (lib/cache-tags.ts). */
-async function cachedReadExpenseList(ctx: Awaited<ReturnType<typeof financeContext>>, raw: SearchParams) {
+async function cachedReadExpenseList(ctx: CacheKeyContext<Awaited<ReturnType<typeof financeContext>>>, raw: SearchParams) {
   "use cache: remote";
   adminCache(ctx.organizationId);
   const org = ctx.organizationId;
   const me = await actorStaffId(org, ctx.actor);
-  const canAll = ctx.can("expenses_read");
-  const canReview = ctx.can("expenses_review") || ctx.can("expenses_approve");
-  const canPay = ctx.can("expenses_disburse");
+  const canAll = ctx.permissions.includes("expenses_read");
+  const canReview = ctx.permissions.includes("expenses_review") || ctx.permissions.includes("expenses_approve");
+  const canPay = ctx.permissions.includes("expenses_disburse");
   const q = parseQuery(raw);
   const requested = one(raw, "view") as ExpenseView;
   const defaultView: ExpenseView = canReview ? "review" : canAll ? "all" : "mine";
@@ -86,10 +86,10 @@ async function cachedReadExpenseList(ctx: Awaited<ReturnType<typeof financeConte
         count(*) FILTER (WHERE status='returned' AND requested_by_id=${me}::uuid)::int AS mine_returned
       FROM expenses WHERE organization_id=${org} ${canAll ? sql`` : sql`AND requested_by_id=${me}::uuid`}`),
   ]);
-  const exceptions = canAll && (canPay || canReview || ctx.can("expenses_reconcile")) ? await readExpenseExceptions(org) : [];
+  const exceptions = canAll && (canPay || canReview || ctx.permissions.includes("expenses_reconcile")) ? await readExpenseExceptions(org) : [];
   return {
     rows: rows.rows, total, page, size: q.size, summary: summary.rows, counts: counts.rows[0], exceptions,
-    view, canAll, canReview, canPay, canCreate: ctx.can("expenses_create"),
+    view, canAll, canReview, canPay, canCreate: ctx.permissions.includes("expenses_create"),
     filters: { view, search: q.search, status, division: q.division, currency: q.currency, from: q.from, to: q.to, projectId },
   };
 }
