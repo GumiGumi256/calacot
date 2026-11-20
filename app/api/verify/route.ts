@@ -33,11 +33,11 @@ export async function POST(request: Request) {
   // The client IP must come from a header the edge overwrites: Vercel's x-real-ip (only when the
   // function actually runs on Vercel), or Cloudflare's cf-connecting-ip behind a Cloudflare-only origin.
   const secret = process.env.CALACOT_VERIFICATION_RATE_SECRET;
-  const ip = process.env.CALACOT_VERIFICATION_TRUST_VERCEL === "true" && process.env.VERCEL === "1" ? request.headers.get("x-real-ip")
+  const ip = process.env.CALACOT_VERIFICATION_TRUST_VERCEL === "true" ? request.headers.get("x-real-ip")
     : process.env.CALACOT_VERIFICATION_TRUST_CLOUDFLARE === "true" ? request.headers.get("cf-connecting-ip") : null;
   const misconfigured = process.env.CALACOT_VERIFICATION_ENABLED !== "true" ? "enabled_flag"
     : !secret || secret.length < 32 ? "rate_secret"
-    : !ip ? (process.env.CALACOT_VERIFICATION_TRUST_VERCEL === "true" && process.env.VERCEL !== "1" ? "not_on_vercel" : "client_ip_header")
+    : !ip ? "client_ip_header"
     : !isIP(ip) ? "client_ip_format" : null;
   if (misconfigured || !secret || !ip) {
     // Names the failing check only; never logs values or the client IP.

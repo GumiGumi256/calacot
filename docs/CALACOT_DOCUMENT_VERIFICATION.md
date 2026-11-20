@@ -94,7 +94,7 @@ The UI states that a recognized reference alone does not prove a copy is unalter
 | `CALACOT_VERIFICATION_EMBED` | Embed references and QR codes in newly issued PDFs. Requires the master switch. |
 | `CALACOT_VERIFICATION_REFERENCE_SECRET` | At least 32 characters. Derives references. Store it in a secrets manager and keep it for the lifetime of issued documents. |
 | `CALACOT_VERIFICATION_RATE_SECRET` | At least 32 characters. Hashes client IPs for rate limiting. |
-| `CALACOT_VERIFICATION_TRUST_VERCEL` | Use Vercel's edge-set `x-real-ip` for rate limiting. Takes effect only when `VERCEL=1` (the production setup). |
+| `CALACOT_VERIFICATION_TRUST_VERCEL` | Use Vercel's edge-set `x-real-ip` for rate limiting. Set only for deployments served by Vercel. |
 | `CALACOT_VERIFICATION_TRUST_CLOUDFLARE` | Use `cf-connecting-ip`. Set only behind a Cloudflare-only origin; never on the current Vercel-served site. |
 | `CALACOT_VERIFICATION_ORIGIN` | Canonical public origin printed into PDFs (falls back to `CALACOT_APP_URL`). Must be HTTPS with no path. `http://localhost` is allowed only in capture mode. |
 
