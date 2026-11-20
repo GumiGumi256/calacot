@@ -6,6 +6,7 @@ import { financeMutation, financeMessages, type FinanceResult } from "@/lib/fina
 import { staffContext } from "@/lib/sales/permissions";
 import { catalogueItemSchema, type CatalogueItem } from "./contracts";
 import { catalogueOptions } from "./reads";
+import { expireAdminData } from "@/lib/cache-tags";
 
 export type CatalogueSaveResult = FinanceResult & { item?: CatalogueItem };
 
@@ -23,6 +24,7 @@ export async function saveCatalogueItem(input: unknown): Promise<CatalogueSaveRe
     const id = r.rows[0].result.id;
     item = (await db.execute<CatalogueItem>(sql`SELECT id,code,name,division,category,item_type,description,unit,default_unit_price::text AS unit_price,currency,is_active,row_version,updated_at::text AS updated_at,NULL AS updated_by FROM services WHERE id=${id}::uuid AND organization_id=${ctx.organizationId}`)).rows[0];
     revalidatePath("/admin/catalogue", "layout");
+    expireAdminData(); // cached admin reads (lib/cache-tags.ts)
     return { ok: true, message: parsed.data.id ? "Catalogue item updated." : "Catalogue item created.", id };
   });
   return result.ok ? { ...result, item } : result;

@@ -10,6 +10,7 @@ export default function HeroSection() {
       {/* Hero content */}
       <div className="relative z-10 mx-auto grid max-w-[1600px] grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-8">
+          <p className="type-eyebrow mb-4 text-brand-black-600 dark:text-brand-black-200">Design, property &amp; technology in Kampala, Uganda</p>
           <h1 className="font-heading text-[clamp(3rem,14vw,5rem)] font-light leading-[0.95] tracking-[-0.05em] lg:text-8xl lg:leading-[1.02]">
             We Make
             <br />

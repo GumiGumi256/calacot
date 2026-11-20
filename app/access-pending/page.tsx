@@ -8,7 +8,6 @@ import { ArrowLeftIcon } from "lucide-react";
 import { PublicIntro } from "@/components/layout/public-intro";
 
 export const metadata: Metadata = { title: "Access pending", robots: { index: false, follow: false } };
-export const dynamic = "force-dynamic";
 
 /**
  * Holding page for confirmed members of the Calacot organization who cannot use the admin

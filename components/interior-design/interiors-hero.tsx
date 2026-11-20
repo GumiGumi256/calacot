@@ -70,12 +70,12 @@ export function InteriorsHero() {
       <div className="mx-auto flex min-h-[calc(100svh-9rem)] w-full max-w-360 flex-col">
         {/* Hero copy */}
         <div className="relative z-20 mx-auto max-w-4xl text-center">
-          {/* <p
+          <p
             data-hero-copy
             className="type-eyebrow text-brand-black-600 dark:text-brand-black-300"
           >
-            Calacot Interiors
-          </p> */}
+            Interior designers in Kampala, Uganda
+          </p>
 
           <h1
             data-hero-copy

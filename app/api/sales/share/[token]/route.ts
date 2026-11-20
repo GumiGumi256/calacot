@@ -2,8 +2,8 @@ import { createHash } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { db } from "@/database/db";
 import { loadPdf } from "@/lib/sales/storage";
-export const runtime = "nodejs";
-export async function GET(
+import { expiringAdminData } from "@/lib/cache-tags";
+async function handleGET(
   _: Request,
   { params }: { params: Promise<{ token: string }> },
 ) {
@@ -34,3 +34,6 @@ export async function GET(
     return new Response("Document temporarily unavailable", { status: 503 });
   }
 }
+
+// Expire cached admin reads after a successful write (lib/cache-tags.ts).
+export const GET = expiringAdminData(handleGET);

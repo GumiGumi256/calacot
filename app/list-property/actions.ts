@@ -1,4 +1,5 @@
 "use server";
+import { expireAdminData } from "@/lib/cache-tags";
 
 import { queueEnquiryEmails } from "@/lib/email/queue";
 
@@ -38,6 +39,7 @@ export async function submitPropertyLead(
     }).returning();
 
     queueEnquiryEmails({ id: saved.id, kind: "property", email: saved.email, details: saved });
+    expireAdminData(); // the new enquiry appears in the admin at once
     return { success: true };
   } catch {
     console.error("Failed to save property lead.");

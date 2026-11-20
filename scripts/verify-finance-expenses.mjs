@@ -49,7 +49,7 @@ try {
       b.onLoad({ filter: /.*/, namespace: "test" }, ({ path }) => {
         const g = "const c=globalThis.__financeTest;";
         if (path === "server-only") return { loader: "js", contents: "" };
-        if (path === "next/cache") return { loader: "js", contents: "export function revalidatePath(){}" };
+        if (path === "next/cache") return { loader: "js", contents: "export function revalidatePath(){} export function revalidateTag(){} export function updateTag(){} export function cacheTag(){} export function cacheLife(){}" };
         if (path === "next/headers") return { loader: "js", contents: g + "export async function headers(){return new Headers({host:'app.test',...(c.origin?{origin:c.origin}:{})})}" };
         if (path === "next/navigation") return { loader: "js", contents: "export function notFound(){throw new Error('NEXT_NOT_FOUND')}" };
         // Phase 1E: mutations re-verify membership live with Clerk; the fake mirrors the session unless c.revoked.

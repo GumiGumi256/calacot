@@ -23,7 +23,8 @@
     "sales:plan-repair": "tsx scripts/plan-sales-repair.ts",
     "typecheck": "tsc --noEmit",
     "test:org-routing": "node scripts/verify-org-routing.mjs",
-    "test:design-system": "tsx scripts/verify-design-system.ts"
+    "test:design-system": "tsx scripts/verify-design-system.ts",
+    "test:seo": "tsx scripts/verify-seo.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

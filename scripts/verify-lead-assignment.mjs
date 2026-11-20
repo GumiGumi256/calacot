@@ -9,7 +9,7 @@ const bundle = await build({entryPoints:['lib/admin/actions.ts'],bundle:true,pla
  b.onResolve({filter:adapters},({path})=>({path,namespace:'fixture'}));
  b.onLoad({filter:/.*/,namespace:'fixture'},({path})=>{
  const prefix='const c=globalThis.__leadAssignmentTest;';
- if(path==='next/cache')return {contents:'export function revalidatePath(){}',loader:'js'};
+ if(path==='next/cache')return {contents:'export function revalidatePath(){} export function revalidateTag(){} export function updateTag(){} export function cacheTag(){} export function cacheLife(){}',loader:'js'};
  if(path.includes('permissions'))return {contents:prefix+'export async function staffContext(){if(!c.authorized)throw Error("unauthorized");return {organizationId:"org_a",actor:"staff",permissions:["leads_write"]}}',loader:'js'};
  if(path==='@clerk/nextjs/server')return {contents:prefix+'export async function clerkClient(){return {organizations:{async getOrganizationMembershipList(){if(c.clerk==="error")throw Error("unavailable");return {data:c.clerk==="member"?[{organization:{id:"org_a"},publicUserData:{userId:"user_1"}}]:[]}}}}}',loader:'js'};
  return {contents:prefix+'export const db={async execute(){c.calls++;return {rows:c.calls%2===1?(c.staff?[{clerk_user_id:"user_1"}]:[]):[{}]}}}',loader:'js'};

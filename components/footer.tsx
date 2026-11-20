@@ -34,15 +34,16 @@ const SOCIAL_LINKS = [
   },
 ];
 
+// Only pages that exist: /privacy, /terms and /cookies returned 404 (broken links hurt visitors and
+// search rankings). Add Terms and Cookies back once approved policy texts are published.
 const LEGAL_LINKS = [
-  { name: "Privacy Policy", href: "/privacy" },
-  { name: "Terms", href: "/terms" },
-  { name: "Cookies", href: "/cookies" },
+  { name: "Privacy Policy", href: "/privacy-policy" },
 ];
 
-export default function Footer() {
+export type FooterContact = { place: string; phone?: string; email?: string };
+
+export default function Footer({ contact = { place: "Kampala, Uganda" }, year }: { contact?: FooterContact; year?: React.ReactNode }) {
   const pathname = usePathname();
-  const currentYear = new Date().getFullYear();
 
   const [first, second] = pathname.split("/").filter(Boolean);
   if (first === "admin" || second === "admin" || first === "access-pending") {
@@ -179,13 +180,16 @@ export default function Footer() {
           {/* Bottom */}
           <div className="type-eyebrow mt-4 flex flex-col items-start justify-between gap-4 pb-8 text-brand-black-600 dark:text-brand-black-400 md:flex-row md:items-center">
             <span>
-              © {currentYear} Calacot Uganda Limited.{" "}
+              © {year} Calacot Uganda Limited.{" "}
               <span className="capitalize">All rights reserved.</span>
             </span>
 
-            {/* <span>
-              Kampala — Uganda
-            </span> */}
+            {/* Name, place and contact, identical to the structured data and Google Business Profile. */}
+            <address className="flex flex-wrap items-center gap-x-4 gap-y-1 not-italic">
+              <span>{contact.place}</span>
+              {contact.phone && <a href={`tel:${contact.phone.replace(/[^\d+]/g, "")}`} className="hover:text-brand-black dark:hover:text-brand-white">{contact.phone}</a>}
+              {contact.email && <a href={`mailto:${contact.email}`} className="normal-case hover:text-brand-black dark:hover:text-brand-white">{contact.email}</a>}
+            </address>
           </div>
         </div>
       </div>

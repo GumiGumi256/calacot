@@ -5,8 +5,8 @@ import { clerkClient } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { db } from "@/database/db";
 import { syncStaffMember } from "@/lib/admin/staff-sync";
+import { expiringAdminData } from "@/lib/cache-tags";
 
-export const runtime = "nodejs";
 const membershipEvents = new Set(["organizationMembership.created", "organizationMembership.updated", "organizationMembership.deleted"]);
 
 /**
@@ -15,7 +15,7 @@ const membershipEvents = new Set(["organizationMembership.created", "organizatio
  * Svix delivery ids are recorded; processed ids are acknowledged without reprocessing and
  * failures return 500 so Svix retries. Scheduled reconciliation covers missed deliveries.
  */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   if (!process.env.CLERK_WEBHOOK_SIGNING_SECRET) return new Response("Webhook not configured", { status: 503 });
   const org = process.env.CALACOT_CLERK_ORG_ID?.trim();
   let event: Awaited<ReturnType<typeof verifyWebhook>>;
@@ -38,3 +38,6 @@ export async function POST(request: NextRequest) {
     return new Response("Sync failed", { status: 500 });
   }
 }
+
+// Expire cached admin reads after a successful write (lib/cache-tags.ts).
+export const POST = expiringAdminData(handlePOST);

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { siteUrl, seoPages } from "@/lib/seo";
 import { SiteStructuredData } from "@/components/seo/structured-data";
@@ -8,6 +9,8 @@ import Navbar from "@/components/navbar";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import Footer from "@/components/footer";
+import { CopyrightYear } from "@/components/layout/copyright-year";
+import { business } from "@/lib/business";
 import { Toaster } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -26,10 +29,15 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   metadataBase: siteUrl,
   title: {
-    default: "Calacot | We Make Possibilities Real",
+    default: "Calacot | Architects, Interiors, Painting & Property in Uganda",
     template: "%s | Calacot",
   },
   description: seoPages["/"].description,
+  // Search Console / Bing Webmaster ownership checks, set in deployment settings (no code change).
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION?.trim() ? { google: process.env.GOOGLE_SITE_VERIFICATION.trim() } : {}),
+    ...(process.env.BING_SITE_VERIFICATION?.trim() ? { other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION.trim() } } : {}),
+  },
   robots: {
     index: true,
     follow: true,
@@ -82,7 +90,10 @@ export default function RootLayout({
               {/* <Navbar /> */}
               {children}
             </TooltipProvider>
-            <Footer />
+            {/* usePathname() inside is request-time on dynamic routes: give it its own boundary. */}
+            <Suspense fallback={null}>
+              <Footer year={<CopyrightYear />} contact={{ place: [business.street, business.area, `${business.city}, ${business.countryName}`].filter(Boolean).join(", "), phone: business.phone, email: business.email }} />
+            </Suspense>
             <Toaster />
           </ThemeProvider>
         </ClerkProvider>

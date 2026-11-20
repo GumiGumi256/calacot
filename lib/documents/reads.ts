@@ -6,6 +6,7 @@ import { db } from "@/database/db";
 import { staffContext } from "@/lib/sales/permissions";
 import { literalSearch, parseQuery } from "@/lib/sales/contracts";
 import { canWriteLink, documentAccessPredicate, linkTypes, type DocumentContext, type LinkType } from "./access";
+import { cacheKeyContext, adminCache } from "@/lib/cache-tags";
 
 type Raw = Record<string, string | string[] | undefined>;
 const one = (raw: Raw, k: string) => (typeof raw[k] === "string" ? (raw[k] as string).slice(0, 200) : "");
@@ -54,6 +55,12 @@ export type DocumentRow = { id: string; root: string; name: string; kind: string
 
 export async function readDocuments(raw: Raw) {
   const ctx = await staffContext("documents_read");
+  return cachedReadDocuments(cacheKeyContext(ctx), raw);
+}
+/** Cached per organization, caller context and inputs; expired on writes (lib/cache-tags.ts). */
+async function cachedReadDocuments(ctx: Awaited<ReturnType<typeof staffContext>>, raw: Raw) {
+  "use cache: remote";
+  adminCache(ctx.organizationId);
   const q = parseQuery(raw);
   const kind = documentKinds.includes(one(raw, "kind") as never) ? one(raw, "kind") : "";
   const record = [...linkTypes, "expense", "invoice", "quotation"].includes(one(raw, "record")) ? one(raw, "record") : "";

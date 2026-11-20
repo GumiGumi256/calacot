@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/database/db";
 import { financeMutation, type FinanceResult } from "@/lib/finance/context";
 import { documentAccessPredicate } from "./access";
+import { expireAdminData } from "@/lib/cache-tags";
 
 /** Archives a whole document family (all versions). Financial artifacts are refused by the database. */
 export async function archiveDocument(_: FinanceResult, data: FormData): Promise<FinanceResult> {
@@ -16,6 +17,7 @@ export async function archiveDocument(_: FinanceResult, data: FormData): Promise
     try {
       const r = await db.execute<{ result: { already: boolean } }>(sql`SELECT document_archive(${ctx.organizationId},${ctx.actor},${p.data.documentId}::uuid,${p.data.reason},${correlation}) AS result`);
       revalidatePath("/admin/documents", "layout");
+      expireAdminData(); // cached admin reads (lib/cache-tags.ts)
       return { ok: true, message: r.rows[0].result.already ? "Already archived." : "Document archived. It stays available in the archive and in audit history." };
     } catch (e) {
       if (String(e instanceof Error ? `${e.message} ${e.cause instanceof Error ? e.cause.message : ""}` : e).includes("financial_document_immutable")) return { ok: false, message: "Quotations, invoices, receipts and expense evidence cannot be archived here." };

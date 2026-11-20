@@ -6,8 +6,8 @@ import { renderCommercialPdf } from "@/lib/sales/pdf";
 import { finalArtifact } from "@/lib/sales/artifacts";
 import type { DocumentSnapshot } from "@/lib/sales/document-model";
 import { readFile } from "node:fs/promises";
-export const runtime = "nodejs";
-export async function GET(
+import { expiringAdminData } from "@/lib/cache-tags";
+async function handleGET(
   request: Request,
   { params }: { params: Promise<{ entity: string; id: string }> },
 ) {
@@ -130,3 +130,6 @@ export async function GET(
     );
   }
 }
+
+// Expire cached admin reads after a successful write (lib/cache-tags.ts).
+export const GET = expiringAdminData(handleGET);

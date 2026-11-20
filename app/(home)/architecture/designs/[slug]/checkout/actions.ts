@@ -17,6 +17,7 @@ import {
 import { createPurchaseReferences } from "@/lib/design-purchases/references";
 import { queueDesignEmail } from "@/lib/design-purchases/email";
 import { queuePurchaseCreatedWhatsApp } from "@/lib/whatsapp/purchase-notifications";
+import { expireAdminData } from "@/lib/cache-tags";
 
 export async function createDesignPurchase(
   _: ActionState,
@@ -144,5 +145,6 @@ export async function createDesignPurchase(
   if (values.whatsappConsent) queuePurchaseCreatedWhatsApp(purchase);
   revalidatePath("/account/designs");
   revalidatePath("/admin/design-purchases");
+  expireAdminData(); // cached admin reads (lib/cache-tags.ts)
   redirect(`/account/designs/${purchase.id}`);
 }

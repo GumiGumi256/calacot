@@ -9,6 +9,7 @@ import { salesConfig } from "./config";
 import { totals } from "./money";
 import { AGREED_ON_APPROVAL } from "./stages";
 import { parseQuotationImport, type ImportQuote } from "./quote-import";
+import { expireAdminData } from "@/lib/cache-tags";
 
 /*
  * Quotation import (server). Every quotation is imported in its own database transaction:
@@ -178,5 +179,6 @@ export async function runQuotationImport(text: string): Promise<{ ok: true; resu
     await pool.end();
   }
   for (const route of ["clients", "projects", "quotations"]) revalidatePath(`/admin/${route}`, "layout");
+  expireAdminData(); // cached admin reads (lib/cache-tags.ts)
   return { ok: true, results };
 }

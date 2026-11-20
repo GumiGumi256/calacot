@@ -7,6 +7,7 @@ import { literalSearch, parseQuery } from "@/lib/sales/contracts";
 import { actorStaffId, financeContext } from "./context";
 import { effectiveSettings } from "@/lib/admin/settings";
 import { expenseStatuses, expenseViews, type ExpenseView } from "./options";
+import { cacheKeyContext, adminCache } from "@/lib/cache-tags";
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 const one = (raw: SearchParams, k: string) => (typeof raw[k] === "string" ? (raw[k] as string) : "");
@@ -24,6 +25,12 @@ export type ExpenseListRow = {
 
 export async function readExpenseList(raw: SearchParams) {
   const ctx = await financeContext(["expenses_read", "expenses_create"]);
+  return cachedReadExpenseList(cacheKeyContext(ctx), raw);
+}
+/** Cached per organization, caller context and inputs; expired on writes (lib/cache-tags.ts). */
+async function cachedReadExpenseList(ctx: Awaited<ReturnType<typeof financeContext>>, raw: SearchParams) {
+  "use cache: remote";
+  adminCache(ctx.organizationId);
   const org = ctx.organizationId;
   const me = await actorStaffId(org, ctx.actor);
   const canAll = ctx.can("expenses_read");
@@ -159,6 +166,8 @@ export async function expenseFormOptions() {
 
 /** Exceptions for finance staff on the expenses workspace. */
 export async function readExpenseExceptions(org: string) {
+  "use cache: remote";
+  adminCache(org);
   const r = await db.execute<{ kind: string; count: number }>(sql`
     SELECT 'paid_without_disbursement' AS kind,count(*)::int AS count FROM expenses e WHERE e.organization_id=${org} AND e.status='paid' AND NOT EXISTS(SELECT 1 FROM expense_disbursements d WHERE d.organization_id=e.organization_id AND d.expense_id=e.id AND d.status='recorded')
     UNION ALL SELECT 'unreconciled_over_30_days',count(*)::int FROM expense_disbursements d WHERE d.organization_id=${org} AND d.status='recorded' AND d.reconciled_at IS NULL AND d.paid_on<finance_kampala_today()-30

@@ -1,8 +1,7 @@
 import { workerAuthorized } from "@/lib/customer-care/security";
 import { runCareWorker } from "@/lib/customer-care/worker";
+import { expiringAdminData } from "@/lib/cache-tags";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 export const maxDuration = 180;
 async function handleWorker(request: Request, secret: string | undefined) {
   if (
@@ -23,10 +22,16 @@ async function handleWorker(request: Request, secret: string | undefined) {
 }
 
 // Vercel cron invokes GET with Authorization: Bearer <CRON_SECRET>.
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   return handleWorker(request, process.env.CRON_SECRET);
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   return handleWorker(request, process.env.CUSTOMER_CARE_WORKER_SECRET);
 }
+
+// Expire cached admin reads after a successful write (lib/cache-tags.ts).
+export const GET = expiringAdminData(handleGET);
+
+// Expire cached admin reads after a successful write (lib/cache-tags.ts).
+export const POST = expiringAdminData(handlePOST);

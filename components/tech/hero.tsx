@@ -63,6 +63,7 @@ export default function TechHero() {
       <div className="relative z-20 flex flex-col pb-16 pt-24 sm:pb-20 lg:pb-24 lg:pt-32 site-container">
         <div className="flex flex-1 items-center justify-center py-12">
           <div className="mx-auto max-w-5xl text-center">
+            <p className="type-eyebrow mb-5 text-brand-black-200">Software development in Kampala, Uganda</p>
             <h1 className="text-balance text-[clamp(2.75rem,7vw,6rem)] font-heading font-semibold leading-[0.92] tracking-[-0.055em] text-brand-white">
               Your ideas, put to work.
               <span className="mt-2 block text-brand-primary">

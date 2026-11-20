@@ -74,6 +74,7 @@ export default function PaintingHero() {
 
       {/* Centered content */}
       <div className="relative z-10 mx-auto max-w-3xl px-6 text-center mb-44 md:mb-64">
+        <p className="type-eyebrow mb-4 text-brand-black-600 dark:text-brand-black-200">Painting services in Kampala, Uganda</p>
         <h1 className="sub-title font-light text-4xl tracking-tight text-neutral-900 dark:text-brand-white md:text-5xl lg:text-6xl hero-title">
           A new finish. A fresh sense of home.
         </h1>
