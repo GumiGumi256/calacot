@@ -46,6 +46,13 @@ for (const line of [
   "--primary: var(--color-brand-primary);",
   "--radius: 0.625rem;",
 ]) check(`globals.css keeps ${line.split(":")[0]}`, () => assert.ok(css.includes(line), `missing: ${line}`));
+check("brand scales are complete (50-950) for primary, black, white, lavender and grey-olive", () => {
+  const steps = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"];
+  const missing = ["primary", "black", "white", "lavender", "grey-olive"].flatMap((name) =>
+    steps.filter((step) => !new RegExp(`--color-brand-${name}-${step}:\\s*oklch\\(`).test(css)).map((step) => `${name}-${step}`),
+  );
+  assert.deepEqual(missing, [], `missing: ${missing.join(", ")}`);
+});
 check("fonts remain Plus Jakarta Sans (sans) and Outfit (heading)", () => {
   assert.match(layout, /Outfit\(\{[^}]*variable: "--font-heading"/);
   assert.match(layout, /Plus_Jakarta_Sans\(\{[^}]*variable: "--font-sans"/);

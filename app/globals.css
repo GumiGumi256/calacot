@@ -19,8 +19,77 @@ h1, h2, h3, h4, h5, h6 {
 --color-brand-green: oklch(0.8803 0.2765 138.82);
 --color-brand-accent: oklch(0.4778 0.1433 40.83);
 --color-brand-lavender: oklch(59.7% 0.145 302.1);
---color-brand-grey-olive: oklch(63.8% 0.029 152.1)
+--color-brand-grey-olive: oklch(63.8% 0.029 152.1);
+}
 
+/*
+ * Brand colour scales (50 lightest to 950 darkest). The base names above are unchanged;
+ * each scale is the full range of that colour, usable as e.g. bg-brand-primary-100 or
+ * text-brand-black-600, or directly as var(--color-brand-lavender-500).
+ * "static" makes Tailwind always output these variables, even before a class uses them.
+ * Source palettes: golden-pollen (primary), onyx (black), ghost-white (white),
+ * lavender-purple (lavender), grey-olive (grey-olive).
+ */
+@theme static {
+--color-brand-primary-50: oklch(98.15% 0.027 93.10);
+--color-brand-primary-100: oklch(96.38% 0.052 92.93);
+--color-brand-primary-200: oklch(93.03% 0.101 92.96);
+--color-brand-primary-300: oklch(89.98% 0.141 92.26);
+--color-brand-primary-400: oklch(87.24% 0.166 90.21);
+--color-brand-primary-500: oklch(84.79% 0.174 86.06);
+--color-brand-primary-600: oklch(71.79% 0.147 86.44);
+--color-brand-primary-700: oklch(58.17% 0.119 87.05);
+--color-brand-primary-800: oklch(43.69% 0.089 88.18);
+--color-brand-primary-900: oklch(27.87% 0.057 91.01);
+--color-brand-primary-950: oklch(22.66% 0.046 91.59);
+
+--color-brand-black-50: oklch(95.90% 0.004 286.32);
+--color-brand-black-100: oklch(91.48% 0.009 286.21);
+--color-brand-black-200: oklch(82.77% 0.019 285.97);
+--color-brand-black-300: oklch(74.09% 0.027 285.72);
+--color-brand-black-400: oklch(64.90% 0.038 285.28);
+--color-brand-black-500: oklch(55.42% 0.051 284.62);
+--color-brand-black-600: oklch(47.41% 0.042 284.70);
+--color-brand-black-700: oklch(39.06% 0.032 284.82);
+--color-brand-black-800: oklch(29.92% 0.025 284.78);
+--color-brand-black-900: oklch(20.35% 0.014 285.10);
+--color-brand-black-950: oklch(17.49% 0.008 285.52);
+
+--color-brand-white-50: oklch(94.81% 0.016 278.50);
+--color-brand-white-100: oklch(89.84% 0.032 277.90);
+--color-brand-white-200: oklch(79.49% 0.067 276.29);
+--color-brand-white-300: oklch(69.06% 0.104 275.29);
+--color-brand-white-400: oklch(58.45% 0.144 273.83);
+--color-brand-white-500: oklch(48.42% 0.183 270.56);
+--color-brand-white-600: oklch(41.42% 0.153 270.80);
+--color-brand-white-700: oklch(34.32% 0.120 270.74);
+--color-brand-white-800: oklch(26.63% 0.087 271.15);
+--color-brand-white-900: oklch(18.38% 0.047 273.47);
+--color-brand-white-950: oklch(15.64% 0.034 273.44);
+
+--color-brand-lavender-50: oklch(95.24% 0.015 302.55);
+--color-brand-lavender-100: oklch(90.32% 0.033 305.32);
+--color-brand-lavender-200: oklch(80.51% 0.067 304.69);
+--color-brand-lavender-300: oklch(70.60% 0.103 303.81);
+--color-brand-lavender-400: oklch(60.70% 0.140 302.49);
+--color-brand-lavender-500: oklch(51.09% 0.175 300.32);
+--color-brand-lavender-600: oklch(43.69% 0.146 300.50);
+--color-brand-lavender-700: oklch(35.97% 0.116 300.77);
+--color-brand-lavender-800: oklch(27.82% 0.083 301.25);
+--color-brand-lavender-900: oklch(19.06% 0.047 302.26);
+--color-brand-lavender-950: oklch(16.35% 0.034 302.99);
+
+--color-brand-grey-olive-50: oklch(96.24% 0.003 165.08);
+--color-brand-grey-olive-100: oklch(92.61% 0.008 151.88);
+--color-brand-grey-olive-200: oklch(84.97% 0.012 153.64);
+--color-brand-grey-olive-300: oklch(77.27% 0.020 152.72);
+--color-brand-grey-olive-400: oklch(69.25% 0.026 151);
+--color-brand-grey-olive-500: oklch(61.19% 0.034 152.46);
+--color-brand-grey-olive-600: oklch(52.09% 0.028 150.75);
+--color-brand-grey-olive-700: oklch(42.76% 0.023 152.23);
+--color-brand-grey-olive-800: oklch(32.71% 0.015 153.07);
+--color-brand-grey-olive-900: oklch(21.97% 0.011 151.25);
+--color-brand-grey-olive-950: oklch(18.26% 0.006 156.55);
 }
 
 .painting-hero-light {

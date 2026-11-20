@@ -68,6 +68,31 @@ export default async function DesignSystemGallery({ searchParams }: { searchPara
           <ModeToggle />
         </header>
 
+        <Section title="Brand colour scales">
+          <div className="flex flex-col gap-3">
+            {["primary", "black", "white", "lavender", "grey-olive"].map((name) => (
+              <div key={name} className="flex flex-col gap-1">
+                <span className="type-caption">brand-{name} (base swatch first)</span>
+                <div className="grid grid-cols-12 overflow-hidden rounded-lg border">
+                  {["", "50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"].map((step) => (
+                    <div
+                      key={step || "base"}
+                      title={`--color-brand-${name}${step ? `-${step}` : ""}`}
+                      className="flex h-12 items-end p-1 text-[0.625rem] tabular-nums"
+                      style={{
+                        background: `var(--color-brand-${name}${step ? `-${step}` : ""})`,
+                        color: (step ? Number(step) < 500 : name !== "black") ? "var(--color-brand-black)" : "var(--color-brand-white)",
+                      }}
+                    >
+                      {step || "base"}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+
         <Section title="Buttons">
           <div className="flex flex-wrap items-center gap-3">
             <Button><PlusIcon /> New quotation</Button>
