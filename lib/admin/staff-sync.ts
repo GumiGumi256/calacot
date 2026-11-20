@@ -2,6 +2,7 @@ import "server-only";
 import { clerkClient } from "@clerk/nextjs/server";
 import { sql } from "drizzle-orm";
 import { db } from "@/database/db";
+import { invalidateLiveMembership } from "@/lib/sales/permissions";
 
 type Clerk = Awaited<ReturnType<typeof clerkClient>>;
 
@@ -31,6 +32,8 @@ export async function syncStaffMember(clerk: Clerk, org: string, userId: string,
       WHERE organization_id=${org} AND clerk_user_id=${userId} AND (last_synced_at IS NULL OR last_synced_at<=${observed}::timestamptz) RETURNING id`);
     if (r.rows[0] && before.status === "active") changed = { id: r.rows[0].id, action: "staff.sync_removed", from: before.clerk_role, to: null };
   }
+  // Any detected change (or absence) clears this instance's cached live verification.
+  if (changed || !member) invalidateLiveMembership(org, userId);
   if (changed) {
     await db.execute(sql`INSERT INTO audit_logs(organization_id,actor_clerk_user_id,actor_type,action,entity_type,entity_id,changes,request_id) VALUES(${org},${actor === "system" ? null : actor},${actor === "system" ? "system" : "staff"},${String(changed.action)},'staff_membership',${String(changed.id)},${JSON.stringify({ roleFrom: changed.from, roleTo: changed.to, source: "clerk" })}::jsonb,${correlation})`);
   }

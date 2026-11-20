@@ -92,7 +92,7 @@ export default function ConceptualWorkSection() {
               {/* Content */}
               <CardHeader className="">
                 {item.tag && (
-                  <span className="text-xs uppercase tracking-wider">
+                  <span className="type-eyebrow">
                     {item.tag}
                   </span>
                 )}

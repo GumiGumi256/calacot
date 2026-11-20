@@ -22,8 +22,8 @@ import {
   type EnquiryField, type EnquiryIntent, type EnquiryValues,
 } from "@/lib/enquiry-schema";
 
-const controlClass = "min-h-12 rounded-md border-brand-black/15 bg-transparent px-3 text-base text-brand-black shadow-none placeholder:text-brand-black/40 focus-visible:border-brand-black/50 focus-visible:ring-brand-primary/30 dark:border-brand-white/20 dark:text-brand-white dark:placeholder:text-brand-white/40 dark:focus-visible:border-brand-white/50";
-const mutedClass = "text-brand-black/65 dark:text-brand-white/65";
+const controlClass = "min-h-12 rounded-md border-brand-black/15 bg-transparent px-3 text-base text-brand-black shadow-none placeholder:text-brand-black-500 focus-visible:border-brand-black/50 focus-visible:ring-brand-primary/30 dark:border-brand-white/20 dark:text-brand-white dark:placeholder:text-brand-black-400 dark:focus-visible:border-brand-white/50";
+const mutedClass = "text-brand-black-600 dark:text-brand-black-200";
 
 export function EstateEnquiryForm({ initialIntent }: { initialIntent: EnquiryIntent }) {
   const form = useForm<EnquiryValues>({
@@ -276,7 +276,7 @@ export function EstateEnquiryForm({ initialIntent }: { initialIntent: EnquiryInt
                 {JOURNEYS.map((journey) => (
                   <button key={journey.value} type="button" aria-pressed={intent === journey.value}
                     onClick={() => changeIntent(journey.value)}
-                    className={`min-h-11 text-sm underline-offset-8 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary ${intent === journey.value ? "font-semibold underline decoration-brand-primary decoration-2" : "text-brand-black/55 hover:text-brand-black dark:text-brand-white/55 dark:hover:text-brand-white"}`}>
+                    className={`min-h-11 text-sm underline-offset-8 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary ${intent === journey.value ? "font-semibold underline decoration-brand-primary decoration-2" : "text-brand-black-600 hover:text-brand-black dark:text-brand-black-300 dark:hover:text-brand-white"}`}>
                     {journey.label}
                   </button>
                 ))}

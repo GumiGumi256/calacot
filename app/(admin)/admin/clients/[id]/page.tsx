@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RecordDocuments } from "@/components/documents/record-documents";
 import { clientDetail } from "@/lib/sales/reads";
 import { clientSchema, divisions } from "@/lib/sales/contracts";
 import type { z } from "zod";
@@ -12,6 +13,9 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageContainer } from "@/components/layout/page-container";
+import { StatusBadge } from "@/components/ui/status-badge";
 export default async function Page({
   params,
 }: {
@@ -43,15 +47,13 @@ export default async function Page({
     })),
   };
   return (
-    <main className="flex flex-col gap-6 p-4 md:p-6">
+    <PageContainer>
+      <PageHeader
+        title={String(c.display_name)}
+        description={<>{String(c.department || "Department not assigned")} · {String(c.kind)[0].toUpperCase() + String(c.kind).slice(1)}</>}
+        meta={<StatusBadge domain="client" status={c.archived_at ? "archived" : "active"} />}
+      />
       <Card>
-        <CardHeader>
-          <CardTitle>{String(c.display_name)}</CardTitle>
-          <CardDescription>
-            {String(c.department || "Department not assigned")} ·{" "}
-            {String(c.kind)} · {c.archived_at ? "Archived" : "Active"}
-          </CardDescription>
-        </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <p>
             {initial.legalName} ·{" "}
@@ -127,7 +129,8 @@ export default async function Page({
           </CardContent>
         </Card>
       ))}
+      <RecordDocuments type="client" id={id} label={String(d.client.display_name)} />
       <Activity events={d.activity} />
-    </main>
+    </PageContainer>
   );
 }

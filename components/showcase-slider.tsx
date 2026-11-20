@@ -249,7 +249,7 @@ export default function StackedScrollSlider() {
   return (
     <>
     <div className="pb-14 pt-24 md:pb-20 md:pt-32 site-container">
-  <p className="mb-5 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+  <p className="type-eyebrow mb-5 text-muted-foreground">
     Our direction
   </p>
 
@@ -283,7 +283,7 @@ export default function StackedScrollSlider() {
                 ref={(el) => {
                   numberRefs.current[index] = el;
                 }}
-                className="text-3xl font-light tracking-wide text-brand-black dark:text-white will-change-transform"
+                className="text-3xl font-light tracking-wide text-brand-black dark:text-brand-white will-change-transform"
               >
                 {slide.id}
               </div>
@@ -322,11 +322,11 @@ export default function StackedScrollSlider() {
 
                 {/* CONTENT */}
                 <div className="absolute bottom-0 left-0 z-10 max-w-2xl p-8 md:p-14">
-                  <h2 className="mb-4 text-white font-heading section-heading">
+                  <h2 className="mb-4 text-brand-white font-heading section-heading">
                     {slide.title}
                   </h2>
 
-                  <p className="max-w-xl text-lg leading-relaxed text-white/80 md:text-xl">
+                  <p className="max-w-xl text-lg leading-relaxed text-brand-black-100 md:text-xl">
                     {slide.description}
                   </p>
                 </div>

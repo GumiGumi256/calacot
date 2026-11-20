@@ -68,7 +68,7 @@ export function TechCta() {
       {/* Content */}
       <div className="relative mx-auto w-full max-w-[90rem]">
         <div className="mx-auto max-w-4xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-black/50 dark:text-brand-white/45">
+          <p className="type-eyebrow text-brand-black-600 dark:text-brand-black-300">
             Start a conversation
           </p>
 
@@ -76,7 +76,7 @@ export function TechCta() {
             Let’s build what your business needs next.
           </h2>
 
-          <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-7 text-brand-black/60 dark:text-brand-white/60 sm:text-lg sm:leading-8">
+          <p className="mx-auto mt-6 max-w-2xl text-pretty text-base leading-7 text-brand-black-600 dark:text-brand-black-200 sm:text-lg sm:leading-8">
             Tell us what is repetitive, disconnected or difficult to manage.
             You do not need a technical specification—just a problem worth
             solving.

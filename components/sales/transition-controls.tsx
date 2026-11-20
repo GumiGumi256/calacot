@@ -18,6 +18,35 @@ import {
 } from "@/components/ui/dialog";
 import { FieldGroup } from "@/components/ui/field";
 import { TextField, ChoiceField, FormMessage } from "./form-controls";
+import { notify } from "@/components/feedback/notify";
+
+/** Plain-language action names (Design System V1): what happens, not the internal command. */
+const actionLabels: Record<string, string> = {
+  send: "Send quotation",
+  confirm: "Record acceptance",
+  decline: "Mark as declined",
+  revise: "Create revision",
+  void: "Void invoice",
+  credit: "Issue credit note",
+  archive: "Archive client",
+  retry: "Retry failed delivery",
+  resend: "Send again",
+};
+/** Shown only after the server confirms the command succeeded. */
+const successMessages: Record<string, string> = {
+  send: "Quotation finalised and queued for email",
+  confirm: "Acceptance recorded and invoice issued",
+  decline: "Quotation marked as declined",
+  revise: "New draft revision created",
+  void: "Invoice voided",
+  credit: "Credit note issued",
+  archive: "Client archived",
+  retry: "Delivery retry queued",
+  resend: "Delivery queued again",
+};
+/** The one action that moves the record forward gets the primary style. */
+const primaryCommands = new Set(["send", "confirm", "retry"]);
+const destructiveCommands = new Set(["void", "archive"]);
 export function TransitionControls({
   entity,
   id,
@@ -84,19 +113,13 @@ export function TransitionControls({
         {allowed.map((c) => (
           <Button
             key={c}
-            variant={
-              c === "void" || c === "archive" ? "destructive" : "outline"
-            }
+            variant={destructiveCommands.has(c) ? "destructive" : primaryCommands.has(c) ? "default" : "outline"}
             onClick={() => {
               setCommand(c);
               setMessage("");
             }}
           >
-            {c === "retry"
-              ? "Retry failed delivery"
-              : c === "resend"
-                ? "Send again"
-                : c[0].toUpperCase() + c.slice(1)}
+            {actionLabels[c] ?? c}
           </Button>
         ))}
       </div>
@@ -108,9 +131,7 @@ export function TransitionControls({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {command[0]?.toUpperCase() + command.slice(1)}
-            </DialogTitle>
+            <DialogTitle>{actionLabels[command] ?? command}</DialogTitle>
             <DialogDescription>
               {summary}
               {command === "confirm"
@@ -150,6 +171,7 @@ export function TransitionControls({
                         ? await deliveryCommand(p)
                         : await archiveClient(id);
                 if (r.ok) {
+                  notify.success(successMessages[command] ?? "Done");
                   setCommand("");
                   router.refresh();
                   if (
@@ -232,9 +254,14 @@ export function TransitionControls({
                 />
               )}
               <FormMessage>{message}</FormMessage>
-              <Button type="submit" disabled={pending}>
-                {pending ? "Processing…" : `Confirm ${command}`}
-              </Button>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button type="button" variant="outline" disabled={pending} onClick={() => setCommand("")}>
+                  Cancel
+                </Button>
+                <Button type="submit" variant={destructiveCommands.has(command) ? "destructive" : "default"} loading={pending}>
+                  {pending ? "Working…" : (actionLabels[command] ?? command)}
+                </Button>
+              </div>
             </FieldGroup>
           </form>
         </DialogContent>

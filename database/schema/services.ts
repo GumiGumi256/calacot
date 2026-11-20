@@ -8,8 +8,13 @@ import {
   text,
   uuid,
   jsonb,
+  integer,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { allowed, currencies, divisions, money, timestamps } from "./common";
+
+/** Quotation item catalogue entry types. Older service rows predate the catalogue and have none. */
+export const catalogueItemTypes = ["material", "labour", "service"] as const;
 import { organizations } from "./organization";
 
 export const services = pgTable(
@@ -28,6 +33,12 @@ export const services = pgTable(
     currency: text("currency", { enum: currencies }).notNull().default("UGX"),
     defaultTaxRate: money("default_tax_rate").notNull().default("0"),
     isActive: boolean("is_active").notNull().default(true),
+    // Item catalogue (quotation enhancement). Nullable so pre-catalogue rows stay valid.
+    category: text("category"),
+    itemType: text("item_type", { enum: catalogueItemTypes }),
+    rowVersion: integer("row_version").notNull().default(1),
+    createdByClerkUserId: text("created_by_clerk_user_id"),
+    updatedByClerkUserId: text("updated_by_clerk_user_id"),
     scopeTemplate: jsonb("scope_template").$type<{
       deliverables?: string[];
       exclusions?: string[];
@@ -45,6 +56,15 @@ export const services = pgTable(
     check("services_tax_check", sql`${t.defaultTaxRate} between 0 and 100`),
     unique("services_code_org_uq").on(t.organizationId, t.code),
     index("services_org_division_idx").on(t.organizationId, t.division),
+    check(
+      "services_item_type_check",
+      sql`${t.itemType} is null or ${t.itemType} in ('material', 'labour', 'service')`,
+    ),
+    check("services_row_version_check", sql`${t.rowVersion} > 0`),
+    // One active catalogue entry per name, unit and currency within a division.
+    uniqueIndex("services_active_item_uq")
+      .on(t.organizationId, t.division, t.currency, sql`lower(${t.name})`, t.unit)
+      .where(sql`${t.isActive}`),
   ],
 );
 export type ServicesRecord = typeof services.$inferSelect;

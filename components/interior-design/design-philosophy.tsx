@@ -33,13 +33,13 @@ export function DesignPhilosophy() {
 
           {/* Supporting text */}
           <div className="order-3 lg:col-span-5 lg:col-start-7 lg:pt-5">
-            <p className="max-w-2xl text-base leading-7 text-brand-black/60 dark:text-brand-white/60 sm:text-lg sm:leading-8">
+            <p className="max-w-2xl text-base leading-7 text-brand-black-600 dark:text-brand-black-200 sm:text-lg sm:leading-8">
               A beautiful room is not enough. It should support how people
               move, rest, gather, work and live—while creating a genuine sense
               of comfort and belonging.
             </p>
 
-            <p className="mt-5 max-w-2xl text-sm leading-6 text-brand-black/50 dark:text-brand-white/50 sm:text-base sm:leading-7">
+            <p className="mt-5 max-w-2xl text-sm leading-6 text-brand-black-600 dark:text-brand-black-300 sm:text-base sm:leading-7">
               Every material, proportion and detail should contribute to both
               the atmosphere of the space and the experience of using it.
             </p>
@@ -69,7 +69,7 @@ export function DesignPhilosophy() {
                 </h3>
               </div>
 
-              <p className="mt-4 max-w-sm text-sm leading-6 text-brand-black/55 dark:text-brand-white/55 sm:text-base sm:leading-7">
+              <p className="mt-4 max-w-sm text-sm leading-6 text-brand-black-600 dark:text-brand-black-300 sm:text-base sm:leading-7">
                 {principle.description}
               </p>
             </article>

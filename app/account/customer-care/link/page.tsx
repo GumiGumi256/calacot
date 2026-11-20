@@ -41,7 +41,7 @@ export default async function AccountLink({
     : [];
   return (
     <main className="mx-auto min-h-screen max-w-xl px-6 pb-20 pt-32">
-      <p className="text-xs uppercase tracking-widest text-muted-foreground">
+      <p className="type-eyebrow text-muted-foreground">
         Calacot customer care
       </p>
       <h1 className="my-5 text-3xl font-medium">Link your WhatsApp.</h1>

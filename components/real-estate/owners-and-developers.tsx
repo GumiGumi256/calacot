@@ -43,7 +43,7 @@ export default function OwnersAndDevelopers() {
         <div className="grid items-center gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:gap-8 lg:grid-cols-2 lg:gap-16">
           {/* Image composition */}
           <div className="relative mx-auto w-full max-w-md pb-7 pl-6 pt-3 sm:pl-10 md:max-lg:pl-4">
-            <div className="relative aspect-[4/4.3] overflow-hidden rounded-md bg-[#eee9df] dark:bg-[#292620] md:max-lg:aspect-[3/4]">
+            <div className="relative aspect-[4/4.3] overflow-hidden rounded-md bg-brand-black-50 dark:bg-brand-black-800 md:max-lg:aspect-[3/4]">
               <Image
                 src="/urbanhouse.jpg"
                 alt=""
@@ -59,7 +59,7 @@ export default function OwnersAndDevelopers() {
                 List with Calacot Estates
               </p>
 
-              <p className="mt-1 text-xs leading-5 text-brand-black/60 dark:text-brand-white/60">
+              <p className="mt-1 text-xs leading-5 text-brand-black-600 dark:text-brand-black-200">
                 Introduce your property to prospective buyers.
               </p>
             </div>
@@ -70,7 +70,7 @@ export default function OwnersAndDevelopers() {
                 Discuss sales representation
               </p>
 
-              <p className="mt-1 text-xs leading-5 text-brand-black/60 dark:text-brand-white/60">
+              <p className="mt-1 text-xs leading-5 text-brand-black-600 dark:text-brand-black-200">
                 A conversation about your property and goals.
               </p>
             </div>
@@ -96,7 +96,7 @@ export default function OwnersAndDevelopers() {
                     className={`min-h-11 rounded-sm px-4 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary sm:px-5 sm:text-sm ${
                       active
                         ? "bg-brand-primary text-brand-black"
-                        : "text-brand-black/60 hover:text-brand-black dark:text-brand-white/60 dark:hover:text-brand-white"
+                        : "text-brand-black-600 hover:text-brand-black dark:text-brand-black-200 dark:hover:text-brand-white"
                     }`}
                   >
                     {audiences[key].label}
@@ -110,11 +110,11 @@ export default function OwnersAndDevelopers() {
                 {content.title}
               </h2>
 
-              <p className="mt-5 max-w-md text-sm leading-7 text-brand-black/65 dark:text-brand-white/65 md:max-lg:leading-6 lg:text-base">
+              <p className="mt-5 max-w-md text-sm leading-7 text-brand-black-600 dark:text-brand-black-200 md:max-lg:leading-6 lg:text-base">
                 {content.description}
               </p>
 
-              <p className="mt-3 max-w-md text-sm leading-7 text-brand-black/65 dark:text-brand-white/65 md:max-lg:leading-6 lg:text-base">
+              <p className="mt-3 max-w-md text-sm leading-7 text-brand-black-600 dark:text-brand-black-200 md:max-lg:leading-6 lg:text-base">
                 {content.supporting}
               </p>
 

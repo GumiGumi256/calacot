@@ -44,7 +44,7 @@ export default function DesignCheckout({
           Back to design details
         </Link>
         <header className="mb-12 mt-8 border-b border-border/60 pb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="type-eyebrow text-muted-foreground">
             Calacot Architecture
           </p>
           <h1 className="mt-2 text-3xl font-medium tracking-tight sm:text-4xl lg:text-5xl">
@@ -223,7 +223,7 @@ export default function DesignCheckout({
               <div className="flex items-center justify-between">
                 <h2
                   id="summary-heading"
-                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                  className="type-eyebrow text-muted-foreground"
                 >
                   Order summary
                 </h2>

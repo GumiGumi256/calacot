@@ -3,9 +3,11 @@
 export type NavigationItem = { name: string; url: string; group: "main" | "sales" | "finance" | "operations" | "administration"; permission?: Permission; anyPermission?: Permission[]; adminOnly?: boolean };
 export const navigation: NavigationItem[] = [
   { name: "Dashboard", url: "/admin/dashboard", group: "main" },
+  { name: "Reports", url: "/admin/reports", group: "main", anyPermission: ["leads_read", "quotations_read", "invoices_read", "payments_read", "projects_read", "finance_reports", "staff_manage"] },
   { name: "Leads", url: "/admin/leads", group: "sales", permission: "leads_read" },
   { name: "Clients", url: "/admin/clients", group: "sales", permission: "clients_read" },
   { name: "Quotations", url: "/admin/quotations", group: "sales", permission: "quotations_read" },
+  { name: "Item catalogue", url: "/admin/catalogue", group: "sales", permission: "catalogue_read" },
   { name: "Customer care", url: "/admin/customer-care", group: "sales", adminOnly: true },
   { name: "Invoices", url: "/admin/invoices", group: "finance", permission: "invoices_read" },
   { name: "Payments", url: "/admin/payments", group: "finance", permission: "payments_read" },
@@ -14,6 +16,7 @@ export const navigation: NavigationItem[] = [
   { name: "Payment accounts", url: "/admin/payment-accounts", group: "finance", permission: "finance_accounts_manage" },
   { name: "Projects", url: "/admin/projects", group: "operations", permission: "projects_read" },
   { name: "Tasks", url: "/admin/tasks", group: "operations", permission: "projects_read" },
+  { name: "Documents", url: "/admin/documents", group: "operations", permission: "documents_read" },
   { name: "Design Orders", url: "/admin/design-purchases", group: "operations", adminOnly: true },
   { name: "Delivery operations", url: "/admin/deliveries", group: "operations", permission: "notifications_manage" },
   { name: "Staff", url: "/admin/staff", group: "administration", permission: "staff_manage" },

@@ -17,7 +17,7 @@ export default function RealEstateHero() {
             </span>
           </h1>
 
-          <p className="mt-5 max-w-lg text-sm leading-relaxed text-brand-black/65 dark:text-brand-white/65 sm:text-base sm:leading-7 lg:mt-6 lg:leading-8">
+          <p className="mt-5 max-w-lg text-sm leading-relaxed text-brand-black-600 dark:text-brand-black-200 sm:text-base sm:leading-7 lg:mt-6 lg:leading-8">
             Find a home or land in Uganda that fits the life you have in mind.
             Calacot Estates helps you explore properties and consider your
             options through property discovery and advisory services.

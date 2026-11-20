@@ -163,7 +163,7 @@ function DesignCard({ design }: { design: CollectionDesign }) {
         <span aria-hidden="true" className="absolute bottom-4 right-4 grid size-10 place-items-center rounded-full bg-background/95 text-foreground"><ArrowUpRight className="size-5" /></span>
       </div>
       <div className="px-1 pt-5">
-        <p className="text-[11px] uppercase tracking-[.13em] text-muted-foreground">{[design.designType, design.architecturalStyle].filter(Boolean).map((value) => label(value!)).join(" / ") || "Architectural design"}</p>
+        <p className="type-eyebrow text-muted-foreground">{[design.designType, design.architecturalStyle].filter(Boolean).map((value) => label(value!)).join(" / ") || "Architectural design"}</p>
         <h3 className="mt-2 text-2xl font-medium tracking-tight">{design.title}</h3>
         <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground" aria-label="Design specifications">
           {design.bedrooms != null && <li className="flex items-center gap-1.5"><BedDouble className="size-4" aria-hidden="true" />{design.bedrooms} {design.bedrooms === 1 ? "bedroom" : "bedrooms"}</li>}

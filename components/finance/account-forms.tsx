@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { NativeSelect } from "@/components/ui/native-select";
 
 const initial = { ok: false, message: "" };
-const selectClass = "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 export function RegisterAccount({ requestKey }: { requestKey: string }) {
   const [open, setOpen] = useState(false);
@@ -28,8 +28,8 @@ export function RegisterAccount({ requestKey }: { requestKey: string }) {
             <input type="hidden" name="key" value={requestKey} />
             <FieldGroup>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field><FieldLabel htmlFor="acc-method">Payment method</FieldLabel><select id="acc-method" name="method" className={selectClass} defaultValue="bank_transfer"><option value="bank_transfer">Bank transfer</option><option value="mobile_money">Mobile money</option><option value="cheque">Cheque</option></select></Field>
-                <Field><FieldLabel htmlFor="acc-currency">Currency</FieldLabel><select id="acc-currency" name="currency" className={selectClass} defaultValue="UGX"><option value="UGX">UGX</option><option value="USD">USD</option></select></Field>
+                <Field><FieldLabel htmlFor="acc-method">Payment method</FieldLabel><NativeSelect wrapperClassName="w-full" id="acc-method" name="method" defaultValue="bank_transfer"><option value="bank_transfer">Bank transfer</option><option value="mobile_money">Mobile money</option><option value="cheque">Cheque</option></NativeSelect></Field>
+                <Field><FieldLabel htmlFor="acc-currency">Currency</FieldLabel><NativeSelect wrapperClassName="w-full" id="acc-currency" name="currency" defaultValue="UGX"><option value="UGX">UGX</option><option value="USD">USD</option></NativeSelect></Field>
               </div>
               <Field><FieldLabel htmlFor="acc-provider">Bank or mobile-money provider</FieldLabel><Input id="acc-provider" name="provider" required maxLength={100} /></Field>
               <Field><FieldLabel htmlFor="acc-number">Account number or wallet number</FieldLabel><Input id="acc-number" name="accountIdentifier" required maxLength={100} /></Field>

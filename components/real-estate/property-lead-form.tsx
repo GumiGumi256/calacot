@@ -35,7 +35,7 @@ const inputClass = "w-full min-w-0";
 
 
 const mutedClass =
-  "text-brand-black/65 dark:text-brand-white/65";
+  "text-brand-black-600 dark:text-brand-black-200";
 
 type Props = {
   initialType: PropertyLeadValues["submissionType"];

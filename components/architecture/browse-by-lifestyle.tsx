@@ -49,7 +49,7 @@ export default function BrowseByLifestyle() {
       <div className="site-container">
         <div className="mb-12 flex flex-col justify-between gap-8 md:mb-16 md:flex-row md:items-end">
           <div className="max-w-3xl">
-            <p className="mb-5 flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[.17em] opacity-60">
+            <p className="type-eyebrow mb-5 flex items-center gap-2.5 opacity-60">
               <span className="size-1.5 rounded-full bg-brand-primary" />
               Find your fit
             </p>
@@ -85,7 +85,7 @@ export default function BrowseByLifestyle() {
               <div className="absolute inset-0 bg-brand-black/35 transition-colors duration-500 group-hover:bg-brand-black/25" />
               <div className="absolute inset-0 bg-linear-to-t from-brand-black/90 via-brand-black/10 to-transparent" />
               <div className="relative flex h-full flex-col justify-between p-5 sm:p-6">
-                <span className="text-[11px] tracking-[.14em] text-brand-white/65">{lifestyle.number}</span>
+                <span className="text-[11px] tracking-[.14em] text-brand-black-200">{lifestyle.number}</span>
                 <div>
                   <div className="mb-5 flex items-end justify-between gap-3">
                     <h3 className="max-w-[12rem] text-2xl font-normal leading-[1.02] tracking-[-.04em] sm:text-[27px]">
@@ -95,7 +95,7 @@ export default function BrowseByLifestyle() {
                       <ArrowUpRight size={18} aria-hidden="true" />
                     </span>
                   </div>
-                  <p className="max-w-[17rem] text-xs leading-6 text-brand-white/75">
+                  <p className="max-w-[17rem] text-xs leading-6 text-brand-black-200">
                     {lifestyle.description}
                   </p>
                 </div>

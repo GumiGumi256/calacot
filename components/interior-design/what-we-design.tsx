@@ -94,7 +94,7 @@ export function WhatWeDesign() {
               Interiors that reflect you.
             </h2>
 
-            <p className="mt-6 max-w-lg text-base leading-7 text-brand-black/60 dark:text-brand-white/60 sm:text-lg sm:leading-8">
+            <p className="mt-6 max-w-lg text-base leading-7 text-brand-black-600 dark:text-brand-black-200 sm:text-lg sm:leading-8">
               From calm contemporary homes to distinctive commercial and
               hospitality spaces, every interior is shaped around its people,
               purpose and architecture.
@@ -143,7 +143,7 @@ export function WhatWeDesign() {
                 {value}
               </p>
 
-              <p className="mt-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-brand-black/45 dark:text-brand-white/45">
+              <p className="type-eyebrow mt-2 text-brand-black-600 dark:text-brand-black-300">
                 {label}
               </p>
             </div>
@@ -162,7 +162,7 @@ export function WhatWeDesign() {
               Thoughtful design for real life.
             </h2>
 
-            <p className="mt-6 max-w-lg text-base leading-7 text-brand-black/60 dark:text-brand-white/60">
+            <p className="mt-6 max-w-lg text-base leading-7 text-brand-black-600 dark:text-brand-black-200">
               We bring together natural materials, considered planning and
               everyday functionality to create interiors that feel warm,
               balanced and distinctly yours.
@@ -186,7 +186,7 @@ export function WhatWeDesign() {
             {advantages.map(({ title, description, icon: Icon }) => (
               <article
                 key={title}
-                className="flex min-h-56 flex-col justify-between bg-brand-black p-7 text-brand-white dark:border dark:border-brand-white/10 dark:bg-[#1a191d] sm:min-h-60 sm:p-8"
+                className="flex min-h-56 flex-col justify-between bg-brand-black p-7 text-brand-white dark:border dark:border-brand-white/10 dark:bg-brand-black-950 sm:min-h-60 sm:p-8"
               >
                 <Icon
                   aria-hidden="true"
@@ -199,7 +199,7 @@ export function WhatWeDesign() {
                     {title}
                   </h3>
 
-                  <p className="mt-3 max-w-sm text-sm leading-6 text-brand-white/55">
+                  <p className="mt-3 max-w-sm text-sm leading-6 text-brand-black-300">
                     {description}
                   </p>
                 </div>

@@ -40,6 +40,18 @@ export const permissions = [
   // Phase 1E administration. Administrators only by default.
   "staff_manage",
   "settings_manage",
+  // Phase 1F documents. Record-level checks additionally require read access to every
+  // business record a document is linked to (lib/documents/access.ts).
+  "documents_read",
+  "documents_write",
+  "documents_archive",
+  // Quotation item catalogue. Reading/selecting items follows quotation access; managing the
+  // catalogue and overriding catalogue prices are administrator-only by default and can be
+  // delegated per user with the Clerk custom permissions org:calacot:catalogue_manage and
+  // org:calacot:quotation_price_override.
+  "catalogue_read",
+  "catalogue_manage",
+  "quotation_price_override",
 ] as const;
 export type Permission = (typeof permissions)[number];
 export function roleAllows(role: string | null | undefined, p: Permission) {
@@ -54,17 +66,21 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
       "quotations_create",
       "quotations_edit",
       "quotations_send",
+      "catalogue_read",
       "invoices_read",
       "leads_read",
       "leads_write",
       "expenses_create",
       "expenses_submit",
+      "documents_read",
+      "documents_write",
     ],
     "org:finance": [
       "clients_read",
       "projects_read",
       "quotations_read",
       "quotations_confirm",
+      "catalogue_read",
       "invoices_read",
       "invoices_issue",
       "invoices_void",
@@ -79,15 +95,19 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
       "expenses_disburse",
       "expenses_reconcile",
       "finance_reports",
+      "documents_read",
+      "documents_write",
     ],
     "org:viewer": [
       "clients_read",
       "projects_read",
       "quotations_read",
+      "catalogue_read",
       "invoices_read",
       "leads_read",
       "payments_read",
       "expenses_read",
+      "documents_read",
     ],
     // Phase 1E. org:project_manager must exist in Clerk before it can be assigned.
     "org:project_manager": [
@@ -95,9 +115,12 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
       "projects_read",
       "projects_write",
       "quotations_read",
+      "catalogue_read",
       "leads_read",
       "expenses_create",
       "expenses_submit",
+      "documents_read",
+      "documents_write",
     ],
     // Clerk's built-in member role = Staff/Employee: request expenses only.
     "org:member": ["expenses_create", "expenses_submit"],
@@ -114,6 +137,8 @@ export const sensitivePermissions: ReadonlySet<Permission> = new Set<Permission>
   "payments_read", "payments_verify", "invoices_read", "invoices_issue", "invoices_void",
   "expenses_read", "expenses_review", "expenses_approve", "expenses_disburse", "expenses_reconcile",
   "finance_reports", "finance_accounts_manage", "staff_manage", "settings_manage", "notifications_manage",
+  "documents_read", "documents_write", "documents_archive",
+  "catalogue_manage", "quotation_price_override",
 ]);
 
 type LocalAccess = { status: string; eligibility: string } | null;

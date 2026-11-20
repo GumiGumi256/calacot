@@ -28,7 +28,7 @@ export function AmountBreakdown({ currency, status, total, disbursed, reconciled
   return (
     <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {items.map((i) => (
-        <div key={i.label} className="rounded-lg border p-3">
+        <div key={i.label} className="rounded-(--card-radius-inner) border border-card-edge bg-card-nested p-3">
           <dt className="text-xs text-muted-foreground">{i.label}</dt>
           <dd className="text-base font-semibold tabular-nums">{formatAmount(currency, i.value)}</dd>
           <dd className="text-xs text-muted-foreground">{i.help}</dd>

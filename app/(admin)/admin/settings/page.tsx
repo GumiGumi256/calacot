@@ -4,6 +4,8 @@ import { readCompanySettings } from "@/lib/admin/settings";
 import { sectionLabels } from "@/lib/admin/settings-schema";
 import { salesConfig } from "@/lib/sales/config";
 import { DecideProposal, SettingsForm } from "@/components/admin/settings-form";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageContainer } from "@/components/layout/page-container";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function Page() {
@@ -13,9 +15,14 @@ export default async function Page() {
   try { const c = salesConfig(); tax = `${c.taxRate}% approved tax rate; invoices due ${c.dueDays} days after issue; initial billing policy: ${c.policy}`; } catch { /* shown as not configured */ }
   const p = s.proposal;
   return (
-    <main className="flex flex-col gap-4 p-4 md:p-6">
+    <PageContainer width="reading">
+      <PageHeader
+        title="Company settings"
+        description="Business details used on new documents and customer messages. Changes never alter quotations or invoices already issued."
+        meta={<span className="type-caption">{s.saved ? `Version ${s.version}` : "Not saved yet: showing the current organization record and deployment payment configuration."}</span>}
+      />
       {p && (
-        <Card className="border-amber-500/50">
+        <Card variant="attention" tone="warning">
           <CardHeader><CardTitle>Payment-instruction change awaiting approval</CardTitle><CardDescription>Proposed {p.proposed_at.slice(0, 16).replace("T", " ")}: {p.note}</CardDescription></CardHeader>
           <CardContent className="flex flex-col gap-4 text-sm">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -28,11 +35,10 @@ export default async function Page() {
       )}
       <Card>
         <CardHeader>
-          <CardTitle>Company settings</CardTitle>
-          <CardDescription>Business details used on new documents and customer messages. Changes never alter quotations or invoices already issued. Infrastructure secrets (API keys, database, webhook and provider credentials) are managed in deployment configuration and are never shown here.</CardDescription>
+          <CardTitle as="h2">Business details</CardTitle>
+          <CardDescription>Infrastructure secrets (API keys, database, webhook and provider credentials) are managed in deployment configuration and are never shown here.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <p className="text-sm text-muted-foreground">{s.saved ? `Version ${s.version}.` : "Not saved yet: showing the current organization record and deployment payment configuration."}</p>
           <SettingsForm initialSettings={s.settings} version={s.version} requestKey={randomUUID()} locked={!!p} />
         </CardContent>
       </Card>
@@ -48,7 +54,7 @@ export default async function Page() {
           ) : <p className="text-sm text-muted-foreground">No settings changes recorded.</p>}
         </CardContent>
       </Card>
-    </main>
+    </PageContainer>
   );
 }
 

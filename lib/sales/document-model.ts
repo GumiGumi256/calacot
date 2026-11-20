@@ -29,6 +29,10 @@ export type DocumentSnapshot = {
   instructions: string;
   items: (MoneyLine & {
     position: number;
+    /** Catalogue-era snapshots only; absent on older documents. */
+    name?: string;
+    itemType?: string;
+    priceSource?: "catalogue" | "override" | "custom";
     subtotal: string;
     taxAmount: string;
     total: string;

@@ -1,19 +1,8 @@
 import { RefreshStaff } from "@/components/admin/refresh-staff";
-import { readLeads, type SearchParams } from "@/lib/admin/reads";
-import { LeadUpdateForm } from "@/components/admin/lead-update-form";
-import { LeadConversion } from "@/components/admin/lead-conversion";
-import Link from "next/link";
-import { label, leadStatuses, leadTypes } from "@/lib/admin/options";
-import { FilterBar, Pager, fmtDate } from "@/components/admin/list-controls";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
+import { readLeads, type SearchParams } from "@/lib/admin/reads";import { LeadUpdateForm } from "@/components/admin/lead-update-form";import { LeadConversion } from "@/components/admin/lead-conversion";import Link from "next/link";import { label, leadStatuses, leadTypes } from "@/lib/admin/options";import { FilterBar, Pager, fmtDate } from "@/components/admin/list-controls";import { Badge } from "@/components/ui/badge";import { NativeSelect } from "@/components/ui/native-select";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageContainer } from "@/components/layout/page-container";
+import { Card, CardContent } from "@/components/ui/card";import {
   Table,
   TableBody,
   TableCell,
@@ -30,14 +19,12 @@ export default async function Page({
   const data = await readLeads(await searchParams);
   const counts = Object.fromEntries(data.stats.map((s) => [s.status, s.count]));
   return (
-    <main className="flex flex-col gap-6 p-4 md:p-6">
+    <PageContainer>
+      <PageHeader
+        title="Leads"
+        description="Enquiries from the scheduling, project and contact forms."
+      />
       <Card>
-        <CardHeader>
-          <CardTitle>Leads</CardTitle>
-          <CardDescription>
-            Enquiries from the scheduling, project and contact forms.
-          </CardDescription>
-        </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {data.canRefreshStaff && <RefreshStaff />}
           <div className="flex flex-wrap gap-2">
@@ -58,7 +45,7 @@ export default async function Page({
               { name: "followUp", label: "Follow-up date", type: "date" },
             ]}
           />
-          <form method="get" className="flex flex-wrap items-end gap-2"><label htmlFor="assignee-filter">Assigned employee</label><select id="assignee-filter" name="assignee" defaultValue={data.filters.assignee} className="h-9 rounded-md border px-3"><option value="">All</option><option value="unassigned">Unassigned</option>{data.staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select><button className="rounded-md border px-3 py-2" type="submit">Filter</button></form>
+          <form method="get" className="flex flex-wrap items-end gap-2"><label htmlFor="assignee-filter">Assigned employee</label><NativeSelect id="assignee-filter" name="assignee" defaultValue={data.filters.assignee}><option value="">All</option><option value="unassigned">Unassigned</option>{data.staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</NativeSelect><button className="rounded-md border px-3 py-2" type="submit">Filter</button></form>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -132,6 +119,6 @@ export default async function Page({
           />
         </CardContent>
       </Card>
-    </main>
+    </PageContainer>
   );
 }

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 export const currencies = ["UGX", "USD"] as const;
+export const catalogueItemTypes = ["material", "labour", "service"] as const;
 export const divisions = [
   "estates",
   "architecture",
@@ -94,6 +95,12 @@ export const quoteSchema = z.object({
         unitPrice: amount,
         discountAmount: amount,
         taxRate: amount,
+        // Item catalogue. A catalogue line names its item; the database resolves the name, unit,
+        // reference price and price source from the organization's catalogue. Custom lines may
+        // carry their own name and type. Older lines have none of these.
+        catalogueItemId: z.union([z.uuid(), z.literal("")]).optional(),
+        name: text(200).optional(),
+        itemType: z.union([z.enum(catalogueItemTypes), z.literal("")]).optional(),
       }),
     )
     .min(1)
@@ -216,3 +223,13 @@ export function parseQuery(
   };
 }
 export const literalSearch = (s: string) => `%${s.replace(/[\\%_]/g, "\\$&")}%`;
+
+/** Statuses each sales list can filter by (moved from the old entity list; also the status registry's source of truth). */
+export const listStatuses = {
+  clients: ["active", "archived"],
+  projects: ["planned", "active", "on_hold", "completed", "cancelled"],
+  quotations: ["draft", "sent", "accepted", "declined", "expired", "superseded"],
+  invoices: ["draft", "issued", "void"],
+  deliveries: ["queued", "processing", "provider_accepted", "delivered", "read", "failed", "blocked", "suppressed", "uncertain", "captured", "skipped"],
+} as const satisfies Record<Entity, readonly string[]>;
+export const invoicePaymentStates = ["paid", "unpaid", "partial", "overdue"] as const;

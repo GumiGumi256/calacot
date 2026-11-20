@@ -40,7 +40,7 @@ export function ProjectSheet({ initialOpen, selectedClient }: { initialOpen: boo
       <SheetHeader className="border-b px-6 py-5 pr-14"><SheetTitle className="text-lg">New planned project</SheetTitle><SheetDescription>Pre-sales project. Confirmation will retain this project and its planned execution status.</SheetDescription></SheetHeader>
       <div className="flex-1 px-6 pt-6">
         {error ? <div role="alert" className="space-y-3 pb-6"><p className="text-sm text-destructive">{error}</p><Button variant="outline" onClick={() => { setError(""); setAttempt(n => n + 1); }}>Try again</Button></div> : !data ? <p role="status" className="pb-6 text-sm text-muted-foreground">Loading clients and staff…</p> : <>
-          {selectedClient && <div className="mb-6 rounded-lg border bg-muted/40 px-4 py-3 text-sm"><span className="text-muted-foreground">Client</span><p className="font-medium">{selectedClient.name}</p></div>}
+          {selectedClient && <div className="mb-6 rounded-(--card-radius-inner) border border-card-edge bg-card-nested px-4 py-3 text-sm"><span className="text-muted-foreground">Client</span><p className="font-medium">{selectedClient.name}</p></div>}
           <ProjectForm stickyActions clients={data.clients} owners={data.owners} clientId={selectedClient?.id} onCreated={id => { changeOpen(false); router.push(`${orgSlug ? `/${encodeURIComponent(orgSlug)}` : ""}/admin/projects/${id}`); router.refresh(); }} />
         </>}
       </div>

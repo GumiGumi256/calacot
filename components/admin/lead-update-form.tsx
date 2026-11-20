@@ -4,21 +4,22 @@ import { updateLead } from "@/lib/admin/actions";
 import { label, leadStatuses } from "@/lib/admin/options";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { NativeSelect } from "@/components/ui/native-select";
 
 export function LeadUpdateForm({ id, status, notes, division, assignee, followUpOn, followUpNotes, staff }: { id: string; status: string; notes: string; division: string; assignee: string; followUpOn: string; followUpNotes: string; staff: {id: string; name: string}[] }) {
   const [state, action, pending] = useActionState(updateLead, { ok: false, message: "" });
   return <form action={action} className="mt-3 flex flex-col gap-2">
     <input type="hidden" name="id" value={id} />
     <label htmlFor={`status-${id}`} className="text-sm font-medium">Status</label>
-    <select id={`status-${id}`} name="status" defaultValue={status} className="h-9 rounded-md border border-input bg-transparent px-3 text-sm capitalize">
+    <NativeSelect className="capitalize" id={`status-${id}`} name="status" defaultValue={status}>
       {leadStatuses.map(value => <option key={value} value={value}>{label(value)}</option>)}
-    </select>
+    </NativeSelect>
     <label htmlFor={`notes-${id}`} className="text-sm font-medium">Internal notes</label>
     <Textarea id={`notes-${id}`} name="adminNotes" defaultValue={notes} maxLength={4000} />
     <label htmlFor={`division-${id}`} className="text-sm font-medium">Department</label>
-    <select id={`division-${id}`} name="division" defaultValue={division} className="h-9 rounded-md border px-3"><option value="">Unspecified</option>{["estates", "architecture", "painting", "interiors", "tech"].map(v => <option key={v} value={v}>{v}</option>)}</select>
+    <NativeSelect id={`division-${id}`} name="division" defaultValue={division}><option value="">Unspecified</option>{["estates", "architecture", "painting", "interiors", "tech"].map(v => <option key={v} value={v}>{v}</option>)}</NativeSelect>
     <label htmlFor={`assignee-${id}`} className="text-sm font-medium">Assigned employee</label>
-    <select id={`assignee-${id}`} name="assignedStaffId" defaultValue={assignee} className="h-9 rounded-md border px-3"><option value="">Unassigned</option>{staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
+    <NativeSelect id={`assignee-${id}`} name="assignedStaffId" defaultValue={assignee}><option value="">Unassigned</option>{staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</NativeSelect>
     <label htmlFor={`followup-${id}`} className="text-sm font-medium">Next follow-up date</label>
     <input id={`followup-${id}`} name="followUpOn" type="date" defaultValue={followUpOn} className="h-9 rounded-md border px-3" />
     <p className="text-xs text-muted-foreground">Clear the date when the follow-up is complete, or enter a new date to reschedule.</p>

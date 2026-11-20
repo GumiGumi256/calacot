@@ -1,7 +1,34 @@
 ﻿"use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+import { isActivePath } from "@/lib/admin/breadcrumbs";
+import { activeItemClass } from "@/components/nav-main";
+
 export function NavItems({ items, title }: { title: string; items: { name: string; url: string; icon: React.ReactNode }[] }) {
+  const pathname = usePathname();
   if (!items.length) return null;
-  return <SidebarGroup><SidebarGroupLabel>{title}</SidebarGroupLabel><SidebarMenu>{items.map(item => <SidebarMenuItem key={item.name}><SidebarMenuButton tooltip={item.name} render={<Link href={item.url} />}>{item.icon}<span>{item.name}</span></SidebarMenuButton></SidebarMenuItem>)}</SidebarMenu></SidebarGroup>;
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>{title}</SidebarGroupLabel>
+      <SidebarMenu>
+        {items.map((item) => {
+          const active = isActivePath(pathname, item.url);
+          return (
+            <SidebarMenuItem key={item.name}>
+              <SidebarMenuButton
+                tooltip={item.name}
+                isActive={active}
+                className={activeItemClass}
+                render={<Link href={item.url} aria-current={active ? "page" : undefined} />}
+              >
+                {item.icon}
+                <span>{item.name}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          );
+        })}
+      </SidebarMenu>
+    </SidebarGroup>
+  );
 }

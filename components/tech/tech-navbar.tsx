@@ -70,8 +70,8 @@ export function TechNavbar() {
                   aria-current={active ? "page" : undefined}
                   className={`relative rounded-full px-5 py-2.5 text-sm font-medium transition-colors duration-300 ${
                     active
-                      ? "bg-white/10 text-white"
-                      : "text-white/65 hover:text-white"
+                      ? "bg-white/10 text-brand-white"
+                      : "text-brand-black-200 hover:text-brand-white"
                   }`}
                 >
                   {item.name}
@@ -135,7 +135,7 @@ export function TechNavbar() {
                   </SheetDescription>
                 </SheetHeader>
 
-                <div className="mt-10 border-b border-white/10 pb-4 text-xs font-medium uppercase tracking-[0.18em] text-white/35">
+                <div className="type-eyebrow mt-10 border-b border-white/10 pb-4 text-brand-black-400">
                   Navigation
                 </div>
 
@@ -157,20 +157,20 @@ export function TechNavbar() {
                             className={`text-3xl font-medium tracking-[-0.045em] transition-colors duration-300 ${
                               active
                                 ? "text-brand-primary"
-                                : "text-white group-hover:text-brand-primary"
+                                : "text-brand-white group-hover:text-brand-primary"
                             }`}
                           >
                             {item.name}
                           </span>
 
                           <span className="flex items-center gap-4">
-                            <span className="text-xs tabular-nums text-white/30">
+                            <span className="text-xs tabular-nums text-brand-black-400">
                               {String(index + 1).padStart(2, "0")}
                             </span>
 
                             <ArrowRight
                               aria-hidden="true"
-                              className="size-5 text-white/40 transition duration-300 group-hover:translate-x-1 group-hover:text-brand-primary"
+                              className="size-5 text-brand-black-400 transition duration-300 group-hover:translate-x-1 group-hover:text-brand-primary"
                             />
                           </span>
                         </Link>
@@ -194,7 +194,7 @@ export function TechNavbar() {
                     </Link>
                   </SheetClose>
 
-                  <div className="flex items-center justify-between text-xs text-white/35">
+                  <div className="flex items-center justify-between text-xs text-brand-black-400">
                     <span>Kampala, Uganda</span>
                     <span>Calacot Tech</span>
                   </div>

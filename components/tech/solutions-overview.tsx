@@ -71,7 +71,7 @@ export function SolutionsOverview() {
         {/* Header Section */}
         <header className="mb-16 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-7">
-            <p className="mb-3 text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+            <p className="type-eyebrow mb-3 text-muted-foreground">
               What We Build
             </p>
             <h2 className="font-heading section-heading">
@@ -125,7 +125,7 @@ export function SolutionsOverview() {
                   </p>
 
                   <div className="mt-8 border-t border-border/60 pt-6">
-                    <p className="mb-4 text-xs font-semibold tracking-wider uppercase text-muted-foreground">
+                    <p className="type-eyebrow mb-4 text-muted-foreground">
                       Capabilities
                     </p>
                     <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">

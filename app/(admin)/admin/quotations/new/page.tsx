@@ -2,29 +2,24 @@ import { staffContext } from "@/lib/sales/permissions";
 import { pickers } from "@/lib/sales/reads";
 import { salesConfig } from "@/lib/sales/config";
 import { QuoteForm } from "@/components/sales/quote-form";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
+
 export default async function Page() {
-  await staffContext("quotations_create");
+  const ctx = await staffContext("quotations_create");
   const data = await pickers();
   return (
-    <main className="p-4 md:p-6">
-      <Card className="max-w-4xl">
-        <CardHeader>
-          <CardTitle>New quotation</CardTitle>
-          <CardDescription>
-            A client and planned project must exist before you save.
-          </CardDescription>
-        </CardHeader>
+    <PageContainer width="reading">
+      <PageHeader
+        title="New quotation"
+        description="Choose the client and planned project, describe the scope, then price the lines. Saving creates a draft; nothing is sent until you choose Send quotation."
+      />
+      <Card>
         <CardContent>
-          <QuoteForm pickers={data} taxRate={salesConfig().taxRate} />
+          <QuoteForm pickers={data} taxRate={salesConfig().taxRate} can={{ pick: ctx.permissions.includes("catalogue_read"), override: ctx.permissions.includes("quotation_price_override"), manage: ctx.permissions.includes("catalogue_manage") }} />
         </CardContent>
       </Card>
-    </main>
+    </PageContainer>
   );
 }

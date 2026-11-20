@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { db } from "@/database/db";
 import { staffContext } from "@/lib/sales/permissions";
 import { Deliveries } from "@/components/sales/activity";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
 export default async function Page({
   params,
 }: {
@@ -17,8 +19,9 @@ export default async function Page({
   );
   if (!d.rows.length) notFound();
   return (
-    <main className="p-4 md:p-6">
+    <PageContainer width="reading">
+      <PageHeader title="Delivery details" description="Attempts and outcome for one queued email or WhatsApp message. Delivery is tracked separately from acceptance and payment." />
       <Deliveries rows={d.rows} permissions={ctx.permissions} />
-    </main>
+    </PageContainer>
   );
 }

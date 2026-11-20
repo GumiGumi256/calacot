@@ -163,7 +163,7 @@ export default function DesignLanguageSection() {
             <div className="panel-content relative flex h-full items-end max-lg:h-auto">
               <div className="flex flex-col justify-between gap-6 pb-10 pt-6 lg:gap-10 lg:pt-0 lg:pb-24 lg:flex-row lg:items-end md:max-lg:pb-12 site-container">
                 <div>
-                  <p className="mb-4 text-xs uppercase tracking-[0.35em] text-brand-white/50">
+                  <p className="type-eyebrow mb-4 text-brand-black-300">
                     0{index + 1}
                   </p>
 
@@ -172,7 +172,7 @@ export default function DesignLanguageSection() {
                   </h3>
                 </div>
 
-                <p className="max-w-md text-sm leading-relaxed text-white/70 md:text-base md:max-lg:max-w-2xl">
+                <p className="max-w-md text-sm leading-relaxed text-brand-black-200 md:text-base md:max-lg:max-w-2xl">
                   {panel.description}
                 </p>
               </div>

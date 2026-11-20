@@ -182,7 +182,7 @@ export default function PaintingProcess() {
                 {item.title}
               </h3>
 
-              <p className="text-lg leading-relaxed dark:text-brand-white/50 text-brand-black/50 max-w-[90%]">
+              <p className="text-lg leading-relaxed dark:text-brand-black-300 text-brand-black-600 max-w-[90%]">
                 {item.description}
               </p>
             </div>
@@ -210,7 +210,7 @@ export default function PaintingProcess() {
                 className="object-contain"
               />
 
-              <h2 className="text-white section-heading">
+              <h2 className="text-brand-white section-heading">
                 Painting
                 <br />
                 Process
@@ -236,7 +236,7 @@ export default function PaintingProcess() {
                 {item.title}
               </h3>
 
-              <p className="text-lg leading-relaxed dark:text-brand-white/50 text-brand-black/50 max-w-[90%]">
+              <p className="text-lg leading-relaxed dark:text-brand-black-300 text-brand-black-600 max-w-[90%]">
                 {item.description}
               </p>
             </div>
@@ -266,7 +266,7 @@ export default function PaintingProcess() {
               className="object-contain"
             />
 
-            <h2 className="text-white section-heading">
+            <h2 className="text-brand-white section-heading">
               Painting
               <br />
               Process
@@ -289,7 +289,7 @@ export default function PaintingProcess() {
                 {item.title}
               </h3>
 
-              <p className="text-base leading-relaxed dark:text-brand-white/50 text-brand-black/50">
+              <p className="text-base leading-relaxed dark:text-brand-black-300 text-brand-black-600">
                 {item.description}
               </p>
             </div>

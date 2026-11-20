@@ -10,12 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
+import { formatDate, formatDateTime } from "@/lib/format";
 
-const when = (v: unknown) => {
-  if (!v) return "Not recorded";
-  const d = new Date(String(v));
-  return Number.isNaN(d.getTime()) ? String(v) : new Intl.DateTimeFormat("en-UG", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Kampala" }).format(d);
-};
+const when = (v: unknown) => (v ? formatDateTime(String(v)) : "Not recorded");
 const actionLabels: Record<string, string> = {
   created: "Draft created", updated: "Request edited", submit: "Submitted for review", withdraw: "Withdrawn to draft", cancel: "Cancelled",
   approve: "Approved", return: "Returned for correction", reject: "Rejected", disbursement_recorded: "Disbursement recorded",
@@ -34,16 +33,39 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const today = (await db.execute<{ d: string }>(sql`SELECT finance_kampala_today()::text AS d`)).rows[0].d;
   const fullyReconciled = status === "paid" && Number(disbursed) > 0 && reconciled === disbursed;
   const ownSubmitted = !!d.me && e.requested_by_id === d.me && status === "submitted";
+  const hasNextStep = d.can.edit || d.can.submit || d.can.withdraw || d.can.cancel || d.can.review || d.can.disburse || ownSubmitted;
   return (
-    <main className="flex flex-col gap-4 p-4 md:p-6">
-      <Link href="/admin/expenses" className="text-sm underline-offset-4 hover:underline">Back to expenses</Link>
+    <PageContainer>
+      <PageHeader
+        title={String(e.description)}
+        description={expenseStatusHelp[status]}
+        meta={
+          <>
+            <ExpenseStatusBadge status={status} reconciled={fullyReconciled} />
+            <span className="type-body-strong tabular-nums">{formatAmount(currency, String(e.total))}</span>
+          </>
+        }
+      />
+      {/* Phones: the next step comes first. Wide screens: it sits beside the details. */}
+      <div className={hasNextStep ? "grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]" : "flex min-w-0 flex-col gap-6"}>
+      {hasNextStep && (
+        <aside aria-label="Next step" className="flex min-w-0 flex-col gap-6 xl:col-start-2 xl:row-start-1">
+          <Card variant="attention" tone="warning">
+          <CardHeader><CardTitle as="h2">Next step</CardTitle><CardDescription>Actions available to you for this request.</CardDescription></CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            {d.can.edit && <div><Button variant="outline" render={<Link href={`/admin/expenses/${id}/edit`} />}>Edit request</Button></div>}
+            <RequesterActions expenseId={id} version={Number(e.version)} requestKey={randomUUID()} canSubmit={d.can.submit} canWithdraw={d.can.withdraw} canCancel={d.can.cancel} />
+            {ownSubmitted && <p className="text-sm text-muted-foreground">You requested this expense, so another authorized employee must review it.</p>}
+            {d.can.review && <ReviewPanel expenseId={id} version={Number(e.version)} requestKey={randomUUID()} canApprove={d.can.approve} canReturnOrReject={d.can.returnOrReject} />}
+            {d.can.disburse && <RecordDisbursement expenseId={id} version={Number(e.version)} currency={currency} outstanding={outstanding} requestKey={randomUUID()} staff={d.staff} documents={d.documents.map((x) => ({ id: String(x.id), name: String(x.name) }))} accounts={d.accounts} defaultResponsible={d.me ?? ""} today={today} />}
+          </CardContent>
+        </Card>
+        </aside>
+      )}
+      <div className="flex min-w-0 flex-col gap-6 xl:col-start-1 xl:row-start-1">
       <Card>
-        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <CardTitle className="break-words">{String(e.description)}</CardTitle>
-            <CardDescription>{expenseStatusHelp[status]}</CardDescription>
-          </div>
-          <ExpenseStatusBadge status={status} reconciled={fullyReconciled} />
+        <CardHeader>
+          <CardTitle as="h2">Details</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <AmountBreakdown currency={currency} status={status} total={String(e.total)} disbursed={disbursed} reconciled={reconciled} />
@@ -52,7 +74,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             <div><dt className="text-muted-foreground">Project</dt><dd>{e.project_id ? <Link className="underline underline-offset-4" href={`/admin/projects/${e.project_id}`}>{String(e.project_code)} {String(e.project)}</Link> : "No project"}</dd></div>
             <div><dt className="text-muted-foreground">Category</dt><dd>{String(e.category)}</dd></div>
             <div><dt className="text-muted-foreground">Supplier</dt><dd>{String(e.supplier ?? "Not specified")}{e.supplier_invoice_reference ? ` (ref ${String(e.supplier_invoice_reference)})` : ""}</dd></div>
-            <div><dt className="text-muted-foreground">Expense date</dt><dd>{String(e.incurred_on)}</dd></div>
+            <div><dt className="text-muted-foreground">Expense date</dt><dd>{formatDate(String(e.incurred_on))}</dd></div>
             <div><dt className="text-muted-foreground">Amount</dt><dd>{formatAmount(currency, String(e.net_amount))} + tax {formatAmount(currency, String(e.tax_amount))}</dd></div>
             <div><dt className="text-muted-foreground">Requested by</dt><dd>{String(e.requester ?? "Not recorded (older expense)")}</dd></div>
             <div><dt className="text-muted-foreground">Submitted</dt><dd>{e.submitted_at ? when(e.submitted_at) : "Not submitted"}</dd></div>
@@ -63,20 +85,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         </CardContent>
       </Card>
 
-      {(d.can.edit || d.can.submit || d.can.withdraw || d.can.cancel || d.can.review || d.can.disburse || ownSubmitted) && (
-        <Card>
-          <CardHeader><CardTitle>Next step</CardTitle></CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            {d.can.edit && <div><Button variant="outline" render={<Link href={`/admin/expenses/${id}/edit`} />}>Edit request</Button></div>}
-            <RequesterActions expenseId={id} version={Number(e.version)} requestKey={randomUUID()} canSubmit={d.can.submit} canWithdraw={d.can.withdraw} canCancel={d.can.cancel} />
-            {ownSubmitted && <p className="text-sm text-muted-foreground">You requested this expense, so another authorized employee must review it.</p>}
-            {d.can.review && <ReviewPanel expenseId={id} version={Number(e.version)} requestKey={randomUUID()} canApprove={d.can.approve} canReturnOrReject={d.can.returnOrReject} />}
-            {d.can.disburse && <RecordDisbursement expenseId={id} version={Number(e.version)} currency={currency} outstanding={outstanding} requestKey={randomUUID()} staff={d.staff} documents={d.documents.map((x) => ({ id: String(x.id), name: String(x.name) }))} accounts={d.accounts} defaultResponsible={d.me ?? ""} today={today} />}
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid min-w-0 grid-cols-1 gap-6 2xl:grid-cols-2">
         <Card>
           <CardHeader><CardTitle>Documents</CardTitle><CardDescription>Receipts, supplier invoices and proof of payment. Stored privately.</CardDescription></CardHeader>
           <CardContent className="flex flex-col gap-4">
@@ -136,6 +145,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           ) : <p className="text-sm text-muted-foreground">No workflow history recorded. This expense was created before the Phase 1D workflow.</p>}
         </CardContent>
       </Card>
-    </main>
+      </div>
+      </div>
+    </PageContainer>
   );
 }

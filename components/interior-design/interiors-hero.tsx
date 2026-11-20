@@ -72,7 +72,7 @@ export function InteriorsHero() {
         <div className="relative z-20 mx-auto max-w-4xl text-center">
           {/* <p
             data-hero-copy
-            className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-black/50 dark:text-brand-white/45"
+            className="type-eyebrow text-brand-black-600 dark:text-brand-black-300"
           >
             Calacot Interiors
           </p> */}
@@ -86,7 +86,7 @@ export function InteriorsHero() {
 
           <p
             data-hero-copy
-            className="mx-auto mt-6 max-w-xl text-pretty text-base leading-7 text-brand-black/60 dark:text-brand-white/60 sm:text-lg sm:leading-8"
+            className="mx-auto mt-6 max-w-xl text-pretty text-base leading-7 text-brand-black-600 dark:text-brand-black-200 sm:text-lg sm:leading-8"
           >
             Interior design for homes and workspaces in Uganda, shaped by light,
             materials and the routines that make a space yours.

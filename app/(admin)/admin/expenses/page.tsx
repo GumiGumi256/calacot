@@ -5,8 +5,10 @@ import { divisions } from "@/lib/sales/contracts";
 import { FilterBar, Pager, fmtDate } from "@/components/admin/list-controls";
 import { ExpenseStatusBadge } from "@/components/finance/expense-status";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageContainer } from "@/components/layout/page-container";
 
 const viewLabels: Record<ExpenseView, string> = { mine: "My requests", review: "Needs review", payable: "Approved, awaiting payment", all: "All expenses" };
 const exceptionLabels: Record<string, string> = {
@@ -22,15 +24,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
   const views: ExpenseView[] = data.canAll ? ["mine", ...(data.canReview ? ["review" as const] : []), ...(data.canPay ? ["payable" as const] : []), "all"] : ["mine"];
   const tabHref = (view: ExpenseView) => `?view=${view}`;
   return (
-    <main className="flex flex-col gap-6 p-4 md:p-6">
+    <PageContainer>
+      <PageHeader
+        title="Expenses"
+        description="Request, review, approve and record payment of company spending. Approval authorizes spending; disbursements record money actually paid."
+        primaryAction={data.canCreate && <Button render={<Link href="/admin/expenses/new" />}>New expense request</Button>}
+      />
       <Card>
-        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
-          <div className="flex flex-col gap-1.5">
-            <CardTitle>Expenses</CardTitle>
-            <CardDescription>Request, review, approve and record payment of company spending. Approval authorizes spending; disbursements record money actually paid.</CardDescription>
-          </div>
-          {data.canCreate && <Button render={<Link href="/admin/expenses/new" />}>New expense request</Button>}
-        </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <nav aria-label="Expense views" className="flex flex-wrap gap-2">
             {views.map((v) => (
@@ -43,7 +43,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
             ))}
           </nav>
           {exceptions.length > 0 && (
-            <section aria-labelledby="expense-exceptions" className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
+            <section aria-labelledby="expense-exceptions" className="rounded-(--card-radius-inner) border border-warning-border bg-warning-soft p-3 text-sm">
               <h2 id="expense-exceptions" className="font-medium">Needs attention</h2>
               <ul className="mt-1 list-disc pl-5">{exceptions.map((x) => <li key={x.kind}>{exceptionLabels[x.kind] ?? x.kind}: {x.count}</li>)}</ul>
             </section>
@@ -119,6 +119,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
           <p className="text-xs text-muted-foreground">Status guide: {expenseStatuses.map((s) => expenseStatusLabels[s]).join(", ")}. Amounts are shown per currency and never combined.</p>
         </CardContent>
       </Card>
-    </main>
+    </PageContainer>
   );
 }

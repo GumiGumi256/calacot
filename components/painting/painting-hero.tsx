@@ -74,7 +74,7 @@ export default function PaintingHero() {
 
       {/* Centered content */}
       <div className="relative z-10 mx-auto max-w-3xl px-6 text-center mb-44 md:mb-64">
-        <h1 className="sub-title font-light text-4xl tracking-tight text-neutral-900 dark:text-white md:text-5xl lg:text-6xl hero-title">
+        <h1 className="sub-title font-light text-4xl tracking-tight text-neutral-900 dark:text-brand-white md:text-5xl lg:text-6xl hero-title">
           A new finish. A fresh sense of home.
         </h1>
 

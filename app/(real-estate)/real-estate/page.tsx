@@ -63,7 +63,7 @@ export default function CalacotEstatesHomepage() {
         chapter look like?
       </h2>
 
-      <p className="max-w-sm text-sm leading-7 text-brand-black/65 dark:text-brand-white/65 md:text-base lg:justify-self-end">
+      <p className="max-w-sm text-sm leading-7 text-brand-black-600 dark:text-brand-black-200 md:text-base lg:justify-self-end">
         Tell us what you have in mind. We’ll begin with what matters to you.
       </p>
     </header>
@@ -119,7 +119,7 @@ export default function CalacotEstatesHomepage() {
               {journey.title}
             </h3>
 
-            <p className="mt-3 max-w-[34ch] text-sm leading-6 text-brand-black/65 dark:text-brand-white/65">
+            <p className="mt-3 max-w-[34ch] text-sm leading-6 text-brand-black-600 dark:text-brand-black-200">
               {journey.description}
             </p>
 
@@ -154,7 +154,7 @@ export default function CalacotEstatesHomepage() {
             
             <h2 className="text-3xl md:text-5xl font-serif text-brand-black dark:text-brand-white mt-1">Market Intelligence</h2>
           </div>
-          <a href="#" className="text-xs uppercase tracking-widest font-semibold text-brand-black dark:text-brand-white hover:text-amber-600 flex items-center gap-1 mt-4 md:mt-0">
+          <a href="#" className="type-eyebrow text-brand-black dark:text-brand-white hover:text-brand-primary-800 dark:hover:text-brand-primary flex items-center gap-1 mt-4 md:mt-0">
             View All Reports <ChevronRight size={14} />
           </a>
         </div>
@@ -181,11 +181,11 @@ export default function CalacotEstatesHomepage() {
             }
           ].map((post, idx) => (
             <div key={idx} className="group cursor-pointer">
-              <div className="h-56 rounded-xl overflow-hidden mb-4 border border-stone-200">
+              <div className="h-56 rounded-xl overflow-hidden mb-4 border border-brand-black-100 dark:border-brand-black-800">
                 <img src={post.img} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
-              <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-amber-600 font-medium">
-                <span>{post.category}</span> · <span className="text-brand-white dark:text-brand-black/80">{post.date}</span>
+              <div className="flex items-center gap-2 type-eyebrow text-brand-primary-800 dark:text-brand-primary">
+                <span>{post.category}</span> · <span className="text-brand-white dark:text-brand-black-800">{post.date}</span>
               </div>
               <h3 className="text-xl font-serif text-brand-black dark:text-brand-white mt-2 group-hover:text-brand-primary transition-colors leading-snug">
                 {post.title}
@@ -204,7 +204,7 @@ export default function CalacotEstatesHomepage() {
           starts with a conversation.
         </h2>
 
-        <p className="mx-auto mt-5 max-w-lg text-sm leading-7 text-brand-black/65 dark:text-brand-white/65 md:text-base">
+        <p className="mx-auto mt-5 max-w-lg text-sm leading-7 text-brand-black-600 dark:text-brand-black-200 md:text-base">
           Tell us where you’d like to be and what matters to you.
           Let’s discuss the property you have in mind.
         </p>
@@ -224,7 +224,7 @@ export default function CalacotEstatesHomepage() {
 
           <Link
             href="/list-property?type=individual"
-            className="inline-flex min-h-12 items-center justify-center text-sm font-medium text-brand-black/70 transition-colors hover:text-brand-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary dark:text-brand-white/70 dark:hover:text-brand-white"
+            className="inline-flex min-h-12 items-center justify-center text-sm font-medium text-brand-black-700 transition-colors hover:text-brand-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-primary dark:text-brand-black-200 dark:hover:text-brand-white"
           >
             Have a property to sell?
           </Link>

@@ -5,12 +5,15 @@ import {
   integer,
   index,
   unique,
+  uniqueIndex,
+  boolean,
   pgTable,
   text,
   uuid,
 } from "drizzle-orm/pg-core";
 import { allowed, instant, scopedForeignKey } from "./common";
-import { organizations } from "./organization";
+import { organizations, staffMemberships } from "./organization";
+import { projectMilestones } from "./commercial-core";
 import { clients } from "./clients";
 import { opportunities } from "./opportunities";
 import { quotationVersions } from "./quotations";
@@ -39,6 +42,12 @@ export const documents = pgTable(
         "expense_receipt",
         "property_document",
         "other",
+        // Phase 1F operational categories.
+        "permit",
+        "photo",
+        "report",
+        "policy",
+        "staff_record",
       ],
     }).notNull(),
     storageKey: text("storage_key").notNull(), // Private object key; generate short-lived signed URLs.
@@ -49,10 +58,18 @@ export const documents = pgTable(
     supersedesDocumentId: uuid("supersedes_document_id"),
     createdByClerkUserId: text("created_by_clerk_user_id"),
     archivedAt: instant("archived_at"),
+    // Phase 1F: version family (null on legacy rows = the row's own id) and controlled archival.
+    familyId: uuid("family_id"),
+    archivedBy: text("archived_by"),
+    archiveReason: text("archive_reason"),
     createdAt: instant("created_at").notNull().defaultNow(),
   },
   (t) => [
     unique("documents_org_id_uq").on(t.organizationId, t.id),
+    // A version can be revised once: concurrent revisions of the same version cannot both win.
+    uniqueIndex("documents_single_successor_uq").on(t.organizationId, t.supersedesDocumentId).where(sql`${t.supersedesDocumentId} is not null`),
+    index("documents_family_idx").on(t.organizationId, t.familyId),
+    check("documents_archive_check", sql`${t.archivedAt} is null or ${t.archivedBy} is null or nullif(trim(${t.archiveReason}), '') is not null`),
     allowed("documents_kind_check", t.kind, [
       "contract",
       "quotation",
@@ -63,6 +80,11 @@ export const documents = pgTable(
       "expense_receipt",
       "property_document",
       "other",
+      "permit",
+      "photo",
+      "report",
+      "policy",
+      "staff_record",
     ]),
     check(
       "documents_size_version_check",
@@ -101,6 +123,10 @@ export const documentLinks = pgTable(
     taskId: uuid("task_id"),
     expenseId: uuid("expense_id"),
     propertyId: uuid("property_id"),
+    // Phase 1F relationships.
+    milestoneId: uuid("milestone_id"),
+    staffId: uuid("staff_id"),
+    companyRecord: boolean("company_record"),
     createdAt: instant("created_at").notNull().defaultNow(),
   },
   (t) => [
@@ -168,10 +194,15 @@ export const documentLinks = pgTable(
       properties.organizationId,
       properties.id,
     ),
+    scopedForeignKey("document_links_milestoneId_fk", t.organizationId, t.milestoneId, projectMilestones.organizationId, projectMilestones.id),
+    scopedForeignKey("document_links_staffId_fk", t.organizationId, t.staffId, staffMemberships.organizationId, staffMemberships.id),
+    check("document_links_company_record_check", sql`${t.companyRecord} is null or ${t.companyRecord}`),
     check(
       "document_links_one_parent_check",
-      sql`num_nonnulls(${t.clientId}, ${t.opportunityId}, ${t.quotationVersionId}, ${t.invoiceId}, ${t.projectId}, ${t.taskId}, ${t.expenseId}, ${t.propertyId}) = 1`,
+      sql`num_nonnulls(${t.clientId}, ${t.opportunityId}, ${t.quotationVersionId}, ${t.invoiceId}, ${t.projectId}, ${t.taskId}, ${t.expenseId}, ${t.propertyId}, ${t.milestoneId}, ${t.staffId}, ${t.companyRecord}) = 1`,
     ),
+    index("document_links_project_idx").on(t.organizationId, t.projectId),
+    index("document_links_client_idx").on(t.organizationId, t.clientId),
     index("document_links_document_idx").on(t.organizationId, t.documentId),
   ],
 );

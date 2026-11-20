@@ -49,12 +49,12 @@ export default function Painting() {
             Transform Your Space with <br />
             <span className="font-semibold">Professional Painting</span>
           </h2>
-          <p className="mt-6 text-base md:text-xl text-brand-black/80 max-w-2xl mx-auto">
+          <p className="mt-6 text-base md:text-xl text-brand-black-800 max-w-2xl mx-auto">
             From residential to commercial projects, Calacot delivers flawless
             finishes and lasting beauty. Let our experts bring your vision to life.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/start-project?service=painting" className="bg-brand-black hover:bg-brand-black/90 text-white font-medium px-8 py-3 rounded-full transition-all duration-300 shadow-lg">
+            <Link href="/start-project?service=painting" className="bg-brand-black hover:bg-brand-black/90 text-brand-white font-medium px-8 py-3 rounded-full transition-all duration-300 shadow-lg">
               Start A Project
             </Link>
             <Link href="/start-project?service=painting" className="bg-brand-white/10 backdrop-blur-sm hover:bg-white/20 text-brand-black font-medium px-8 py-3 rounded-full border border-white/30 transition-all duration-300">
