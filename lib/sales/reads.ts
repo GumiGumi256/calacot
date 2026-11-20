@@ -132,7 +132,11 @@ async function cachedDocumentDetail(org: string, entity: "quotations" | "invoice
   const payments =
     entity === "invoices"
       ? await db.execute(
-          sql`SELECT p.id,p.amount,p.currency,p.status,p.reference,coalesce((SELECT sum(a.amount) FROM payment_allocations a WHERE a.payment_id=p.id AND a.organization_id=p.organization_id),0)::text AS allocated FROM payments p WHERE p.organization_id=${org} AND p.client_id=${record.rows[0].client_id}::uuid AND p.currency=${record.rows[0].currency} ORDER BY p.created_at DESC LIMIT 50`,
+          sql`SELECT p.id,p.amount,p.currency,p.status,p.reference,p.method,p.received_at::text,p.receipt_number,
+            coalesce((SELECT sum(a.amount) FROM payment_allocations a WHERE a.payment_id=p.id AND a.organization_id=p.organization_id),0)::text AS allocated,
+            (p.amount-coalesce((SELECT sum(a.amount) FROM payment_allocations a WHERE a.payment_id=p.id AND a.organization_id=p.organization_id),0)-coalesce((SELECT sum(f.amount) FROM payment_refunds f WHERE f.payment_id=p.id AND f.organization_id=p.organization_id AND f.status='completed'),0))::text AS available,
+            coalesce((SELECT sum(a.amount) FROM payment_allocations a WHERE a.payment_id=p.id AND a.organization_id=p.organization_id AND a.invoice_id=${id}::uuid),0)::text AS applied_here
+            FROM payments p WHERE p.organization_id=${org} AND p.client_id=${record.rows[0].client_id}::uuid AND p.currency=${record.rows[0].currency} ORDER BY p.created_at DESC LIMIT 50`,
         )
       : { rows: [] };
   return {

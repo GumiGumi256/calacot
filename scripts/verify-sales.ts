@@ -399,6 +399,7 @@ async function main() {
     snap.customer.name,
   );
   const key = randomUUID();
+  await pg.exec(await readFile("drizzle-current/0016_payment_confirmations.sql", "utf8"));
   const payment = {
     command: "submit",
     invoiceId: iid,
@@ -426,6 +427,16 @@ async function main() {
     JSON.stringify(verification),
     randomUUID(),
   ]);
+  const paymentConfirmations = await pg.query<{ recipient: string; payload: { amount: string; balance: string; invoice: string; receipt: string } }>(
+    "SELECT recipient,payload FROM delivery_intents WHERE organization_id=$1 AND entity_id=$2 AND payload->>'template'='payment-confirmation-v1'", [org, iid],
+  );
+  assert.equal(paymentConfirmations.rows.length, 1);
+  assert.ok(paymentConfirmations.rows[0].recipient);
+  assert.equal(paymentConfirmations.rows[0].payload.amount, "75.00");
+  assert.equal(Number(paymentConfirmations.rows[0].payload.balance), 125);
+  assert.ok(paymentConfirmations.rows[0].payload.receipt);
+  await pg.query("SELECT sales_payment($1,$2,$3::jsonb,$4)", [org, actor, JSON.stringify(verification), randomUUID()]);
+  assert.equal((await pg.query("SELECT id FROM delivery_intents WHERE organization_id=$1 AND entity_id=$2 AND payload->>'template'='payment-confirmation-v1'", [org, iid])).rows.length, 1);
   const list = listQueries(org, "invoices", parseQuery({ payment: "partial" }));
   const balance = await db.execute<{ balance: string }>(list.rows(1));
   assert.equal(balance.rows[0].balance, "125.00");

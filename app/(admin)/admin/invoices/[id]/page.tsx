@@ -82,13 +82,13 @@ export default async function Page({
       {i.status === "issued" && d.permissions.includes("payments_verify") && (
         <Card>
           <CardHeader>
-            <CardTitle>Record and verify payment</CardTitle>
+            <CardTitle>Invoice payments</CardTitle>
             <CardDescription>
-              Submitted references remain pending until separately verified.
+              Record money received, then verify and apply it to this invoice.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <PaymentForm invoiceId={id} payments={d.payments} />
+            <PaymentForm invoiceId={id} payments={d.payments} currency={String(i.currency)} balance={String(i.balance)} />
           </CardContent>
         </Card>
       )}

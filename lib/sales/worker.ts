@@ -12,6 +12,7 @@ import { emailContent } from "./email";
 import { salesConfig } from "./config";
 import { backoff, recoveryDecision, whatsappEligible } from "./worker-policy";
 import type { DocumentSnapshot } from "./document-model";
+import { renderNotificationTemplate } from "@/lib/email/template";
 export type SalesJob = {
   id: string;
   organization_id: string;
@@ -130,11 +131,28 @@ async function attempt(job: SalesJob, d: Intent) {
   }
   let sendPayload: CreateEmailOptions | undefined;
   if (d.channel === "email") {
+    if (!d.recipient) throw new DeliveryFailure("recipient_missing", true);
     const suppressed = await db.execute(
       sql`SELECT id FROM delivery_intents WHERE channel='email' AND lower(recipient)=lower(${d.recipient}) AND (bounced_at IS NOT NULL OR complained_at IS NOT NULL) LIMIT 1`,
     );
     if (suppressed.rows.length)
       return finish(job, d, "suppressed", "recipient_suppressed");
+    if (d.payload.template === "payment-confirmation-v1") {
+      const p = d.payload;
+      const details: Array<[string, string]> = [
+        ["Invoice", String(p.invoice)],
+        ["Amount applied", `${p.currency} ${p.amount}`],
+        ["Invoice total", `${p.currency} ${p.total}`],
+        ["Remaining balance", `${p.currency} ${p.balance}`],
+      ];
+      const message = "We have verified your payment and applied it to your invoice. Thank you.";
+      sendPayload = {
+        from: String(p.from), replyTo: String(p.replyTo) || undefined, to: d.recipient,
+        subject: `Payment confirmation ${p.receipt} | Calacot`,
+        text: `Payment confirmed\n\n${message}\n\nReceipt: ${p.receipt}\n${details.map(([k, v]) => `${k}: ${v}`).join("\n")}`,
+        html: renderNotificationTemplate({ audience: "customer", heading: "Payment confirmed", reference: String(p.receipt), message, details }),
+      };
+    } else {
     const doc = d.payload.document as DocumentSnapshot;
     const artifact = await finalArtifact(
       d.organization_id,
@@ -174,6 +192,7 @@ async function attempt(job: SalesJob, d: Intent) {
         sql`UPDATE delivery_intents SET document_id=${artifact.id}::uuid,payload=payload||jsonb_build_object('emailPayload',${json(sendPayload)}),updated_at=now() WHERE id=${d.id}::uuid AND organization_id=${d.organization_id} AND ${fence(job)} RETURNING id`,
       );
       if (!saved.rows.length) return;
+    }
     }
     if (cfg.mode !== "capture" && !getEmailClient())
       throw new DeliveryFailure("sender_configuration_missing", true);

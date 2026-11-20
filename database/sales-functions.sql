@@ -278,7 +278,7 @@ BEGIN
 END $$;
 
 CREATE OR REPLACE FUNCTION sales_payment(org text, actor text, p jsonb, correlation text) RETURNS uuid LANGUAGE plpgsql AS $$
-DECLARE i invoices; pay payments; pid uuid; staff uuid; paid numeric; credited numeric; due numeric;
+DECLARE i invoices; pay payments; pid uuid; staff uuid; paid numeric; credited numeric; due numeric; notification_recipient text; receipt text;
 BEGIN
   SELECT * INTO i FROM invoices WHERE id=(p->>'invoiceId')::uuid AND organization_id=org FOR UPDATE;
   IF NOT FOUND OR i.status<>'issued' THEN RAISE EXCEPTION 'invoice_unavailable'; END IF;
@@ -309,6 +309,11 @@ BEGIN
     SELECT i.total-paid-credited+coalesce(sum(r.amount),0) INTO due FROM payment_allocation_reversals r JOIN payment_allocations a ON a.id=r.allocation_id AND a.organization_id=r.organization_id JOIN payment_refunds f ON f.id=r.refund_id AND f.organization_id=r.organization_id WHERE a.invoice_id=i.id AND a.organization_id=org AND f.status='completed';
     IF (p->>'amount')::numeric>due THEN RAISE EXCEPTION 'allocation_exceeds_balance'; END IF;
     INSERT INTO payment_allocations(organization_id,payment_id,client_id,currency,invoice_id,amount) VALUES(org,pid,i.client_id,i.currency,i.id,(p->>'amount')::numeric);
+    SELECT coalesce((SELECT recipient FROM delivery_intents WHERE organization_id=org AND entity_type='invoice' AND entity_id=i.id AND channel='email' AND recipient<>'' ORDER BY created_at LIMIT 1), (SELECT email FROM client_contacts WHERE organization_id=org AND client_id=i.client_id AND is_primary AND email IS NOT NULL LIMIT 1), '') INTO notification_recipient;
+    SELECT receipt_number INTO receipt FROM payments WHERE organization_id=org AND id=pid;
+    PERFORM sales_intent(org,'invoice',i.id,'email',notification_recipient,
+      jsonb_build_object('template','payment-confirmation-v1','from',coalesce(p->>'notificationFrom',''),'replyTo',coalesce(p->>'notificationReplyTo',''), 'receipt',receipt,'invoice',i.number,'currency',i.currency,'amount',p->>'amount','total',i.total::text,'balance',(due-(p->>'amount')::numeric)::text),
+      correlation,'sales/'||org||'/payment/'||pid||'/invoice/'||i.id||'/confirmation');
   END IF;
   PERFORM sales_audit(org,actor,'payment.'||(p->>'command'),'invoice',i.id::text,jsonb_build_object('paymentId',pid,'amount',p->>'amount','evidence',p->>'evidence'),correlation);
   RETURN pid;

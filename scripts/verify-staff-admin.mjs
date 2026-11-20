@@ -89,7 +89,11 @@ try {
     for (const p of ["staff_manage", "settings_manage", "finance_accounts_manage"]) for (const role of ["org:finance", "org:sales", "org:project_manager", "org:member", "org:viewer"]) assert.equal(r(role, p), false, `${role} must not have ${p}`);
     assert.equal(r("org:admin", "staff_manage"), true);
     for (const p of ["expenses_approve", "expenses_disburse", "expenses_reconcile", "payments_verify", "invoices_issue"]) for (const role of ["org:project_manager", "org:member", "org:sales", "org:viewer"]) assert.equal(r(role, p), false, `${role} must not have ${p}`);
-    assert.deepEqual(["expenses_create", "expenses_submit"].map((p) => r("org:member", p)), [true, true]);
+    for (const role of ["org:finance", "org:sales", "org:project_manager", "org:member", "org:viewer"]) for (const p of ["expenses_create", "expenses_submit", "expenses_review", "expenses_approve"]) {
+      assert.equal(r(role, p), false);
+      assert.equal(m.effectiveGrants(role, () => true, { status: "active", eligibility: "approved" }).includes(p), false, `${role} cannot receive ${p} through custom grants`);
+    }
+    for (const p of ["expenses_create", "expenses_submit", "expenses_review", "expenses_approve"]) assert.equal(r("org:admin", p), true);
     assert.equal(r("org:member", "projects_read"), false);
     assert.equal(r("org:project_manager", "projects_write"), true);
     assert.equal(r("org:viewer", "leads_write"), false);
@@ -305,8 +309,7 @@ try {
     as("user_admin1");
     assert.equal((await m.setEmployeeEligibility({}, form({ staffId: emp.id, version: String(emp.profile_version), eligibility: "approved", reason: "Signed contract on file" }))).ok, true);
     as("user_emp", "org:member");
-    const ctx = await m.staffContext();
-    assert.deepEqual([...ctx.permissions].sort(), ["expenses_create", "expenses_submit"], "approved employee receives only staff capabilities");
+    await assert.rejects(m.staffContext(), /NEXT_NOT_FOUND/, "approved employees need an assigned role to access the administration area");
     await assert.rejects(m.staffContext("projects_read"), /NEXT_NOT_FOUND/, "no project access for employees");
     as("user_admin1");
     const v = (await staff("user_emp")).profile_version;
@@ -401,8 +404,7 @@ try {
     assert.equal((await m.setEmployeeEligibility({}, form({ staffId: w.id, version: String(w.profile_version), eligibility: "approved", reason: "Contract verified" }))).ok, true);
     as("user_wait", "org:member");
     calls = 0;
-    assert.equal((await m.staffAccessStatus()).kind, "granted");
-    assert.equal(calls, 0, "approved session resolves without a Clerk call");
+    assert.equal((await m.staffAccessStatus()).kind, "awaiting_assignment");
     as("user_admin1");
     const w2 = await staff("user_wait");
     assert.equal((await m.setEmployeeEligibility({}, form({ staffId: w2.id, version: String(w2.profile_version), eligibility: "revoked", reason: "Contract ended" }))).ok, true);

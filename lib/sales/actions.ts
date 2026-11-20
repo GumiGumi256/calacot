@@ -313,7 +313,7 @@ export async function paymentCommand(input: unknown) {
     if (p.command === "verify" && !p.paymentId)
       throw new Error("Select a payment");
     const r = await db.execute<{ id: string }>(
-      sql`SELECT sales_payment(${ctx.organizationId},${ctx.actor},${json(p)},${c}) AS id`,
+      sql`SELECT sales_payment(${ctx.organizationId},${ctx.actor},${json({ ...p, notificationFrom: salesConfig().from, notificationReplyTo: salesConfig().replyTo })},${c}) AS id`,
     );
     return r.rows[0].id;
   });

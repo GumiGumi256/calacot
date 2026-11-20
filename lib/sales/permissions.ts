@@ -70,8 +70,6 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
       "invoices_read",
       "leads_read",
       "leads_write",
-      "expenses_create",
-      "expenses_submit",
       "documents_read",
       "documents_write",
     ],
@@ -88,10 +86,6 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
       "notifications_manage",
       "payments_read",
       "expenses_read",
-      "expenses_create",
-      "expenses_submit",
-      "expenses_review",
-      "expenses_approve",
       "expenses_disburse",
       "expenses_reconcile",
       "finance_reports",
@@ -117,13 +111,10 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
       "quotations_read",
       "catalogue_read",
       "leads_read",
-      "expenses_create",
-      "expenses_submit",
       "documents_read",
       "documents_write",
     ],
-    // Clerk's built-in member role = Staff/Employee: request expenses only.
-    "org:member": ["expenses_create", "expenses_submit"],
+    "org:member": [],
   };
   return grants[role || ""]?.includes(p) ?? false;
 }
@@ -135,7 +126,7 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
  */
 export const sensitivePermissions: ReadonlySet<Permission> = new Set<Permission>([
   "payments_read", "payments_verify", "invoices_read", "invoices_issue", "invoices_void",
-  "expenses_read", "expenses_review", "expenses_approve", "expenses_disburse", "expenses_reconcile",
+  "expenses_read", "expenses_create", "expenses_submit", "expenses_review", "expenses_approve", "expenses_disburse", "expenses_reconcile",
   "finance_reports", "finance_accounts_manage", "staff_manage", "settings_manage", "notifications_manage",
   "documents_read", "documents_write", "documents_archive",
   "catalogue_manage", "quotation_price_override",
@@ -158,6 +149,7 @@ const localAccess = cache(async (organizationId: string, userId: string): Promis
 export function effectiveGrants(role: string | null | undefined, hasCustom: (p: Permission) => boolean, local: LocalAccess) {
   const approvedEmployee = local?.status === "active" && local.eligibility === "approved";
   return permissions.filter((p) => {
+    if (role !== "org:admin" && (["expenses_create", "expenses_submit", "expenses_review", "expenses_approve"] as Permission[]).includes(p)) return false;
     if (!roleAllows(role, p) && !hasCustom(p)) return false;
     return role === "org:member" ? approvedEmployee : true;
   });
