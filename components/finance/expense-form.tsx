@@ -26,21 +26,22 @@ function addMoney(a: string, b: string) {
   return `${total / BigInt(100)}.${(total % BigInt(100)).toString().padStart(2, "0")}`;
 }
 
-export function ExpenseForm({ requestKey, projects, suppliers, initial, today, divisionOptions = divisions.map((key) => ({ key, label: key })), defaultCurrency = "UGX" }: { requestKey: string; projects: Project[]; suppliers: Supplier[]; initial?: ExpenseFormValues; today: string; divisionOptions?: { key: string; label: string }[]; defaultCurrency?: string }) {
+export function ExpenseForm({ requestKey, projects, suppliers, initial, today, divisionOptions = divisions.map((key) => ({ key, label: key })), defaultCurrency = "UGX", fixedProject, onSaved }: { requestKey: string; projects: Project[]; suppliers: Supplier[]; initial?: ExpenseFormValues; today: string; divisionOptions?: { key: string; label: string }[]; defaultCurrency?: string; fixedProject?: Project; onSaved?: (id: string) => void }) {
   const router = useRouter();
   const { orgSlug } = useAuth();
   const [state, action, pending] = useActionState(saveExpense, { ok: false, message: "" });
-  const [form, setForm] = useState<ExpenseFormValues>(initial ?? { division: "", projectId: "", category: "", supplierId: "", description: "", purpose: "", currency: defaultCurrency, netAmount: "", taxAmount: "", incurredOn: today, supplierInvoiceReference: "" });
+  const [form, setForm] = useState<ExpenseFormValues>(initial ?? { division: fixedProject?.division ?? "", projectId: fixedProject?.id ?? "", category: "", supplierId: "", description: "", purpose: "", currency: fixedProject?.currency ?? defaultCurrency, netAmount: "", taxAmount: "", incurredOn: today, supplierInvoiceReference: "" });
   const [newSupplier, setNewSupplier] = useState(false);
   const set = (k: keyof ExpenseFormValues, v: string) => setForm((f) => ({ ...f, [k]: v }));
   const projectOptions = useMemo(() => projects.filter((p) => !form.division || p.division === form.division), [projects, form.division]);
   const total = addMoney(form.netAmount || "0", form.taxAmount);
   useEffect(() => {
     if (state.ok && state.id) {
+      if (onSaved) { onSaved(state.id); router.refresh(); return; }
       router.push(`${orgSlug ? "/" + encodeURIComponent(orgSlug) : ""}/admin/expenses/${state.id}`);
       router.refresh();
     }
-  }, [state, router, orgSlug]);
+  }, [state, router, orgSlug, onSaved]);
   return (
     <form action={action} className="flex max-w-3xl flex-col gap-6" noValidate={false}>
       <input type="hidden" name="key" value={requestKey} />
@@ -49,7 +50,7 @@ export function ExpenseForm({ requestKey, projects, suppliers, initial, today, d
       <FieldSet>
         <FieldLegend>What is this expense for?</FieldLegend>
         <FieldGroup>
-          <div className="grid gap-4 sm:grid-cols-2">
+          {fixedProject ? <><input type="hidden" name="division" value={fixedProject.division} /><input type="hidden" name="projectId" value={fixedProject.id} /><p className="text-sm">Project: <span className="font-medium">{fixedProject.code} {fixedProject.name}</span> · {fixedProject.division}</p></> : <div className="grid gap-4 sm:grid-cols-2">
             <Field>
               <FieldLabel htmlFor="expense-division">Division</FieldLabel>
               <NativeSelect wrapperClassName="w-full" className="capitalize" id="expense-division" name="division" required value={form.division} onChange={(e) => { set("division", e.target.value); if (projects.find((p) => p.id === form.projectId)?.division !== e.target.value) set("projectId", ""); }}>
@@ -65,7 +66,7 @@ export function ExpenseForm({ requestKey, projects, suppliers, initial, today, d
               </NativeSelect>
               <FieldDescription id="expense-project-hint">Projects are filtered to the selected division.</FieldDescription>
             </Field>
-          </div>
+          </div>}
           <Field>
             <FieldLabel htmlFor="expense-description">Description</FieldLabel>
             <Input id="expense-description" name="description" required maxLength={500} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="e.g. Cement for foundation, 40 bags" />
@@ -140,7 +141,7 @@ export function ExpenseForm({ requestKey, projects, suppliers, initial, today, d
       </FieldSet>
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={pending}>{pending ? "Saving..." : initial?.id ? "Save corrections" : "Save draft"}</Button>
-        <p className="text-sm text-muted-foreground">Saving does not submit the request. You can attach receipts and submit from the next page.</p>
+        <p className="text-sm text-muted-foreground">Saving does not submit the request. You can attach receipts and submit from the expense page.</p>
       </div>
       {state.message && <p role={state.ok ? "status" : "alert"} className={state.ok ? "text-sm" : "text-sm text-destructive"}>{state.message}</p>}
     </form>

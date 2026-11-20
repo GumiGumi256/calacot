@@ -4,7 +4,7 @@ import { z } from "zod";
 import { db } from "@/database/db";
 import { balanceExpression, listBase } from "@/lib/sales/queries";
 import { financeContext } from "./context";
-import { cacheKeyContext, adminCache } from "@/lib/cache-tags";
+import { cacheKeyContext, adminCache, type CacheKeyContext } from "@/lib/cache-tags";
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 const one = (raw: SearchParams, k: string) => (typeof raw[k] === "string" ? (raw[k] as string) : "");
@@ -38,7 +38,7 @@ export async function readFinancialReports(raw: SearchParams) {
   return cachedReadFinancialReports(cacheKeyContext(ctx), raw);
 }
 /** Cached per organization, caller context and inputs; expired on writes (lib/cache-tags.ts). */
-async function cachedReadFinancialReports(ctx: Awaited<ReturnType<typeof financeContext>>, raw: SearchParams) {
+async function cachedReadFinancialReports(ctx: CacheKeyContext<Awaited<ReturnType<typeof financeContext>>>, raw: SearchParams) {
   "use cache: remote";
   adminCache(ctx.organizationId);
   const org = ctx.organizationId;
