@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { staffAccessStatus, staffContext } from "@/lib/sales/permissions";
 import { SalesSetupState } from "@/lib/sales/setup-state";
@@ -8,11 +9,31 @@ import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+/*
+ * Cache Components: everything below depends on the signed-in user, so it renders at request time
+ * inside a Suspense boundary. The static shell is the quiet frame in AdminShellFallback; pages then
+ * stream in, and their data comes from per-organization caches (lib/cache-tags.ts).
+ */
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<AdminShellFallback />}>
+      <AdminShell>{children}</AdminShell>
+    </Suspense>
+  );
+}
+
+function AdminShellFallback() {
+  return (
+    <div data-surface="admin" className="flex min-h-svh bg-sidebar" aria-busy="true">
+      <div className="hidden w-64 shrink-0 md:block" />
+      <div className="m-2 flex-1 rounded-[2rem] bg-background md:ml-0">
+        <p role="status" className="sr-only">Loading the Calacot admin…</p>
+      </div>
+    </div>
+  );
+}
+
+async function AdminShell({ children }: { children: React.ReactNode }) {
   if (!process.env.CALACOT_CLERK_ORG_ID?.trim()) {
     await requireUser("/admin/clients");
     return <SalesSetupState />;

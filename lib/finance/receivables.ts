@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@/database/db";
 import { listBase } from "@/lib/sales/queries";
 import { staffContext } from "@/lib/sales/permissions";
+import { adminCache } from "@/lib/cache-tags";
 
 /**
  * Receivables overview for the Payments and Invoices pages. Invoice balances and the
@@ -12,6 +13,8 @@ import { staffContext } from "@/lib/sales/permissions";
  * amount - allocations - completed refunds.
  */
 export async function readReceivables(org: string) {
+  "use cache: remote";
+  adminCache(org);
   const invoices = listBase(org, "invoices");
   const available = sql`SELECT p.id,p.receipt_number,p.client_id,c.display_name AS client,p.currency,p.amount::text AS amount,p.received_at::text AS received_at,
       (p.amount-coalesce((SELECT sum(a.amount) FROM payment_allocations a WHERE a.organization_id=p.organization_id AND a.payment_id=p.id),0)

@@ -8,6 +8,7 @@ import { realEstateEnquiries } from "@/database/schema";
 import { saveEnquiry } from "@/lib/save-enquiry"; 
 import type { SubmitEnquiryResult } from "@/lib/enquiry-schema"; 
 import { db } from "@/database/db";
+import { expireAdminData } from "@/lib/cache-tags";
 
 export async function submitEstateEnquiry(input: unknown): Promise<SubmitEnquiryResult> {
   return saveEnquiry(input, {
@@ -17,6 +18,7 @@ export async function submitEstateEnquiry(input: unknown): Promise<SubmitEnquiry
         .returning({ id: realEstateEnquiries.id });
       if (rows.length === 1) {
         queueEnquiryEmails({ id: record.id, kind: "estate", email: record.email, details: { ...record } });
+        expireAdminData(); // the new enquiry appears in the admin at once
       }
       return rows.length === 1;
     },

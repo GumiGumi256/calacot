@@ -4,13 +4,20 @@ import { z } from "zod";
 import { notFound } from "next/navigation";
 import { db } from "@/database/db";
 import { staffContext } from "./permissions";
+import { adminCache } from "@/lib/cache-tags";
 import { listQueries, balanceExpression } from "./queries";
 import type { Entity, ListRow, QueryState } from "./contracts";
 export async function readList(entity: Entity, query: QueryState) {
   const ctx = await staffContext(
     entity === "deliveries" ? "notifications_manage" : `${entity}_read`,
   );
-  const queries = listQueries(ctx.organizationId, entity, query);
+  return { ...(await cachedList(ctx.organizationId, entity, query)), permissions: ctx.permissions };
+}
+/** Cached per organization, entity and query (all part of the key); expired on writes. */
+async function cachedList(org: string, entity: Entity, query: QueryState) {
+  "use cache: remote";
+  adminCache(org);
+  const queries = listQueries(org, entity, query);
   const [count, summary] = await Promise.all([
     db.execute<{ count: number }>(queries.count),
     db.execute<{ currency: string; total: string; due: string }>(
@@ -28,17 +35,22 @@ export async function readList(entity: Entity, query: QueryState) {
     total,
     query: { ...query, page },
     summary: summary.rows,
-    permissions: ctx.permissions,
   };
 }
 export async function clientDetail(id: string) {
   const ctx = await staffContext("clients_read");
-  const org = ctx.organizationId;
   if (!z.uuid().safeParse(id).success) notFound();
+  const data = await cachedClientDetail(ctx.organizationId, id);
+  if (!data) notFound();
+  return { ...data, permissions: ctx.permissions };
+}
+async function cachedClientDetail(org: string, id: string) {
+  "use cache: remote";
+  adminCache(org);
   const c = await db.execute(
     sql`SELECT * FROM clients WHERE id=${id}::uuid AND organization_id=${org}`,
   );
-  if (!c.rows.length) notFound();
+  if (!c.rows.length) return null;
   const [contacts, projects, quotes, invoices, activity] = await Promise.all([
     db.execute(
       sql`SELECT * FROM client_contacts WHERE client_id=${id}::uuid AND organization_id=${org} ORDER BY is_primary DESC,created_at LIMIT 20`,
@@ -67,7 +79,6 @@ export async function clientDetail(id: string) {
     invoices: invoices.rows,
     activity: activity.rows,
     balances: balances.rows,
-    permissions: ctx.permissions,
   };
 }
 export async function documentDetail(
@@ -75,14 +86,20 @@ export async function documentDetail(
   id: string,
 ) {
   const ctx = await staffContext(`${entity}_read`);
-  const org = ctx.organizationId;
   if (!z.uuid().safeParse(id).success) notFound();
+  const data = await cachedDocumentDetail(ctx.organizationId, entity, id);
+  if (!data) notFound();
+  return { ...data, permissions: ctx.permissions };
+}
+async function cachedDocumentDetail(org: string, entity: "quotations" | "invoices", id: string) {
+  "use cache: remote";
+  adminCache(org);
   const record = await db.execute(
     entity === "quotations"
       ? sql`SELECT * FROM quotations WHERE id=${id}::uuid AND organization_id=${org}`
       : sql`SELECT i.*,(${balanceExpression})::text AS balance FROM invoices i WHERE i.id=${id}::uuid AND i.organization_id=${org}`,
   );
-  if (!record.rows.length) notFound();
+  if (!record.rows.length) return null;
   const versions =
     entity === "quotations"
       ? await db.execute(
@@ -128,14 +145,17 @@ export async function documentDetail(
     deliveries: deliveries.rows,
     activity: activity.rows,
     payments: payments.rows,
-    permissions: ctx.permissions,
   };
 }
 export async function pickers(clientId?: string, search = "") {
   const ctx = await staffContext("quotations_read");
-  const org = ctx.organizationId;
   if (clientId && !z.uuid().safeParse(clientId).success)
     return { clients: [], projects: [], contacts: [], owners: [] };
+  return cachedPickers(ctx.organizationId, clientId ?? "", search);
+}
+async function cachedPickers(org: string, clientId: string, search: string) {
+  "use cache: remote";
+  adminCache(org);
   const [clients, projects, contacts, owners] = await Promise.all([
     db.execute(
       sql`SELECT id,display_name AS name FROM clients WHERE organization_id=${org} AND archived_at IS NULL AND display_name ILIKE ${"%" + search.replace(/[\\%_]/g, "\\$&") + "%"} ORDER BY display_name,id LIMIT 50`,

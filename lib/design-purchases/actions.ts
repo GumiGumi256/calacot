@@ -20,12 +20,14 @@ import {
 } from "./transitions";
 import { queueDesignEmail } from "./email";
 import { queuePurchaseCreatedWhatsApp } from "@/lib/whatsapp/purchase-notifications";
+import { expireAdminData } from "@/lib/cache-tags";
 
 function refreshPurchase(id: string) {
   revalidatePath("/account/designs");
   revalidatePath(`/account/designs/${id}`);
   revalidatePath("/admin/design-purchases");
   revalidatePath(`/admin/design-purchases/${id}`);
+  expireAdminData(); // cached admin reads (lib/cache-tags.ts)
 }
 
 export async function submitDesignPaymentReference(

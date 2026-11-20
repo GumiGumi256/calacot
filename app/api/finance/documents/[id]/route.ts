@@ -4,7 +4,6 @@ import { db } from "@/database/db";
 import { staffContext } from "@/lib/sales/permissions";
 import { loadPrivateObject } from "@/lib/sales/storage";
 
-export const runtime = "nodejs";
 
 /** Streams an expense document to staff who may read that expense. Never public or cached. */
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {

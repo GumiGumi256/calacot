@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/database/db";
 import { financeMutation, type FinanceResult } from "./context";
 import { disbursementMethods } from "./options";
+import { expireAdminData } from "@/lib/cache-tags";
 
 const amount = z.string().trim().regex(/^\d{1,15}(\.\d{1,2})?$/, "invalid_amount");
 const optionalUuid = z.union([z.uuid(), z.literal("")]).default("");
@@ -16,6 +17,7 @@ function refresh(expenseId?: string, projectId?: string) {
   revalidatePath("/admin/financial-reports");
   if (expenseId) revalidatePath(`/admin/expenses/${expenseId}`);
   if (projectId) revalidatePath(`/admin/projects/${projectId}`);
+  expireAdminData(); // cached admin reads (lib/cache-tags.ts)
 }
 
 const expenseInput = z.object({
@@ -156,6 +158,7 @@ export async function saveFinanceAccount(_: FinanceResult, data: FormData): Prom
   return financeMutation("finance_accounts_manage", async (ctx, correlation) => {
     const r = await db.execute<{ result: { id: string; already: boolean } }>(sql`SELECT finance_account_save(${ctx.organizationId},${ctx.actor},${json(parsed.data)},${correlation}) AS result`);
     revalidatePath("/admin/payment-accounts");
+    expireAdminData(); // cached admin reads (lib/cache-tags.ts)
     return { ok: true, id: r.rows[0].result.id, message: r.rows[0].result.already ? "Already registered." : "Account registered as verified." };
   });
 }
@@ -166,6 +169,7 @@ export async function setFinanceAccountStatus(_: FinanceResult, data: FormData):
   return financeMutation("finance_accounts_manage", async (ctx, correlation) => {
     await db.execute(sql`SELECT finance_account_status(${ctx.organizationId},${ctx.actor},${parsed.data.accountId}::uuid,${parsed.data.status},${correlation})`);
     revalidatePath("/admin/payment-accounts");
+    expireAdminData(); // cached admin reads (lib/cache-tags.ts)
     return { ok: true, id: parsed.data.accountId, message: parsed.data.status === "active" ? "Account reactivated." : "Account deactivated. It can no longer be used for new disbursements." };
   });
 }

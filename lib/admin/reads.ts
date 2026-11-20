@@ -10,6 +10,7 @@ import {
   paymentMethods,
   expenseStatuses,
 } from "./options";
+import { cacheKeyContext, adminCache } from "@/lib/cache-tags";
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -77,6 +78,12 @@ export type LeadRow = {
 
 export async function readLeads(raw: SearchParams) {
   const ctx = await staffContext("leads_read");
+  return cachedReadLeads(cacheKeyContext(ctx), raw);
+}
+/** Cached per organization, caller context and inputs; expired on writes (lib/cache-tags.ts). */
+async function cachedReadLeads(ctx: Awaited<ReturnType<typeof staffContext>>, raw: SearchParams) {
+  "use cache: remote";
+  adminCache(ctx.organizationId);
   const { q, get } = common(raw);
   const status = pick(get("status"), leadStatuses);
   const type = pick(get("type"), leadTypes);
@@ -136,6 +143,12 @@ export type PaymentRow = {
 
 export async function readPayments(raw: SearchParams) {
   const ctx = await staffContext("payments_read");
+  return cachedReadPayments(cacheKeyContext(ctx), raw);
+}
+/** Cached per organization, caller context and inputs; expired on writes (lib/cache-tags.ts). */
+async function cachedReadPayments(ctx: Awaited<ReturnType<typeof staffContext>>, raw: SearchParams) {
+  "use cache: remote";
+  adminCache(ctx.organizationId);
   const { q, get } = common(raw);
   const status = pick(get("status"), paymentStatuses);
   const method = pick(get("method"), paymentMethods);
@@ -196,6 +209,12 @@ export type ExpenseRow = {
 
 export async function readExpenses(raw: SearchParams) {
   const ctx = await staffContext("expenses_read");
+  return cachedReadExpenses(cacheKeyContext(ctx), raw);
+}
+/** Cached per organization, caller context and inputs; expired on writes (lib/cache-tags.ts). */
+async function cachedReadExpenses(ctx: Awaited<ReturnType<typeof staffContext>>, raw: SearchParams) {
+  "use cache: remote";
+  adminCache(ctx.organizationId);
   const { q, get } = common(raw);
   const status = pick(get("status"), expenseStatuses);
   const where: SQL[] = [];

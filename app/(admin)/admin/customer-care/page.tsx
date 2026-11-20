@@ -31,7 +31,6 @@ export const metadata = {
   title: "Customer care inbox",
   robots: { index: false, follow: false },
 };
-export const dynamic = "force-dynamic";
 
 type Mode = "bot" | "human" | "closed";
 type Conversation = typeof careConversations.$inferSelect;

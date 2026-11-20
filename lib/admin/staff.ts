@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@/database/db";
 import { staffContext } from "@/lib/sales/permissions";
 import { staffRoles } from "./roles";
+import { adminCache } from "@/lib/cache-tags";
 
 export type StaffEntry = {
   userId: string; staffId: string | null; name: string; email: string; role: string | null; status: "active" | "suspended" | "removed";
@@ -74,5 +75,7 @@ export async function readStaffDirectory(raw: Raw) {
 }
 
 export async function readStaffActivity(org: string, staffId: string) {
+  "use cache: remote";
+  adminCache(org);
   return (await db.execute<{ action: string; actor: string | null; created_at: string; changes: Record<string, unknown> }>(sql`SELECT a.action,coalesce(s.display_name,a.actor_clerk_user_id,'System') AS actor,a.created_at::text AS created_at,a.changes FROM audit_logs a LEFT JOIN staff_memberships s ON s.organization_id=a.organization_id AND s.clerk_user_id=a.actor_clerk_user_id WHERE a.organization_id=${org} AND a.entity_type='staff_membership' AND a.entity_id=${staffId} ORDER BY a.created_at DESC,a.id LIMIT 30`)).rows;
 }

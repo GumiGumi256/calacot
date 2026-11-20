@@ -1,6 +1,7 @@
 import { client } from "@/sanity/lib/client";
 import { defineQuery } from "next-sanity";
 import { cache } from "react";
+import { cacheLife, cacheTag } from "next/cache";
 import { urlFor } from "@/sanity/lib/image";
 import { DESIGN_TYPES } from "@/sanity/design-types";
 import { rankDesigns, type SearchableDesign } from "@/lib/design-search";
@@ -44,13 +45,16 @@ export const FEATURED_DESIGNS_QUERY = defineQuery(/* groq */ `
 }`);
 
 export async function getFeaturedDesigns() {
+  "use cache";
+  // Published Sanity content: cached, refreshed every minute and at once by the Sanity webhook.
+  cacheLife("minutes");
+  cacheTag("featured-designs", "designs");
   return client.fetch<FeaturedDesign[]>(
     FEATURED_DESIGNS_QUERY,
     {},
     {
       perspective: "published",
       useCdn: false,
-      next: { revalidate: 60, tags: ["featured-designs"] },
     },
   );
 }
@@ -92,10 +96,14 @@ const DESIGN_SEARCH_INDEX_QUERY = defineQuery(/* groq */ `
 `);
 
 export async function getDesignCollection(type = "", offset = 0, search = ""): Promise<DesignCollectionPage> {
+  "use cache";
+  // Published Sanity content: cached, refreshed every minute and at once by the Sanity webhook.
+  cacheLife("minutes");
+  cacheTag("designs");
   let rankedIds: string[] | null = null;
   if (search.trim()) {
     const index = await client.fetch<SearchableDesign[]>(DESIGN_SEARCH_INDEX_QUERY, { type }, {
-      perspective: "published", useCdn: false, next: { revalidate: 60, tags: ["designs"] },
+      perspective: "published", useCdn: false,
     });
     rankedIds = rankDesigns(index, search);
   }
@@ -105,7 +113,7 @@ export async function getDesignCollection(type = "", offset = 0, search = ""): P
       '$type == "" || designType == $type', '_id in $ids',
     ),
     { type, ids, offset: rankedIds === null ? offset : 0, end: rankedIds === null ? offset + DESIGN_PAGE_SIZE : DESIGN_PAGE_SIZE },
-    { perspective: "published", useCdn: false, next: { revalidate: 60, tags: ["designs"] } },
+    { perspective: "published", useCdn: false },
   );
   if (rankedIds !== null) {
     result.total = rankedIds.length;
@@ -181,30 +189,34 @@ export const DESIGN_BY_SLUG_QUERY = defineQuery(/* groq */ `
   estimatedBuildCost { minimum, maximum }, canCustomize, customizationNote
 }`);
 
-export const getDesignBySlug = cache(async (slug: string) =>
-  client.fetch<DesignDetails | null>(
+export const getDesignBySlug = cache(async (slug: string) => {
+  "use cache";
+  // Published Sanity content: cached, refreshed every minute and at once by the Sanity webhook.
+  cacheLife("minutes");
+  cacheTag("designs");
+  return client.fetch<DesignDetails | null>(
     DESIGN_BY_SLUG_QUERY,
     { slug },
-    {
-      perspective: "published",
-      useCdn: false,
-      next: { revalidate: 60, tags: ["designs"] },
-    },
-  ),
-);
+    { perspective: "published", useCdn: false },
+  );
+});
 
 // Published detail pages, including designs outside the featured carousel.
 export const DESIGN_SITEMAP_QUERY = defineQuery(/* groq */ `
 *[_type == "design" && coalesce(status, "available") != "archived"
   && defined(slug.current) && slug.current != ""] | order(slug.current asc) {
-  "slug": slug.current, _updatedAt
+  "slug": slug.current, _updatedAt, "image": featuredImage.asset->url
 }`);
 
 export async function getDesignSitemapEntries() {
-  return client.fetch<{ slug: string; _updatedAt: string }[]>(
+  "use cache";
+  // Published Sanity content: cached, refreshed every minute and at once by the Sanity webhook.
+  cacheLife("minutes");
+  cacheTag("designs");
+  return client.fetch<{ slug: string; _updatedAt: string; image?: string | null }[]>(
     DESIGN_SITEMAP_QUERY,
     {},
-    { perspective: "published", useCdn: false, next: { revalidate: 60, tags: ["designs"] } },
+    { perspective: "published", useCdn: false },
   );
 }
 

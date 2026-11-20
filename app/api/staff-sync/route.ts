@@ -1,14 +1,14 @@
 import { randomUUID, timingSafeEqual } from "node:crypto";
 import { clerkClient } from "@clerk/nextjs/server";
 import { reconcileOrganization } from "@/lib/admin/staff-sync";
+import { expiringAdminData } from "@/lib/cache-tags";
 
-export const runtime = "nodejs";
 
 /**
  * Scheduled Clerk-to-mirror reconciliation (recovers missed or failed webhook deliveries).
  * Requires `Authorization: Bearer <STAFF_SYNC_SECRET>`; disabled when the secret is unset.
  */
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const secret = process.env.STAFF_SYNC_SECRET;
   const org = process.env.CALACOT_CLERK_ORG_ID?.trim();
   if (!secret || secret.length < 32 || !org) return new Response("Not configured", { status: 503 });
@@ -22,3 +22,6 @@ export async function POST(request: Request) {
     return Response.json({ ok: false }, { status: 500 });
   }
 }
+
+// Expire cached admin reads after a successful write (lib/cache-tags.ts).
+export const POST = expiringAdminData(handlePOST);

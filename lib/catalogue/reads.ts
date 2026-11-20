@@ -4,6 +4,7 @@ import { db } from "@/database/db";
 import { staffContext } from "@/lib/sales/permissions";
 import { divisions, currencies, literalSearch } from "@/lib/sales/contracts";
 import { catalogueItemTypes, type CatalogueItem } from "./contracts";
+import { cacheKeyContext, adminCache } from "@/lib/cache-tags";
 
 type Raw = Record<string, string | string[] | undefined>;
 const one = (raw: Raw, k: string) => (typeof raw[k] === "string" ? (raw[k] as string).trim().slice(0, 200) : "");
@@ -15,6 +16,12 @@ const fromItems = (org: string) => sql`FROM services s LEFT JOIN staff_membershi
 
 export async function readCatalogue(raw: Raw) {
   const ctx = await staffContext("catalogue_read");
+  return cachedReadCatalogue(cacheKeyContext(ctx), raw);
+}
+/** Cached per organization, caller context and inputs; expired on writes (lib/cache-tags.ts). */
+async function cachedReadCatalogue(ctx: Awaited<ReturnType<typeof staffContext>>, raw: Raw) {
+  "use cache: remote";
+  adminCache(ctx.organizationId);
   const org = ctx.organizationId;
   const filters = {
     search: one(raw, "q"),

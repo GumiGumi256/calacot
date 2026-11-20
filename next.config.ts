@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 import path from "node:path";
 
 const nextConfig: NextConfig = {
+  // Cache Components: data is dynamic by default; pages and data opt in with "use cache" and are
+  // refreshed on demand by tag (see lib/cache-tags.ts). Partial Prerendering is on by default.
+  // (partialPrefetching is not available in the installed Next 16.2.1.)
+  cacheComponents: true,
   // Pin the root so Turbopack never resolves packages (e.g. tailwindcss) from the parent Desktop folder.
   turbopack: {
     root: path.resolve(__dirname),

@@ -53,6 +53,7 @@ export default function ArchHero() {
      
 
             {/* HEADLINE */}
+            <p className="type-eyebrow mb-4 text-brand-black-200">Architects in Kampala, Uganda</p>
             <h1 className="text-brand-white mb-6 max-w-6xl title font-light">
              A home imagined. A design to build on.
              

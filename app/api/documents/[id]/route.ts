@@ -7,7 +7,6 @@ import { loadPrivateObject } from "@/lib/sales/storage";
 import { documentAccessPredicate } from "@/lib/documents/access";
 import { inlineTypes, safeFileName } from "@/lib/documents/files";
 
-export const runtime = "nodejs";
 
 /**
  * Streams one document version to a user who may read every record it is linked to.

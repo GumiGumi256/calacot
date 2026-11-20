@@ -2,7 +2,6 @@ import { staffContext } from "@/lib/sales/permissions";
 import { db } from "@/database/db";
 import { parseQuery, type Entity, type ListRow } from "@/lib/sales/contracts";
 import { listQueries } from "@/lib/sales/queries";
-export const runtime = "nodejs";
 const cell = (s: unknown) =>
   `"${String(s ?? "")
     .replace(/^[=+@-]/, "'$&")

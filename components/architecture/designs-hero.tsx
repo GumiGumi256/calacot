@@ -20,6 +20,7 @@ export default function DesignsHero() {
         {/* Left */}
         <div>
         
+          <p className="type-eyebrow mb-4 text-brand-black-600 dark:text-brand-black-200">House plans for sale in Uganda</p>
           <h1
             id="designs-heading"
             className="max-w-[900px] text-[clamp(2.7rem,6vw,6.75rem)] font-normal leading-[0.92] tracking-[-0.06em]"

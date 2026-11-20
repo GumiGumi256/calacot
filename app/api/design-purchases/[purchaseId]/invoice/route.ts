@@ -7,7 +7,6 @@ import { isAdmin } from "@/lib/design-purchases/permissions";
 import { generateDesignInvoice } from "@/lib/design-purchases/invoice";
 import { ownedPurchaseFilter } from "@/lib/design-purchases/transitions";
 
-export const runtime = "nodejs";
 export async function GET(
   _: Request,
   { params }: { params: Promise<{ purchaseId: string }> },

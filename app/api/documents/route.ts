@@ -9,8 +9,8 @@ import { financeError, financeMessages } from "@/lib/finance/context";
 import { canWriteLink, documentAccessPredicate, linkTypes, type LinkType } from "@/lib/documents/access";
 import { detectDocumentType, documentMaxBytes, safeFileName } from "@/lib/documents/files";
 import { uploadKinds } from "@/lib/documents/reads";
+import { expiringAdminData } from "@/lib/cache-tags";
 
-export const runtime = "nodejs";
 const reply = (status: number, message: string, id?: string) => Response.json({ ok: status === 200, message, id }, { status, headers: { "Cache-Control": "no-store" } });
 const messages: Record<string, string> = {
   financial_document_immutable: "Quotations, invoices, receipts and expense evidence are managed in their own workflows and cannot be revised or archived here.",
@@ -23,7 +23,7 @@ const messages: Record<string, string> = {
 };
 
 /** Upload a new document (with one relationship) or a new version of an existing one. */
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   let ctx: Awaited<ReturnType<typeof staffContext>>;
   try { ctx = await staffContext("documents_write", "fresh"); } catch { return reply(404, "Not found"); }
   const origin = request.headers.get("origin");
@@ -81,3 +81,6 @@ export async function POST(request: Request) {
     return reply(message ? 409 : 500, message ?? "The document could not be stored. Try again.");
   }
 }
+
+// Expire cached admin reads after a successful write (lib/cache-tags.ts).
+export const POST = expiringAdminData(handlePOST);

@@ -17,7 +17,7 @@ try {
  const bundle=await build({entryPoints:["lib/projects/actions.ts"],bundle:true,platform:"node",format:"cjs",write:false,packages:"external",plugins:[{name:"isolated",setup(b){
   b.onResolve({filter:/^(next\/cache|@\/database\/db|@\/lib\/sales\/permissions|@clerk\/nextjs\/server)$/},({path})=>({path,namespace:"test"}));
   b.onLoad({filter:/.*/,namespace:"test"},({path})=>{const c="const c=globalThis.__projectTaskTest;";
-   if(path==="next/cache")return {loader:"js",contents:"export function revalidatePath(){}"};
+   if(path==="next/cache")return {loader:"js",contents:"export function revalidatePath(){} export function revalidateTag(){} export function updateTag(){} export function cacheTag(){} export function cacheLife(){}"};
    if(path.includes("permissions"))return {loader:"js",contents:c+'export async function staffContext(){if(!c.allowed)throw Error("unauthorized");return {organizationId:c.org,actor:"actor",role:c.role || "org:admin"}}'};
    if(path==="@clerk/nextjs/server")return {loader:"js",contents:c+'export async function clerkClient(){return {organizations:{async getOrganizationMembershipList(){return {data:c.member?[{organization:{id:c.org},publicUserData:{userId:"assignee"}}]:[]}}}}}'};
    return {loader:"js",contents:c+"export const db={execute(q){return c.db.execute(q)}}"};

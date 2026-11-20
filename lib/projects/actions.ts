@@ -6,6 +6,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { db } from "@/database/db";
 import { staffContext } from "@/lib/sales/permissions";
+import { expireAdminData } from "@/lib/cache-tags";
 
 const input = z.object({
   projectId: z.uuid(), taskId: z.uuid(), title: z.string().trim().min(1).max(200),
@@ -44,6 +45,7 @@ export async function createProjectTask(_: { ok: boolean; message: string }, dat
       if (!existing.rows.length) return { ok: false, message: "Task could not be created. Check the project and refresh before trying again." };
     }
     revalidatePath("/", "layout");
+    expireAdminData(); // cached admin reads (lib/cache-tags.ts)
     return { ok: true, message: "Task created." };
   } catch {
     return { ok: false, message: "Task could not be saved or the employee could not be verified. Please try again." };
@@ -74,6 +76,7 @@ export async function updateProjectTaskStatus(_: { ok: boolean; message: string 
       if (!current.rows.length) return { ok: false, message: "The task or project changed. Refresh before trying again." };
     }
     revalidatePath("/", "layout");
+    expireAdminData(); // cached admin reads (lib/cache-tags.ts)
     return { ok: true, message: "Task status saved." };
   } catch {
     return { ok: false, message: "Task status could not be saved. Please try again." };
@@ -109,6 +112,7 @@ export async function editProjectTask(_: { ok: boolean; message: string }, data:
       if (!same.rows.length) return { ok: false, message: "The task or project changed. Refresh before trying again." };
     }
     revalidatePath("/", "layout");
+    expireAdminData(); // cached admin reads (lib/cache-tags.ts)
     return { ok: true, message: "Task details saved." };
   } catch {
     return { ok: false, message: "Task could not be saved or the employee could not be verified. Please try again." };
@@ -137,6 +141,7 @@ export async function addProjectTaskComment(_: { ok: boolean; message: string },
       if (!existing.rows.length) return { ok: false, message: "The task is unavailable or your staff membership is not synchronized." };
     }
     revalidatePath("/", "layout");
+    expireAdminData(); // cached admin reads (lib/cache-tags.ts)
     return { ok: true, message: "Comment added." };
   } catch {
     return { ok: false, message: "Comment could not be saved. Please try again." };

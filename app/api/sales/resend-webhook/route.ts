@@ -2,8 +2,8 @@ import { Resend } from "resend";
 import { sql } from "drizzle-orm";
 import { db } from "@/database/db";
 import { readWebhookBody } from "@/lib/whatsapp/security";
-export const runtime = "nodejs";
-export async function POST(request: Request) {
+import { expiringAdminData } from "@/lib/cache-tags";
+async function handlePOST(request: Request) {
   const secret = process.env.SALES_RESEND_WEBHOOK_SECRET;
   if (!secret) return new Response("Webhook unavailable", { status: 503 });
   let raw: Buffer;
@@ -39,3 +39,6 @@ export async function POST(request: Request) {
     return new Response("Retry", { status: 503 });
   }
 }
+
+// Expire cached admin reads after a successful write (lib/cache-tags.ts).
+export const POST = expiringAdminData(handlePOST);

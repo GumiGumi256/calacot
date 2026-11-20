@@ -8,6 +8,7 @@ import { leadStatuses } from "./options";
 import { clientSchema, divisions } from "@/lib/sales/contracts";
 import { randomUUID } from "node:crypto";
 import { clerkClient } from "@clerk/nextjs/server";
+import { expireAdminData } from "@/lib/cache-tags";
 
 const schema = z.object({
   id: z.uuid(),
@@ -52,6 +53,7 @@ export async function updateLead(_: { message: string; ok: boolean }, formData: 
     return { ok: false, message: "Could not verify the employee or save this lead. Please try again." };
   }
   revalidatePath("/", "layout");
+  expireAdminData(); // cached admin reads (lib/cache-tags.ts)
   return { ok: true, message: "Lead saved." };
 }
 
@@ -66,6 +68,7 @@ export async function convertLead(input: unknown) {
   try {
     const result = await db.execute<{ id: string }>(sql`SELECT lead_convert(${ctx.organizationId},${ctx.actor},${leadId}::uuid,${clientId || null}::uuid,${JSON.stringify(client ? { ...client.data, reviewedClientIds: parsed.data.reviewedClientIds, confirmDistinct: parsed.data.confirmDistinct } : null)}::jsonb,${randomUUID()}) AS id`);
     revalidatePath("/", "layout");
+    expireAdminData(); // cached admin reads (lib/cache-tags.ts)
     return { ok: true as const, id: result.rows[0].id };
   } catch (error) {
     const text = error instanceof Error ? `${error.message} ${error.cause instanceof Error ? error.cause.message : ""}` : "";

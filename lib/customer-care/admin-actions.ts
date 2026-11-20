@@ -15,9 +15,14 @@ import { hasServiceWindow } from "@/lib/whatsapp/webhook";
 import { deliverCareMessage } from "./worker";
 import { renderStatic } from "./render";
 import { revokeLinkQuery } from "./queries";
+import { expireAdminData } from "@/lib/cache-tags";
 
 const phoneSchema = z.string().regex(/^[1-9]\d{7,14}$/);
-const refresh = () => revalidatePath("/admin/customer-care");
+// Customer care itself is never cached; the dashboard's customer-care figures are, so expire them.
+const refresh = () => {
+  revalidatePath("/admin/customer-care");
+  expireAdminData();
+};
 export async function setConversationMode(form: FormData) {
   const actor = await requireAdmin();
   const phone = phoneSchema.parse(form.get("phone"));

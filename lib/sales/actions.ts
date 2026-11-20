@@ -18,6 +18,7 @@ import { totals, scaled } from "./money";
 import { pickers } from "./reads";
 import { headers } from "next/headers";
 import { currentUser, clerkClient } from "@clerk/nextjs/server";
+import { expireOrgData } from "@/lib/cache-tags";
 const json = (value: unknown) => sql`${JSON.stringify(value)}::jsonb`;
 const messages: Record<string, string> = {
   manager_unavailable: "The selected project manager is unavailable or could not be verified. Refresh staff and try again.",
@@ -97,6 +98,8 @@ async function mutation<T>(
       "deliveries",
     ])
       revalidatePath(`/admin/${route}`, "layout");
+    // Sales writes touch clients, projects, quotations, invoices, payments and deliveries together.
+    expireOrgData(ctx.organizationId);
     return { ok: true as const, value };
   } catch (e) {
     if (e instanceof z.ZodError)

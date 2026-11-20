@@ -7,8 +7,8 @@ import { staffContext } from "@/lib/sales/permissions";
 import { storePrivateObject } from "@/lib/sales/storage";
 import { financeError, financeMessages } from "@/lib/finance/context";
 import { evidenceMaxBytes } from "@/lib/finance/options";
+import { expiringAdminData } from "@/lib/cache-tags";
 
-export const runtime = "nodejs";
 
 const signatures: Record<string, (b: Buffer) => boolean> = {
   "application/pdf": (b) => b.subarray(0, 5).toString("latin1") === "%PDF-",
@@ -19,7 +19,7 @@ const signatures: Record<string, (b: Buffer) => boolean> = {
 const reply = (status: number, message: string, id?: string) => Response.json({ ok: status === 200, message, id }, { status, headers: { "Cache-Control": "no-store" } });
 
 /** Uploads a receipt or payment evidence file to private storage and links it to an expense. */
-export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+async function handlePOST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) return reply(404, "Not found");
   let ctx: Awaited<ReturnType<typeof staffContext>>;
@@ -61,3 +61,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   revalidatePath(`/admin/expenses/${id}`);
   return reply(200, "File attached.", documentId);
 }
+
+// Expire cached admin reads after a successful write (lib/cache-tags.ts).
+export const POST = expiringAdminData(handlePOST);

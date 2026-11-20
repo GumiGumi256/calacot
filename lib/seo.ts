@@ -1,6 +1,11 @@
 import type { Metadata, MetadataRoute } from "next";
 
-export const siteUrl = new URL("https://calacot.com");
+/*
+ * One canonical address for search engines. calacot.com permanently redirects to www.calacot.com,
+ * so canonicals, the sitemap and structured data must use the www host; URLs that redirect are not
+ * indexed. Titles and descriptions name the service and the place people search for.
+ */
+export const siteUrl = new URL("https://www.calacot.com");
 export const absoluteUrl = (path: string) => new URL(path, siteUrl).toString();
 
 type SeoPage = {
@@ -14,56 +19,56 @@ type SeoPage = {
 };
 export const seoPages = {
   "/": {
-    "title": "We Make Possibilities Real | Design, Property & Technology",
-    "description": "Build a home, find your next property or improve how your business works. Calacot brings design, construction and technology together. Share your plans.",
-    "image": "/villa-1.png"
+    title: "Architects, Interior Design, Painting & Property in Uganda",
+    description: "Calacot is a Kampala design and property company: architectural house plans, interior design, painting, real estate and custom software across Uganda.",
+    image: "/villa-1.png",
   },
   "/architecture": {
-    "title": "Architecture for the Home You Have in Mind",
-    "description": "Turn your vision for a home or building into a considered design. Explore Calacot's architectural concepts, layouts and design packages, then discuss your brief.",
-    "image": "/concept-1.jpg",
-    "service": "Architectural design"
+    title: "Architects in Kampala, Uganda: Home & Building Design",
+    description: "Architectural design for homes and buildings across Uganda. Calacot's Kampala architects turn your brief into plans, 3D concepts and design packages.",
+    image: "/concept-1.jpg",
+    service: "Architectural design",
   },
   "/architecture/designs": {
-    "title": "House Designs & Architectural Plans",
-    "description": "Find a starting point for the home you want to build. Explore Calacot's house designs, compare specifications and packages, and enquire about a design.",
-    "image": "/design-hero.png"
+    title: "House Plans for Sale in Uganda: Ready-Made Designs",
+    description: "Browse ready-made house plans for Uganda: villas, bungalows and mansions with specifications and packages. Buy a plan or have it adapted to your plot.",
+    image: "/design-hero.png",
   },
   "/interior-design": {
-    "title": "Interior Design for the Way You Live",
-    "description": "Make more of your home or workspace with Calacot. Explore interior layouts, lighting, materials and finishes shaped around daily life. Tell us about your space.",
-    "image": "/interior-hero-right.png",
-    "service": "Interior design"
+    title: "Interior Designers in Kampala: Homes & Workspaces",
+    description: "Interior design in Kampala and across Uganda: space planning, lighting, materials, furniture and finishes for homes, offices and hospitality spaces.",
+    image: "/interior-hero-right.png",
+    service: "Interior design",
   },
   "/painting": {
-    "title": "Interior & Exterior Painting That Renews Your Space",
-    "description": "Give your home or business a considered new finish. Calacot helps with surface preparation, colour and interior or exterior painting. Discuss your space.",
-    "image": "/painting-hero-light.png",
-    "service": "Interior and exterior painting"
+    title: "Painting Services in Kampala: Interior & Exterior Painters",
+    description: "Professional interior and exterior painting in Kampala and across Uganda: surface preparation, colour advice and durable finishes. Request a quote.",
+    image: "/painting-hero-light.png",
+    service: "Interior and exterior painting",
   },
   "/real-estate": {
-    "title": "Find a Home or Land in Uganda",
-    "description": "Find property that fits your next chapter. Calacot Estates supports home and land searches, property marketing and advisory in Uganda. Share your priorities.",
-    "image": "/real-estate-hero-2.png",
-    "service": "Real estate services",
-    "brand": "Calacot Estates"
+    title: "Houses & Land for Sale in Uganda",
+    description: "Find houses, apartments and land for sale or rent in Kampala and across Uganda. Calacot Estates also markets properties for owners and developers.",
+    image: "/real-estate-hero-2.png",
+    service: "Real estate services",
+    brand: "Calacot Estates",
   },
   "/calacot-tech": {
-    "title": "Custom Software for Better Ways of Working",
-    "description": "Turn a business idea or a difficult workflow into useful software. Calacot Tech builds web platforms and custom systems. Tell us what you want to improve.",
-    "image": "/tech.jpg",
-    "service": "Custom software and digital products",
-    "brand": "Calacot Tech"
+    title: "Software Development Company in Uganda: Web & Custom Systems",
+    description: "Calacot Tech builds websites, web platforms and custom business software in Kampala, Uganda. Turn a workflow or an idea into useful software.",
+    image: "/tech.jpg",
+    service: "Custom software and digital products",
+    brand: "Calacot Tech",
   },
   "/contact": {
-    "title": "Talk About Your Property Plans",
-    "description": "A home to find, land to build on or a property to sell: tell Calacot Estates what you have in mind and how you would like our team to contact you.",
-    "brand": "Calacot Estates"
+    title: "Property Enquiries in Kampala & Uganda",
+    description: "Buying, renting or selling property in Uganda? Tell Calacot Estates what you have in mind and how you would like our Kampala team to contact you.",
+    brand: "Calacot Estates",
   },
   "/list-property": {
-    "title": "Property Marketing for Owners & Developers",
-    "description": "Help buyers understand what your property offers. Share your home, land or development with Calacot Estates to discuss marketing and sales representation.",
-    "brand": "Calacot Estates"
+    title: "List Your Property for Sale in Uganda",
+    description: "Selling a house, land or development in Uganda? List it with Calacot Estates for professional marketing and sales representation in Kampala and beyond.",
+    brand: "Calacot Estates",
   },
   "/start-project": {
     "title": "Tell Us What You Want to Create",
@@ -123,19 +128,24 @@ export function designPageMetadata(design: DesignSeo): Metadata {
     ? description.slice(0, 157).replace(/\s+\S*$/, "") + "..."
     : description;
   return createPageMetadata(`/architecture/designs/${encodeURIComponent(design.slug)}`, {
-    title: `${design.title} - Architectural Design`,
-    description: excerpt || `Explore ${design.title}, an architectural design from Calacot. Review the specifications and enquire about design packages.`,
+    title: `${design.title}: House Plan & Architectural Design in Uganda`,
+    description: excerpt || `Explore ${design.title}, a ready-made house plan for Uganda by Calacot. Review the specifications and design packages, or have it adapted to your plot.`,
     image: design.image || "/design-hero.png",
     imageAlt: design.imageAlt || design.title,
   });
 }
 
-export function sitemapEntries(designs: { slug: string; _updatedAt: string }[]): MetadataRoute.Sitemap {
+/** Main pages first (higher priority), then every house plan with its image for Google Images. */
+const priorities: Partial<Record<SeoPath, number>> = { "/": 1, "/architecture": 0.9, "/architecture/designs": 0.9, "/interior-design": 0.8, "/painting": 0.8, "/real-estate": 0.8, "/calacot-tech": 0.8 };
+export function sitemapEntries(designs: { slug: string; _updatedAt: string; image?: string | null }[]): MetadataRoute.Sitemap {
   return [
-    ...indexablePaths.map((path) => ({ url: absoluteUrl(path) })),
+    ...indexablePaths.map((path) => ({ url: absoluteUrl(path), changeFrequency: "weekly" as const, priority: priorities[path] ?? 0.6 })),
     ...designs.map((design) => ({
       url: absoluteUrl(`/architecture/designs/${encodeURIComponent(design.slug)}`),
       lastModified: design._updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+      ...(design.image ? { images: [design.image] } : {}),
     })),
   ];
 }

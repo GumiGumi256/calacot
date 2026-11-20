@@ -21,7 +21,7 @@ try {
       builder.onLoad({ filter: /.*/, namespace: "test" }, ({ path }) => {
         const prefix = "const c=globalThis.__careReplyTest;";
         if (path === "server-only") return { contents: "", loader: "js" };
-        if (path === "next/cache") return { contents: "export function revalidatePath(){}", loader: "js" };
+        if (path === "next/cache") return { contents: "export function revalidatePath(){} export function revalidateTag(){} export function updateTag(){} export function cacheTag(){} export function cacheLife(){}", loader: "js" };
         if (path.includes("permissions")) return { contents: prefix + 'export async function requireAdmin(){if(!c.authorized)throw Error("unauthorized");return "staff";}', loader: "js" };
         if (path === "./worker") return { contents: prefix + 'export async function deliverCareMessage(){c.sends++;c.message.status=c.outcome;}', loader: "js" };
         return { loader: "js", contents: prefix + `

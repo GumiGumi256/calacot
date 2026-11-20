@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@/database/db";
 import { paymentInstructions } from "@/lib/company";
 import { divisionKeys, type CompanySettings } from "./settings-schema";
+import { adminCache } from "@/lib/cache-tags";
 
 type VersionRow = { id: string; version: number; settings: CompanySettings; changed_sections: string[]; status: string; note: string; proposed_by: string; proposed_at: string; decided_by: string | null; decided_at: string | null; decision_note: string | null; base_version: number };
 
@@ -21,6 +22,8 @@ export async function baselineSettings(org: string): Promise<CompanySettings> {
 }
 
 export async function readCompanySettings(org: string) {
+  "use cache: remote";
+  adminCache(org);
   const [current, proposal, history] = await Promise.all([
     db.execute<VersionRow>(sql`SELECT * FROM company_settings_versions WHERE organization_id=${org} AND status='approved' ORDER BY version DESC LIMIT 1`),
     db.execute<VersionRow>(sql`SELECT * FROM company_settings_versions WHERE organization_id=${org} AND status='proposed' LIMIT 1`),

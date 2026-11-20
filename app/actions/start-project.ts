@@ -1,5 +1,6 @@
 // actions/start-project.ts
 "use server";
+import { expireAdminData } from "@/lib/cache-tags";
 
 import { queueEnquiryEmails } from "@/lib/email/queue";
 
@@ -30,6 +31,7 @@ export async function createProjectLead(data: StartProjectFormData) {
 
     queueEnquiryEmails({ id: insertedLead.id, kind: "project", email: insertedLead.email, details: insertedLead });
 
+    expireAdminData(); // the new enquiry appears in the admin at once
     return { success: true, data: insertedLead };
   } catch (error) {
     console.error("Failed to submit project request:", error);

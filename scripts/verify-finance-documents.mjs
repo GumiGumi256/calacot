@@ -28,7 +28,7 @@ try {
       b.onLoad({ filter: /.*/, namespace: "test" }, ({ path }) => {
         const g = "const c=globalThis.__docTest;";
         if (path === "server-only") return { loader: "js", contents: "" };
-        if (path === "next/cache") return { loader: "js", contents: "export function revalidatePath(){}" };
+        if (path === "next/cache") return { loader: "js", contents: "export function revalidatePath(){} export function revalidateTag(){} export function updateTag(){} export function cacheTag(){} export function cacheLife(){}" };
         if (path === "next/headers") return { loader: "js", contents: "export async function headers(){return new Headers()}" };
         if (path === "next/navigation") return { loader: "js", contents: "export function notFound(){throw new Error('NEXT_NOT_FOUND')}" };
         if (path === "@clerk/nextjs/server") return { loader: "js", contents: "export async function currentUser(){return null} export async function clerkClient(){throw new Error('unused')}" };

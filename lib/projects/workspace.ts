@@ -3,9 +3,12 @@ import { sql } from "drizzle-orm";
 import { db } from "@/database/db";
 import { balanceExpression } from "@/lib/sales/queries";
 import type { Permission } from "@/lib/sales/permissions";
+import { adminCache } from "@/lib/cache-tags";
 
 /** Caller must first authenticate and verify that this project belongs to org. */
 export async function readProjectWorkspace(org: string, projectId: string, permissions: readonly Permission[]) {
+  "use cache: remote";
+  adminCache(org);
   const [manager, members, tasks, counts, milestones, activity, quotation, invoices, expenses] = await Promise.all([
     db.execute(sql`SELECT coalesce(s.display_name,s.clerk_user_id) AS name FROM projects p JOIN staff_memberships s ON s.id=p.manager_id AND s.organization_id=p.organization_id WHERE p.organization_id=${org} AND p.id=${projectId}::uuid`),
     db.execute(sql`SELECT coalesce(s.display_name,s.clerk_user_id) AS name,m.responsibility FROM project_members m JOIN staff_memberships s ON s.organization_id=m.organization_id AND s.id=m.staff_id WHERE m.organization_id=${org} AND m.project_id=${projectId}::uuid ORDER BY name,m.id LIMIT 100`),

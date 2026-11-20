@@ -3,6 +3,8 @@ import { sql } from "drizzle-orm";
 import { db } from "@/database/db";
 import { staffContext } from "./permissions";
 import { listBase } from "./queries";
+import { cacheKeyContext, adminCache } from "@/lib/cache-tags";
+import { cacheLife } from "next/cache";
 
 /** A draft untouched this long is surfaced as needing completion. */
 export const STALE_DRAFT_DAYS = 14;
@@ -23,6 +25,12 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
  */
 export async function quotationAttention(): Promise<AttentionResult> {
   const ctx = await staffContext("quotations_read");
+  return cachedQuotationAttention(cacheKeyContext(ctx));
+}
+/** Cached per organization, caller context and inputs; expired on writes (lib/cache-tags.ts). */
+async function cachedQuotationAttention(ctx: Awaited<ReturnType<typeof staffContext>>): Promise<AttentionResult> {
+  "use cache: remote";
+  adminCache(ctx.organizationId);
   try {
     const row = (
       await db.execute<{ stale: number; expiring: number; expired: number; undelivered: number }>(sql`
@@ -68,6 +76,7 @@ export async function quotationAttention(): Promise<AttentionResult> {
     return { state: "ready", items };
   } catch (error) {
     console.error("quotation_attention_failed", error);
+    cacheLife("seconds"); // never keep a failure for minutes
     return { state: "error" };
   }
 }

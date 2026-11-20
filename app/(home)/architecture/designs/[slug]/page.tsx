@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Check } from "lucide-react";
-import { getDesignBySlug } from "@/lib/queries/design";
+import { getDesignBySlug, type DesignDetails } from "@/lib/queries/design";
 import { urlFor } from "@/sanity/lib/image";
 import { absoluteUrl, designPageMetadata } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/structured-data";
@@ -10,6 +10,35 @@ import DesignGallery from "@/components/architecture/design-gallery";
 import DesignPurchase from "@/components/architecture/design-purchase";
 
 type Props = { params: Promise<{ slug: string }> };
+
+/** Product data for a house plan: lets search results show the design with its package price range. */
+function designProductData(design: DesignDetails, images: string[]) {
+  const prices = design.packages.map((p) => p.price).filter((p): p is number => typeof p === "number" && p > 0);
+  const url = absoluteUrl(`/architecture/designs/${encodeURIComponent(design.slug)}`);
+  return {
+    "@type": "Product",
+    "@id": `${url}#product`,
+    name: `${design.title} house plan`,
+    description: design.description?.trim() || `${design.title}: a ready-made house plan for Uganda by Calacot.`,
+    ...(images.length ? { image: images.slice(0, 6) } : {}),
+    ...(design.designCode ? { sku: design.designCode } : {}),
+    category: "House plans",
+    brand: { "@type": "Brand", name: "Calacot" },
+    url,
+    ...(prices.length ? {
+      offers: {
+        "@type": "AggregateOffer",
+        priceCurrency: "UGX",
+        lowPrice: Math.min(...prices),
+        highPrice: Math.max(...prices),
+        offerCount: prices.length,
+        availability: "https://schema.org/InStock",
+        seller: { "@id": absoluteUrl("/#organization") },
+        url,
+      },
+    } : {}),
+  };
+}
 const label = (value: string) => value.replace(/-/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 const money = (value: number) => `UGX ${value.toLocaleString("en-UG")}`;
 const serviceLabels: Record<string, string> = {
@@ -49,11 +78,14 @@ export default async function DesignDetailsPage({ params }: Props) {
   const estimate = design.estimatedBuildCost;
 
   return <article className="bg-brand-white text-brand-black dark:bg-brand-black dark:text-brand-white">
-    <JsonLd data={{ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
-      { "@type": "ListItem", position: 2, name: "Architecture", item: absoluteUrl("/architecture") },
-      { "@type": "ListItem", position: 3, name: "Architectural designs", item: absoluteUrl("/architecture/designs") },
-      { "@type": "ListItem", position: 4, name: design.title, item: absoluteUrl(`/architecture/designs/${encodeURIComponent(design.slug)}`) },
+    <JsonLd data={{ "@context": "https://schema.org", "@graph": [
+      { "@type": "BreadcrumbList", itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+        { "@type": "ListItem", position: 2, name: "Architecture", item: absoluteUrl("/architecture") },
+        { "@type": "ListItem", position: 3, name: "House plans", item: absoluteUrl("/architecture/designs") },
+        { "@type": "ListItem", position: 4, name: design.title, item: absoluteUrl(`/architecture/designs/${encodeURIComponent(design.slug)}`) },
+      ] },
+      designProductData(design, images.map((i) => i.src)),
     ] }} />
     <div className="pb-24 pt-28 md:pt-28 site-container">
       <Link href="/architecture/designs" className="inline-flex min-h-11 items-center gap-2 text-sm opacity-65 hover:opacity-100"><ArrowLeft size={16} aria-hidden="true" />Explore architectural designs</Link>

@@ -10,9 +10,8 @@ import {
 import { parseWhatsAppWebhook } from "@/lib/whatsapp/webhook";
 import { enqueueQuery, insertJobQuery } from "@/lib/customer-care/queries";
 import { after } from "next/server";
+import { expiringAdminData } from "@/lib/cache-tags";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 export const maxDuration = 180;
 
 export async function GET(request: Request) {
@@ -22,7 +21,7 @@ export async function GET(request: Request) {
   );
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   let config: ReturnType<typeof getWebhookConfig>;
   try {
     config = getWebhookConfig();
@@ -120,3 +119,6 @@ export async function POST(request: Request) {
     return new Response("Please retry", { status: 503 });
   }
 }
+
+// Expire cached admin reads after a successful write (lib/cache-tags.ts).
+export const POST = expiringAdminData(handlePOST);

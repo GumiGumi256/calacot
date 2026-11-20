@@ -5,7 +5,6 @@ import { staffContext } from "@/lib/sales/permissions";
 import { readOperationalReport } from "@/lib/reports/operational";
 import { toCsv } from "@/lib/reports/csv";
 
-export const runtime = "nodejs";
 
 /**
  * CSV export of one report table. Uses exactly the same read (and therefore the same

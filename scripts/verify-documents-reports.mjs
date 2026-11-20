@@ -58,7 +58,7 @@ try {
       b.onLoad({ filter: /.*/, namespace: "test" }, ({ path }) => {
         const g = "const c=globalThis.__docs;";
         if (path === "server-only") return { loader: "js", contents: "" };
-        if (path === "next/cache") return { loader: "js", contents: "export function revalidatePath(){}" };
+        if (path === "next/cache") return { loader: "js", contents: "export function revalidatePath(){} export function revalidateTag(){} export function updateTag(){} export function cacheTag(){} export function cacheLife(){}" };
         if (path === "next/headers") return { loader: "js", contents: "export async function headers(){return new Headers({host:'app.test',origin:'http://app.test'})}" };
         if (path === "next/navigation") return { loader: "js", contents: "export function notFound(){throw new Error('NEXT_NOT_FOUND')} export function redirect(u){throw new Error('REDIRECT:'+u)}" };
         if (path === "@clerk/nextjs/server") return { loader: "js", contents: g + "export async function auth(){const s=c.als.getStore()||c.session;return {...s,orgSlug:'calacot',has(){return false},redirectToSignIn(){throw new Error('signin')}}} export async function clerkClient(){return c.clerk} export async function currentUser(){return null}" };

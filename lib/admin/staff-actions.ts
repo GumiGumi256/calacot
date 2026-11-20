@@ -3,6 +3,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { expireAdminData } from "@/lib/cache-tags";
 import { db } from "@/database/db";
 import { financeMutation as adminMutation, type FinanceResult } from "@/lib/finance/context";
 import { staffRoles, maskEmail, divisionsList } from "./roles";
@@ -13,7 +14,7 @@ const fields = (data: FormData) => Object.fromEntries([...data.entries()].filter
 const invalid = (message: string): FinanceResult => ({ ok: false, message });
 const audit = (org: string, actor: string, action: string, entityId: string, changes: Record<string, unknown>, correlation: string) =>
   db.execute(sql`INSERT INTO audit_logs(organization_id,actor_clerk_user_id,actor_type,action,entity_type,entity_id,changes,request_id) VALUES(${org},${actor},'staff',${action},'staff_membership',${entityId},${JSON.stringify(changes)}::jsonb,${correlation})`);
-const refresh = () => { revalidatePath("/admin/staff", "layout"); revalidatePath("/", "layout"); };
+const refresh = () => { revalidatePath("/admin/staff", "layout"); revalidatePath("/", "layout"); expireAdminData(); };
 const clerkUserId = z.string().regex(/^user_[A-Za-z0-9]{1,64}$/);
 
 async function configuredRoles(clerk: Awaited<ReturnType<typeof clerkClient>>) {
