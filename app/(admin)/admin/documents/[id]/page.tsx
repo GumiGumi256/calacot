@@ -9,14 +9,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { PageHeader } from "@/components/layout/page-header";
 import { PageContainer } from "@/components/layout/page-container";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { VerificationControls } from "@/components/documents/verification-controls";
 
 const bytes = (n: string) => { const b = Number(n); return b >= 1048576 ? `${(b / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`; };
 const when = (v: string) => new Intl.DateTimeFormat("en-UG", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Kampala" }).format(new Date(v));
-const actionLabels: Record<string, string> = { "document.upload": "Uploaded", "document.revise": "New version uploaded", "document.archive": "Archived", "document.download": "Downloaded" };
+const actionLabels: Record<string, string> = { "document.upload": "Uploaded", "document.revise": "New version uploaded", "document.archive": "Archived", "document.download": "Downloaded", "verification.issue_embedded": "Verification issued (embedded QR)", "verification.register_legacy": "Verification registered (existing PDF)", "verification.status": "Verification status changed" };
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { doc, versions, history, can } = await readDocumentDetail(id);
+  const { doc, versions, history, can, verification } = await readDocumentDetail(id);
   return (
     <PageContainer>
       <Link href="/admin/documents" className="text-sm underline-offset-4 hover:underline">Back to documents</Link>
@@ -41,6 +42,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           </div>
         </CardContent>
       </Card>
+      {verification !== undefined && <VerificationControls documentId={doc.id} record={verification} canIssue={can.verificationIssue} canRevoke={can.verificationRevoke} />}
       <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader><CardTitle>Version history</CardTitle><CardDescription>Every version is kept unchanged.</CardDescription></CardHeader>

@@ -2,7 +2,9 @@ import React from "react";
 import type { DocumentSnapshot } from "./document-model";
 import { isAgreedOnApproval } from "./stages";
 /** Node runtime; local embedded branding only. Never fetch caller-supplied asset URLs. */
-export async function renderCommercialPdf(d: DocumentSnapshot, draft = false) {
+export type EmbeddedVerification = { reference: string; url: string };
+export async function renderCommercialPdf(d: DocumentSnapshot, draft = false, verification?: EmbeddedVerification) {
+  if (verification && draft) throw new Error("verification_draft_denied");
   const {
     Document,
     Page,
@@ -220,6 +222,21 @@ export async function renderCommercialPdf(d: DocumentSnapshot, draft = false) {
   const font=await output.embedFont(StandardFonts.Helvetica);
   const pages=output.getPages();
   pages.forEach((page,index)=>{page.drawText(d.number,{x:40,y:20,size:8,font,color:rgb(0.4,0.4,0.4)});const label=`Page ${index+1} of ${pages.length}${draft?" | DRAFT":""}`;page.drawText(label,{x:page.getWidth()-40-font.widthOfTextAtSize(label,8),y:20,size:8,font,color:rgb(0.4,0.4,0.4)});});
+  if (verification) {
+    // Stamped before the final bytes are produced, so the recorded SHA-256 covers the reference and QR.
+    if (!/^[A-Za-z0-9_-]{43}$/.test(verification.reference) || !verification.url.endsWith(`/verify/${verification.reference}`)) throw new Error("verification_configuration");
+    const QRCode = (await import("qrcode")).default;
+    const qr = await output.embedPng(await QRCode.toBuffer(verification.url, { type: "png", errorCorrectionLevel: "M", margin: 1, width: 240, color: { dark: "#000000", light: "#ffffff" } }));
+    const first = pages[0], size = 50;
+    first.drawImage(qr, { x: (first.getWidth() - size) / 2, y: first.getHeight() - 26 - size, width: size, height: size });
+    const note = `Verify this document: ${verification.url}`;
+    pages.forEach((page) => {
+      const room = page.getWidth() - 2 * 130;
+      const fontSize = Math.max(4.5, Math.min(6, (6 * room) / font.widthOfTextAtSize(note, 6)));
+      page.drawText(note, { x: (page.getWidth() - font.widthOfTextAtSize(note, fontSize)) / 2, y: 20, size: fontSize, font, color: rgb(0.4, 0.4, 0.4) });
+    });
+    output.setKeywords([`calacot-verification:${verification.reference}`]);
+  }
   output.setCreationDate(new Date(d.issuedAt));output.setModificationDate(new Date(d.issuedAt));
   return Buffer.from(await output.save());
 }

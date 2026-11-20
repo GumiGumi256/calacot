@@ -10,6 +10,7 @@ async function objectRequest(
   key: string,
   body?: Buffer,
   contentType = "application/pdf",
+  createOnly = false,
 ) {
   if (!process.env.SALES_STORAGE_ENDPOINT) throw new Error("storage_configuration");
   const endpoint = new URL(process.env.SALES_STORAGE_ENDPOINT || "");
@@ -25,8 +26,10 @@ async function objectRequest(
     day = date.slice(0, 8);
   const path = `/${encodeURIComponent(bucket)}/${key.split("/").map(encodeURIComponent).join("/")}`;
   const payload = hash(body || Buffer.alloc(0));
-  const canonicalHeaders = `host:${endpoint.host}\nx-amz-content-sha256:${payload}\nx-amz-date:${date}\n`;
-  const signed = "host;x-amz-content-sha256;x-amz-date",
+  // If-None-Match: * makes the PUT create-only (S3 and R2 conditional writes). It is signed.
+  const conditional = method === "PUT" && createOnly;
+  const canonicalHeaders = `host:${endpoint.host}\n${conditional ? "if-none-match:*\n" : ""}x-amz-content-sha256:${payload}\nx-amz-date:${date}\n`;
+  const signed = conditional ? "host;if-none-match;x-amz-content-sha256;x-amz-date" : "host;x-amz-content-sha256;x-amz-date",
     scope = `${day}/${region}/${service}/aws4_request`;
   const canonical = [method, path, "", canonicalHeaders, signed, payload].join(
     "\n",
@@ -47,11 +50,15 @@ async function objectRequest(
       "x-amz-date": date,
       Authorization: `AWS4-HMAC-SHA256 Credential=${keyId}/${scope}, SignedHeaders=${signed}, Signature=${signature}`,
       ...(method === "PUT" ? { "Content-Type": contentType } : {}),
+      ...(conditional ? { "If-None-Match": "*" } : {}),
     },
     body: body ? new Uint8Array(body) : undefined,
     signal: AbortSignal.timeout(20000),
     cache: "no-store",
   });
+  // 412: an object already exists at this key. 409: a concurrent conditional write is in flight.
+  if (conditional && (response.status === 412 || response.status === 409))
+    throw new Error("artifact_exists");
   if (!response.ok)
     throw new Error(
       response.status === 404 ? "artifact_missing" : "storage_failure",
@@ -67,17 +74,30 @@ function localPath(key: string) {
 function localEnabled() {
   return (process.env.SALES_NOTIFICATION_MODE || "capture") === "capture";
 }
-export async function storePdf(key: string, bytes: Buffer) {
+/**
+ * Create-only write: never replaces an existing artifact. Resolves "exists" when another writer
+ * got there first; callers must then read the stored object back rather than trust their bytes.
+ */
+export async function storePdf(key: string, bytes: Buffer): Promise<"created" | "exists"> {
   if (bytes.length > 20 * 1024 * 1024) throw new Error("document_size_limit");
   if (localEnabled()) {
     const path = localPath(key);
     await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, bytes, { flag: "wx" }).catch(
-      (e: NodeJS.ErrnoException) => {
-        if (e.code !== "EEXIST") throw e;
-      },
-    );
-  } else await objectRequest("PUT", key, bytes);
+    try {
+      await writeFile(path, bytes, { flag: "wx" });
+      return "created";
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code === "EEXIST") return "exists";
+      throw e;
+    }
+  }
+  try {
+    await objectRequest("PUT", key, bytes, "application/pdf", true);
+    return "created";
+  } catch (e) {
+    if (e instanceof Error && e.message === "artifact_exists") return "exists";
+    throw e;
+  }
 }
 export async function loadPdf(key: string) {
   return localEnabled()

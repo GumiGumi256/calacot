@@ -15,7 +15,11 @@ const nextConfig: NextConfig = {
     "/api/sales/*": ["./public/calacot-logo.png", "./node_modules/next/dist/compiled/@vercel/og/Geist-Regular.ttf"],
   },
   async headers() {
-    return [{ source: "/account/customer-care/:path*", headers: [
+    return [{ source: "/verify/:path*", headers: [
+      { key: "Referrer-Policy", value: "no-referrer" },
+      { key: "Cache-Control", value: "private, no-store" },
+      { key: "X-Robots-Tag", value: "noindex, nofollow" },
+    ] }, { source: "/account/customer-care/:path*", headers: [
       { key: "Referrer-Policy", value: "no-referrer" },
       { key: "Cache-Control", value: "private, no-store" },
     ] }];

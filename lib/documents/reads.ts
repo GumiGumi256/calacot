@@ -95,7 +95,15 @@ export async function readDocumentDetail(id: string) {
   ]);
   const linkType = fam.record_type as LinkType;
   const writable = (linkTypes as readonly string[]).includes(fam.record_type) && canWriteLink(ctx, linkType);
-  return { doc: { ...fam, created_at: new Date(fam.created_at).toISOString() }, versions: versions.rows, history: history.rows, can: { revise: !fam.financial && !fam.archived_at && !!writable, archive: !fam.financial && !fam.archived_at && ctx.permissions.includes("documents_archive") } };
+  // Only when the feature (and therefore migration 0017) is enabled. Never exposes the reference.
+  const verification = process.env.CALACOT_VERIFICATION_ENABLED === "true" && ["quotation", "invoice"].includes(fam.kind)
+    ? (await db.execute<{ kind: "legacy" | "embedded"; status: string; registered_at: string; pdf_sha256: string; document_number: string }>(sql`
+        SELECT v.registration_kind AS kind,(SELECT e.status FROM verification_status_events e WHERE e.organization_id=v.organization_id AND e.issuance_id=v.id ORDER BY e.sequence DESC LIMIT 1) AS status,
+          v.registered_at::text AS registered_at,v.pdf_sha256,v.document_number
+        FROM verification_issuances v JOIN documents d ON d.id=v.document_id AND d.organization_id=v.organization_id
+        WHERE v.organization_id=${org} AND coalesce(d.family_id,d.id)=${doc.root}::uuid ORDER BY v.registered_at DESC LIMIT 1`)).rows[0] ?? null
+    : undefined;
+  return { verification, doc: { ...fam, created_at: new Date(fam.created_at).toISOString() }, versions: versions.rows, history: history.rows, can: { revise: !fam.financial && !fam.archived_at && !!writable, archive: !fam.financial && !fam.archived_at && ctx.permissions.includes("documents_archive"), verificationIssue: ctx.permissions.includes("verification_issue"), verificationRevoke: ctx.permissions.includes("verification_revoke") } };
 }
 
 /** Records a user may attach a new document to (bounded lists). */

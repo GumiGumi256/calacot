@@ -24,7 +24,8 @@
     "typecheck": "tsc --noEmit",
     "test:org-routing": "node scripts/verify-org-routing.mjs",
     "test:design-system": "tsx scripts/verify-design-system.ts",
-    "test:seo": "tsx scripts/verify-seo.ts"
+    "test:seo": "tsx scripts/verify-seo.ts",
+    "test:verification": "node scripts/verify-document-verification-crypto.mjs && node scripts/verify-document-verification-db.mjs && node scripts/verify-document-verification-route.mjs && node scripts/verify-document-verification-actions.mjs && node scripts/verify-document-verification-artifacts.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -52,6 +53,7 @@
     "next-sanity": "^11.6.12",
     "next-themes": "^0.4.6",
     "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4",
     "radix-ui": "^1.4.3",
     "react": "19.2.4",
     "react-day-picker": "^10.0.1",
@@ -73,6 +75,7 @@
     "@napi-rs/canvas": "^1.0.9",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.10",

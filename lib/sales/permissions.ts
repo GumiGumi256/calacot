@@ -45,6 +45,9 @@ export const permissions = [
   "documents_read",
   "documents_write",
   "documents_archive",
+  // Administrator-only by default; explicitly delegate through Clerk if required.
+  "verification_issue",
+  "verification_revoke",
   // Quotation item catalogue. Reading/selecting items follows quotation access; managing the
   // catalogue and overriding catalogue prices are administrator-only by default and can be
   // delegated per user with the Clerk custom permissions org:calacot:catalogue_manage and
@@ -129,6 +132,7 @@ export const sensitivePermissions: ReadonlySet<Permission> = new Set<Permission>
   "expenses_read", "expenses_create", "expenses_submit", "expenses_review", "expenses_approve", "expenses_disburse", "expenses_reconcile",
   "finance_reports", "finance_accounts_manage", "staff_manage", "settings_manage", "notifications_manage",
   "documents_read", "documents_write", "documents_archive",
+  "verification_issue", "verification_revoke",
   "catalogue_manage", "quotation_price_override",
 ]);
 
