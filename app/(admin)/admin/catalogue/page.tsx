@@ -5,22 +5,22 @@ import { CatalogueItemDialog, CatalogueStatusButton } from "@/components/catalog
 import { FilterBar, Pager } from "@/components/admin/list-controls";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageContainer } from "@/components/layout/page-container";
 
 export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const d = await readCatalogue(await searchParams);
   const values = { q: d.filters.search, division: d.filters.division, type: d.filters.itemType, currency: d.filters.currency, category: d.filters.category, status: d.filters.status };
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6">
+    <PageContainer>
+      <PageHeader
+        title="Item catalogue"
+        description="Default items and selling prices for quotations, starting with the Painting division. Prices are defaults for new quotation lines; issued quotations keep the prices they were issued with."
+        primaryAction={d.canManage && <CatalogueItemDialog categories={d.categories} trigger={<Button />} triggerLabel="New item" initial={{ division: d.filters.division || "painting" }} />}
+      />
       <Card>
-        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
-          <div className="flex flex-col gap-1.5">
-            <CardTitle as="h1">Item catalogue</CardTitle>
-            <CardDescription>Default items and selling prices for quotations, starting with the Painting division. Prices are defaults for new quotation lines; issued quotations keep the prices they were issued with.</CardDescription>
-          </div>
-          {d.canManage && <CatalogueItemDialog categories={d.categories} trigger={<Button />} triggerLabel="New item" initial={{ division: d.filters.division || "painting" }} />}
-        </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <FilterBar reset="?" values={values} fields={[
             { name: "q", label: "Search", type: "search" },
@@ -55,6 +55,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
           <Pager path="" params={{ ...values }} page={d.page} size={d.size} total={d.total} />
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }

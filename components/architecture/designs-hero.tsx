@@ -32,7 +32,7 @@ export default function DesignsHero() {
 
         {/* Right */}
         <div className="max-w-[420px] lg:justify-self-end lg:pb-2">
-          <p className="text-sm leading-6 text-brand-black/60 dark:text-brand-white/60 sm:text-[15px] sm:leading-7">
+          <p className="text-sm leading-6 text-brand-black-600 dark:text-brand-black-200 sm:text-[15px] sm:leading-7">
             Find a starting point for your home in our architectural designs.
             Compare layouts, specifications and packages, then talk to us about
             the design that fits your plans.
@@ -48,7 +48,7 @@ export default function DesignsHero() {
 
         {/* Side note */}
         <span
-          className="hidden items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-brand-black/45 dark:text-brand-white/45 xl:absolute xl:right-5 xl:top-1/2 xl:flex xl:-translate-y-1/2 xl:[writing-mode:vertical-rl]"
+          className="type-eyebrow hidden items-center gap-2 text-brand-black-600 dark:text-brand-black-300 xl:absolute xl:right-5 xl:top-1/2 xl:flex xl:-translate-y-1/2 xl:[writing-mode:vertical-rl]"
         >
           Designed for living
           <ArrowDownRight size={14} aria-hidden="true" />

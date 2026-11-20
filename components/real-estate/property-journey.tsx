@@ -55,7 +55,7 @@ export default function PropertyJourney() {
             <li key={step.number}>
               <span
                 aria-hidden="true"
-                className="font-serif text-4xl leading-none text-brand-black/30 dark:text-brand-primary/70 md:text-5xl"
+                className="font-serif text-4xl leading-none text-brand-black-500 dark:text-brand-primary/70 md:text-5xl"
               >
                 {step.number}
               </span>
@@ -64,7 +64,7 @@ export default function PropertyJourney() {
                 {step.title}
               </h3>
 
-              <p className="mt-3 max-w-[32ch] text-sm leading-7 text-brand-black/65 dark:text-brand-white/65 md:text-base">
+              <p className="mt-3 max-w-[32ch] text-sm leading-7 text-brand-black-600 dark:text-brand-black-200 md:text-base">
                 {step.description}
               </p>
             </li>

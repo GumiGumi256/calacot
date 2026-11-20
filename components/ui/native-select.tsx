@@ -8,9 +8,17 @@ import { cn } from "@/lib/utils"
  * Use it in server-rendered GET forms (filters) that must work without JavaScript;
  * use components/ui/select.tsx everywhere else.
  */
-function NativeSelect({ className, children, ...props }: React.ComponentProps<"select">) {
+function NativeSelect({
+  className,
+  wrapperClassName,
+  children,
+  ...props
+}: React.ComponentProps<"select"> & {
+  /** Width and layout of the field, e.g. "w-full" in stacked forms. The select fills it. */
+  wrapperClassName?: string
+}) {
   return (
-    <div data-slot="native-select-wrapper" className="relative w-fit min-w-0">
+    <div data-slot="native-select-wrapper" className={cn("relative w-fit min-w-0", wrapperClassName)}>
       <select
         data-slot="native-select"
         className={cn(

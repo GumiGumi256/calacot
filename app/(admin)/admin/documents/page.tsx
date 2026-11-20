@@ -4,8 +4,10 @@ import { UploadDocument } from "@/components/documents/document-forms";
 import { kindLabels, recordLabels } from "@/lib/documents/labels";
 import { FilterBar, Pager } from "@/components/admin/list-controls";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageContainer } from "@/components/layout/page-container";
 
 const formatBytes = (n: string | number) => { const b = Number(n); return b >= 1048576 ? `${(b / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`; };
 
@@ -13,15 +15,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
   const d = await readDocuments(await searchParams);
   const upload = d.can.write ? await uploadTargets() : null;
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6">
+    <PageContainer>
+      <PageHeader
+        title="Documents"
+        description="Contracts, drawings, permits and other files linked to clients, projects, tasks, milestones, employees and company records. You only see documents for records you can access."
+        primaryAction={upload && <UploadDocument targets={upload.targets} />}
+      />
       <Card>
-        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
-          <div className="flex flex-col gap-1.5">
-            <CardTitle as="h1">Documents</CardTitle>
-            <CardDescription>Contracts, drawings, permits and other files linked to clients, projects, tasks, milestones, employees and company records. You only see documents for records you can access.</CardDescription>
-          </div>
-          {upload && <UploadDocument targets={upload.targets} />}
-        </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <FilterBar reset="?" values={d.filters} hidden={{ projectId: d.filters.projectId }} fields={[
             { name: "search", label: "Search", type: "search" },
@@ -53,6 +53,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
           <Pager path="" params={{ ...d.filters, size: String(d.size) }} page={d.page} size={d.size} total={d.total} />
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }

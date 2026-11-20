@@ -44,7 +44,7 @@ export default function RealEstateApproach() {
                 A considered way to find your next home.
               </h2>
 
-              <p className="mt-4 max-w-[26ch] text-sm leading-6 text-brand-black/60 dark:text-brand-white/60">
+              <p className="mt-4 max-w-[26ch] text-sm leading-6 text-brand-black-600 dark:text-brand-black-200">
                 Real estate in Uganda, shaped around the way you want to live.
               </p>
 
@@ -89,7 +89,7 @@ export default function RealEstateApproach() {
                   {title}
                 </h3>
 
-                <p className="mt-3 max-w-[29ch] text-sm leading-6 text-brand-black/60 dark:text-brand-white/60">
+                <p className="mt-3 max-w-[29ch] text-sm leading-6 text-brand-black-600 dark:text-brand-black-200">
                   {description}
                 </p>
               </article>

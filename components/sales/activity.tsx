@@ -86,7 +86,7 @@ export function Deliveries({
       <CardContent className="flex flex-col gap-4">
         {!rows.length && <p className="type-description">No delivery has been requested yet.</p>}
         {rows.map((d) => (
-          <div key={String(d.id)} className="flex flex-col gap-2 rounded-lg border bg-surface-subtle p-3">
+          <div key={String(d.id)} className="flex flex-col gap-2 rounded-(--card-radius-inner) border border-card-edge bg-card-nested p-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="type-body-strong">{channelLabels[String(d.channel)] ?? String(d.channel)}</span>
               <span className="type-body [overflow-wrap:anywhere]">{String(d.recipient)}</span>

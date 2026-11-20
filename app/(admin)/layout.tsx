@@ -41,7 +41,8 @@ export default async function AdminLayout({
       </a>
       <AppSidebar variant="inset" role={context.role} permissions={context.permissions} />
       {/* min-w-0: let wide tables scroll inside the content column instead of widening the page. */}
-      <SidebarInset className="min-w-0">
+      <SidebarInset className="min-w-0 md:peer-data-[variant=inset]:rounded-[2rem] md:peer-data-[variant=inset]:shadow-card">
+        {/* The rounded content panel frames the cards; its corners are a step larger than --card-radius. */}
         <SiteHeader />
         {/* The shell owns the page's single main landmark; pages render plain containers inside it. */}
         <main id="main-content" tabIndex={-1} className="flex min-w-0 flex-1 flex-col outline-none">

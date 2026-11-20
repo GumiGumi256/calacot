@@ -120,15 +120,15 @@ export function DataTable<T>({
           </div>
         )}
         {error ? (
-          <div className="rounded-xl border bg-card">
+          <div className="surface-card overflow-hidden">
             <ErrorState title={`${label} could not be loaded`} description={error} />
           </div>
         ) : empty ? (
-          <div className="rounded-xl border bg-card">{emptyState}</div>
+          <div className="surface-card overflow-hidden">{emptyState}</div>
         ) : (
           <div className={cn("transition-opacity motion-reduce:transition-none", pending && "opacity-60")}>
             {/* Wide containers (672px+): table. Layout follows the content width, not the screen, because the sidebar takes up to 256px. */}
-            <div className="hidden overflow-hidden rounded-xl border bg-card @2xl/table:block">
+            <div className="hidden overflow-hidden surface-card @2xl/table:block">
               <Table aria-label={label} className="[&_td]:align-middle">
                 <TableHeader className="bg-surface-subtle [&_tr]:border-b">
                   <TableRow className="hover:bg-transparent">
@@ -185,7 +185,7 @@ export function DataTable<T>({
             {/* Narrow containers: structured cards built from the same column definitions */}
             <ul aria-label={label} className="flex flex-col gap-3 @2xl/table:hidden">
               {rows.map((row) => (
-                <li key={getRowId(row)} className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-e1">
+                <li key={getRowId(row)} className="flex flex-col gap-3 surface-card rounded-(--card-radius-sm) p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 flex-col gap-0.5">
                       {mobile("title").map((c) => (

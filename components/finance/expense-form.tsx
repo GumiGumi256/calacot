@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet, FieldLegend } from "@/components/ui/field";
+import { NativeSelect } from "@/components/ui/native-select";
 
 const divisions = ["estates", "architecture", "painting", "interiors", "tech"] as const;
-const selectClass = "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 capitalize";
 type Project = { id: string; name: string; code: string; division: string; currency: string };
 type Supplier = { id: string; name: string };
 export type ExpenseFormValues = {
@@ -52,17 +52,17 @@ export function ExpenseForm({ requestKey, projects, suppliers, initial, today, d
           <div className="grid gap-4 sm:grid-cols-2">
             <Field>
               <FieldLabel htmlFor="expense-division">Division</FieldLabel>
-              <select id="expense-division" name="division" required value={form.division} onChange={(e) => { set("division", e.target.value); if (projects.find((p) => p.id === form.projectId)?.division !== e.target.value) set("projectId", ""); }} className={selectClass}>
+              <NativeSelect wrapperClassName="w-full" className="capitalize" id="expense-division" name="division" required value={form.division} onChange={(e) => { set("division", e.target.value); if (projects.find((p) => p.id === form.projectId)?.division !== e.target.value) set("projectId", ""); }}>
                 <option value="" disabled>Select a division</option>
                 {divisionOptions.map((d) => <option key={d.key} value={d.key}>{d.label}</option>)}{initial && !divisionOptions.some((d) => d.key === initial.division) && <option value={initial.division}>{initial.division}</option>}
-              </select>
+              </NativeSelect>
             </Field>
             <Field>
               <FieldLabel htmlFor="expense-project">Project (optional)</FieldLabel>
-              <select id="expense-project" name="projectId" value={form.projectId} onChange={(e) => { set("projectId", e.target.value); const p = projects.find((x) => x.id === e.target.value); if (p) set("division", p.division); }} className={selectClass} aria-describedby="expense-project-hint">
+              <NativeSelect wrapperClassName="w-full" className="capitalize" id="expense-project" name="projectId" value={form.projectId} onChange={(e) => { set("projectId", e.target.value); const p = projects.find((x) => x.id === e.target.value); if (p) set("division", p.division); }} aria-describedby="expense-project-hint">
                 <option value="">No project (operational expense)</option>
                 {projectOptions.map((p) => <option key={p.id} value={p.id}>{p.code} {p.name}</option>)}
-              </select>
+              </NativeSelect>
               <FieldDescription id="expense-project-hint">Projects are filtered to the selected division.</FieldDescription>
             </Field>
           </div>
@@ -100,10 +100,10 @@ export function ExpenseForm({ requestKey, projects, suppliers, initial, today, d
           ) : (
             <Field>
               <FieldLabel htmlFor="expense-supplier">Supplier (optional)</FieldLabel>
-              <select id="expense-supplier" name="supplierId" value={form.supplierId} onChange={(e) => set("supplierId", e.target.value)} className={`${selectClass} normal-case`}>
+              <NativeSelect wrapperClassName="w-full" className="capitalize" id="expense-supplier" name="supplierId" value={form.supplierId} onChange={(e) => set("supplierId", e.target.value)}>
                 <option value="">No supplier / not yet known</option>
                 {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
+              </NativeSelect>
               <FieldDescription><button type="button" className="underline underline-offset-4" onClick={() => { setNewSupplier(true); set("supplierId", ""); }}>Add a supplier that is not listed</button></FieldDescription>
             </Field>
           )}
@@ -119,10 +119,10 @@ export function ExpenseForm({ requestKey, projects, suppliers, initial, today, d
           <div className="grid gap-4 sm:grid-cols-3">
             <Field>
               <FieldLabel htmlFor="expense-currency">Currency</FieldLabel>
-              <select id="expense-currency" name="currency" value={form.currency} onChange={(e) => set("currency", e.target.value)} className={selectClass}>
+              <NativeSelect wrapperClassName="w-full" className="capitalize" id="expense-currency" name="currency" value={form.currency} onChange={(e) => set("currency", e.target.value)}>
                 <option value="UGX">UGX</option>
                 <option value="USD">USD</option>
-              </select>
+              </NativeSelect>
             </Field>
             <Field>
               <FieldLabel htmlFor="expense-net">Amount before tax</FieldLabel>

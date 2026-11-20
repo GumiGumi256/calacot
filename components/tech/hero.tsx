@@ -36,7 +36,7 @@ export default function TechHero() {
       {/* Static fallback when video is unavailable or reduced motion is enabled */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-40 bg-[radial-gradient(circle_at_50%_90%,rgba(40,111,255,0.34),transparent_28%),radial-gradient(circle_at_20%_85%,rgba(255,146,0,0.3),transparent_30%),#08090d]"
+        className="absolute inset-0 -z-40 bg-[radial-gradient(circle_at_50%_90%,color-mix(in_oklch,var(--color-brand-lavender-500)_38%,transparent),transparent_28%),radial-gradient(circle_at_20%_85%,color-mix(in_oklch,var(--color-brand-primary)_28%,transparent),transparent_30%),var(--color-brand-black-950)]"
       />
 
       {/* Main Video overlays */}
@@ -70,7 +70,7 @@ export default function TechHero() {
               </span>
             </h1>
 
-            <p className="mx-auto mt-7 max-w-2xl text-pretty text-base leading-7 text-white/70 sm:text-lg sm:leading-8">
+            <p className="mx-auto mt-7 max-w-2xl text-pretty text-base leading-7 text-brand-black-200 sm:text-lg sm:leading-8">
               Calacot Tech builds custom software and web platforms for businesses
               in Uganda and across Africa. Turn a product idea into something useful,
               connect your systems or make everyday work simpler.

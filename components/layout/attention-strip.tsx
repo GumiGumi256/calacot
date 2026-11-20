@@ -29,7 +29,7 @@ export function AttentionStrip({
           {title}
         </h2>
         {items.length > 0 && (
-          <ul className="flex flex-col divide-y">
+          <ul className="flex flex-col gap-1.5">
             {items.map((item) => {
               const body = (
                 <>
@@ -45,13 +45,13 @@ export function AttentionStrip({
                   {item.href ? (
                     <Link
                       href={item.href}
-                      className="group -mx-2 flex items-center gap-3 rounded-md px-2 py-2 type-body outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+                      className="group flex items-center gap-3 rounded-(--card-radius-inner,0.75rem) bg-card-nested px-3 py-2.5 type-body shadow-e1 outline-none transition-shadow hover:shadow-e2 focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
                     >
                       {body}
                       <span className="sr-only">: review</span>
                     </Link>
                   ) : (
-                    <div className="flex items-center gap-3 py-2 type-body">{body}</div>
+                    <div className="flex items-center gap-3 rounded-(--card-radius-inner,0.75rem) bg-card-nested px-3 py-2.5 type-body shadow-e1">{body}</div>
                   )}
                 </li>
               );

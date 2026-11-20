@@ -59,7 +59,7 @@ export default function ArchHero() {
             </h1>
 
             {/* SUBTEXT */}
-            <p className="text-lg text-brand-white/80 mb-10 text-p">
+            <p className="text-lg text-brand-black-100 mb-10 text-p">
               Bring your plans for a home or building into focus. Our architectural design work in Uganda brings together layouts, materials and 3D concepts around your site and the way you want to use it.
             </p>
 

@@ -3,9 +3,11 @@ import { notFound } from "next/navigation";
 import { readStaffActivity, readStaffDirectory } from "@/lib/admin/staff";
 import { roleLabel, staffRoles } from "@/lib/admin/roles";
 import { ChangeRole, EmployeeEligibility, RemoveMember, StaffProfileForm, StaffStatusControl } from "@/components/admin/staff-forms";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { staffContext } from "@/lib/sales/permissions";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageContainer } from "@/components/layout/page-container";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const actionLabels: Record<string, string> = {
   "staff.invite": "Invited", "staff.role_change": "Role changed", "staff.remove": "Removed from organization", "staff.suspend": "Access suspended", "staff.reactivate": "Suspension lifted",
@@ -25,13 +27,14 @@ export default async function Page({ params }: { params: Promise<{ userId: strin
   const live = s.status !== "removed";
   const editable = d.clerkAvailable && !self;
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6">
+    <PageContainer>
       <Link href="/admin/staff" className="text-sm underline-offset-4 hover:underline">Back to staff</Link>
+      <PageHeader
+        title={s.name}
+        description={s.email}
+        meta={<StatusBadge domain="staff" status={s.status} />}
+      />
       <Card>
-        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
-          <div className="flex flex-col gap-1.5"><CardTitle as="h1">{s.name}</CardTitle><CardDescription className="break-all">{s.email}</CardDescription></div>
-          <Badge variant={s.status === "active" ? "default" : s.status === "suspended" ? "destructive" : "secondary"} className="capitalize">{s.status}</Badge>
-        </CardHeader>
         <CardContent className="flex flex-col gap-2 text-sm">
           <p>Role: <span className="font-medium">{roleLabel(s.role)}</span>. {staffRoles.find((r) => r.key === s.role)?.summary}</p>
           {s.status === "suspended" && <p>Suspended: {s.suspensionReason ?? "No reason recorded"}. Access is refused even though the Clerk membership remains.</p>}
@@ -72,6 +75,6 @@ export default async function Page({ params }: { params: Promise<{ userId: strin
           ) : <p className="text-sm text-muted-foreground">No administrative history recorded yet.</p>}
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }

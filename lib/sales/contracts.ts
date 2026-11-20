@@ -223,3 +223,13 @@ export function parseQuery(
   };
 }
 export const literalSearch = (s: string) => `%${s.replace(/[\\%_]/g, "\\$&")}%`;
+
+/** Statuses each sales list can filter by (moved from the old entity list; also the status registry's source of truth). */
+export const listStatuses = {
+  clients: ["active", "archived"],
+  projects: ["planned", "active", "on_hold", "completed", "cancelled"],
+  quotations: ["draft", "sent", "accepted", "declined", "expired", "superseded"],
+  invoices: ["draft", "issued", "void"],
+  deliveries: ["queued", "processing", "provider_accepted", "delivered", "read", "failed", "blocked", "suppressed", "uncertain", "captured", "skipped"],
+} as const satisfies Record<Entity, readonly string[]>;
+export const invoicePaymentStates = ["paid", "unpaid", "partial", "overdue"] as const;

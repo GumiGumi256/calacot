@@ -76,7 +76,7 @@ export default function Footer() {
                 className="hidden dark:block"
               />
             </Link>
-            <p className="text-sm leading-relaxed text-brand-black/55 dark:text-brand-white/55">
+            <p className="text-sm leading-relaxed text-brand-black-600 dark:text-brand-black-300">
               A multidisciplinary studio creating refined architecture,
               interiors, brands, and digital experiences with timeless intent.
             </p>
@@ -114,7 +114,7 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <span className="text-[11px] uppercase font-bold tracking-[0.25em] text-brand-black dark:text-brand-primary">
+            <span className="type-eyebrow text-brand-black dark:text-brand-primary">
               Navigation
             </span>
 
@@ -123,7 +123,7 @@ export default function Footer() {
                 <li key={link.title}>
                   <Link
                     href={link.link}
-                    className="group inline-flex items-center gap-2 text-sm text-brand-black/65 transition-colors duration-300 hover:text-brand-black dark:text-brand-white/65 dark:hover:text-brand-white"
+                    className="group inline-flex items-center gap-2 text-sm text-brand-black-600 transition-colors duration-300 hover:text-brand-black dark:text-brand-black-200 dark:hover:text-brand-white"
                   >
                     {link.title}
 
@@ -136,7 +136,7 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <span className="text-[11px] uppercase font-bold tracking-[0.25em] text-brand-black dark:text-brand-primary">
+            <span className="type-eyebrow text-brand-black dark:text-brand-primary">
               Legal
             </span>
 
@@ -145,7 +145,7 @@ export default function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-brand-black/65 transition-colors duration-300 hover:text-brand-black dark:text-brand-white/65 dark:hover:text-brand-white"
+                    className="text-sm text-brand-black-600 transition-colors duration-300 hover:text-brand-black dark:text-brand-black-200 dark:hover:text-brand-white"
                   >
                     {link.name}
                   </Link>
@@ -177,7 +177,7 @@ export default function Footer() {
           </div>
 
           {/* Bottom */}
-          <div className="mt-4 flex flex-col items-start justify-between gap-4 pb-8 text-xs uppercase tracking-[0.15em] text-brand-black/40 dark:text-brand-white/40 md:flex-row md:items-center">
+          <div className="type-eyebrow mt-4 flex flex-col items-start justify-between gap-4 pb-8 text-brand-black-600 dark:text-brand-black-400 md:flex-row md:items-center">
             <span>
               © {currentYear} Calacot Uganda Limited.{" "}
               <span className="capitalize">All rights reserved.</span>

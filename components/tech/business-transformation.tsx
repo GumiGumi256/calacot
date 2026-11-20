@@ -82,7 +82,7 @@ export function BusinessTransformation() {
         <div className="mb-8 flex items-center gap-3">
           <span className="h-px w-8 bg-brand-primary" />
 
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          <span className="type-eyebrow text-muted-foreground">
             The problem
           </span>
         </div>
@@ -94,7 +94,7 @@ export function BusinessTransformation() {
             className="flex min-h-[30rem] flex-col justify-between overflow-hidden rounded-3xl border border-border bg-foreground p-7 text-background md:col-span-2 sm:p-9 lg:col-span-7 lg:row-span-2 lg:min-h-0 lg:p-12"
           >
             <div>
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-background/50">
+              <span className="type-eyebrow text-background/50">
                 Operational reality
               </span>
 
@@ -146,11 +146,11 @@ export function BusinessTransformation() {
 
             <div className="relative">
               <div className="flex items-center justify-between gap-4">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-black/55">
+                <span className="type-eyebrow text-brand-black-600">
                   The opportunity
                 </span>
 
-                <span className="flex items-center gap-2 text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-brand-black/60">
+                <span className="type-eyebrow flex items-center gap-2 text-brand-black-600">
                   <span className="size-1.5 rounded-full bg-brand-black" />
                   Connected
                 </span>
@@ -204,12 +204,12 @@ function ProblemCard({ problem, className = "" }: ProblemCardProps) {
               {problem.number}
             </span>
 
-            <span className="text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            <span className="type-eyebrow text-muted-foreground">
               {problem.category}
             </span>
           </div>
 
-          <span className="rounded-full border border-border px-2.5 py-1 text-[0.5625rem] font-semibold uppercase tracking-[0.13em] text-muted-foreground">
+          <span className="type-eyebrow rounded-full border border-border px-2.5 py-1 text-muted-foreground">
             {problem.status}
           </span>
         </div>

@@ -18,6 +18,10 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageContainer } from "@/components/layout/page-container";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { formatMoney } from "@/lib/format";
 export default async function Page({
   params,
 }: {
@@ -27,15 +31,13 @@ export default async function Page({
   const d = await documentDetail("invoices", id),
     i = d.record;
   return (
-    <div className="flex flex-col gap-6 p-4 md:p-6">
+    <PageContainer>
+      <PageHeader
+        title={String(i.number)}
+        description={<>{formatMoney(String(i.currency), String(i.total))} · Amount due {formatMoney(String(i.currency), String(i.balance))}</>}
+        meta={<StatusBadge domain="invoice" status={String(i.status)} />}
+      />
       <Card>
-        <CardHeader>
-          <CardTitle as="h1">{String(i.number)}</CardTitle>
-          <CardDescription>
-            Lifecycle: {String(i.status)} · {String(i.currency)}{" "}
-            {String(i.total)} · Amount due: {String(i.balance)}
-          </CardDescription>
-        </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <p>
             {String(i.notes || "")} · Due {String(i.due_on || "—")}
@@ -92,6 +94,6 @@ export default async function Page({
       )}
       <Deliveries rows={d.deliveries} permissions={d.permissions} />
       <Activity events={d.activity} />
-    </div>
+    </PageContainer>
   );
 }

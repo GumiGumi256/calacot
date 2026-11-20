@@ -133,13 +133,13 @@ export default function FeaturedDesignCarousel({
                     placeholder={design.imageBlur ? "blur" : "empty"}
                     blurDataURL={design.imageBlur || undefined}
                   />
-                  <span className="absolute left-6 top-6 rounded-full border border-white/35 bg-black/25 px-3 py-2 text-[10px] tracking-[.07em] text-white backdrop-blur-xl max-[640px]:left-3.5 max-[640px]:top-3.5 max-[640px]:text-[9px]">
+                  <span className="absolute left-6 top-6 rounded-full border border-white/35 bg-black/25 px-3 py-2 text-[10px] tracking-[.07em] text-brand-white backdrop-blur-xl max-[640px]:left-3.5 max-[640px]:top-3.5 max-[640px]:text-[9px]">
                     {design.status === "coming-soon"
                       ? "Coming soon"
                       : "Featured design"}
                   </span>
                   <span
-                    className="absolute bottom-5 right-6 text-[13px] text-white [text-shadow:0_1px_8px_black]"
+                    className="absolute bottom-5 right-6 text-[13px] text-brand-white [text-shadow:0_1px_8px_black]"
                     aria-hidden="true"
                   >
                     {String(index + 1).padStart(2, "0")}
@@ -147,7 +147,7 @@ export default function FeaturedDesignCarousel({
                 </div>
                 <div className="grid grid-cols-[1.25fr_1fr] gap-9 pt-[26px] max-[1000px]:gap-6 max-[640px]:grid-cols-1 max-[640px]:gap-[22px] max-[640px]:pt-[22px]">
                   <div>
-                    <p className="mb-2.5 text-[10px] uppercase tracking-[.14em] opacity-55">
+                    <p className="type-eyebrow mb-2.5 opacity-55">
                       {[design.architecturalStyle, design.designType]
                         .filter(Boolean)
                         .join(" / ")}

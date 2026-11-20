@@ -11,12 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldDescription, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
+import { NativeSelect } from "@/components/ui/native-select";
 
 type Item = z.input<typeof quoteSchema>["items"][number];
 /** Editor-only fields (stripped by the server schema): stable key, catalogue reference price and scope. */
 export type QuoteLine = Item & { _key: string; _ref?: string; _scope?: string };
-
-const selectClass = "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 let counter = 0;
 export const lineKey = () => `line-${Date.now().toString(36)}-${(counter++).toString(36)}`;
 
@@ -70,7 +69,7 @@ export function QuoteLines({ lines, onChange, division, currency, taxRate, canOv
   return (
     <div className="flex flex-col gap-4">
       {canPick && (
-        <FieldSet className="rounded-lg border p-4">
+        <FieldSet className="rounded-(--card-radius-inner) border border-card-edge bg-card-nested p-4">
           <FieldLegend>Add from catalogue</FieldLegend>
           <Text label={`Search ${division} items (${currency})`} value={search} onChange={setSearch} />
           <ul className="flex max-h-64 flex-col gap-1 overflow-y-auto" aria-label="Catalogue results">
@@ -94,7 +93,7 @@ export function QuoteLines({ lines, onChange, division, currency, taxRate, canOv
         const calc = lineTotal(line, taxRate);
         const mismatch = isCatalogue && line._scope && line._scope !== scope;
         return (
-          <FieldSet key={line._key} className="rounded-lg border p-4">
+          <FieldSet key={line._key} className="rounded-(--card-radius-inner) border border-card-edge bg-card-nested p-4">
             <FieldLegend className="flex w-full flex-wrap items-center gap-2">
               <span>Line {i + 1}</span>
               {isCatalogue ? (overridden ? <Badge variant="destructive">Price override</Badge> : <Badge>Catalogue price</Badge>) : <Badge variant="outline">Custom line</Badge>}
@@ -109,10 +108,10 @@ export function QuoteLines({ lines, onChange, division, currency, taxRate, canOv
                   <Text label="Item name (optional)" value={line.name ?? ""} onChange={(v) => set(i, { name: v })} />
                   <Field>
                     <FieldLabel htmlFor={`${line._key}-type`}>Type (optional)</FieldLabel>
-                    <select id={`${line._key}-type`} className={selectClass} value={line.itemType ?? ""} onChange={(e) => set(i, { itemType: e.target.value as QuoteLine["itemType"] })}>
+                    <NativeSelect wrapperClassName="w-full" id={`${line._key}-type`} value={line.itemType ?? ""} onChange={(e) => set(i, { itemType: e.target.value as QuoteLine["itemType"] })}>
                       <option value="">Not specified</option>
                       {catalogueItemTypes.map((t) => <option key={t} value={t}>{catalogueTypeLabels[t]}</option>)}
-                    </select>
+                    </NativeSelect>
                   </Field>
                 </>
               )}

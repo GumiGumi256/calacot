@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
+import { NativeSelect } from "@/components/ui/native-select";
 
 const initial = { ok: false, message: "" };
-const selectClass = "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 function Message({ state }: { state: { ok: boolean; message: string } }) {
   return state.message ? <p role={state.ok ? "status" : "alert"} className={state.ok ? "text-sm" : "text-sm text-destructive"}>{state.message}</p> : null;
 }
@@ -61,22 +61,22 @@ export function SettingsForm({ initialSettings, version, requestKey, locked }: {
             <Text id="bank-acct-name" label="Account name" value={bank.account} max={120} onChange={(v) => set("payment", { ...s.payment, bank: { ...bank, account: v } })} />
             <Text id="bank-number" label="Account number" value={bank.number} max={60} onChange={(v) => set("payment", { ...s.payment, bank: { ...bank, number: v } })} />
             <Text id="bank-swift" label="SWIFT (optional)" value={bank.swift} max={20} onChange={(v) => set("payment", { ...s.payment, bank: { ...bank, swift: v } })} />
-            <Field><FieldLabel htmlFor="bank-currency">Currency</FieldLabel><select id="bank-currency" className={selectClass} value={bank.currency} onChange={(e) => set("payment", { ...s.payment, bank: { ...bank, currency: e.target.value as "UGX" | "USD" } })}><option>UGX</option><option>USD</option></select></Field>
+            <Field><FieldLabel htmlFor="bank-currency">Currency</FieldLabel><NativeSelect wrapperClassName="w-full" id="bank-currency" value={bank.currency} onChange={(e) => set("payment", { ...s.payment, bank: { ...bank, currency: e.target.value as "UGX" | "USD" } })}><option>UGX</option><option>USD</option></NativeSelect></Field>
           </div>}
           <label className="flex items-center gap-2 text-sm"><Checkbox checked={!!mobile} onCheckedChange={(c) => set("payment", { ...s.payment, mobile: c ? { network: "", number: "", account: "", currency: "UGX" } : null })} />Offer mobile money</label>
           {mobile && <div className="grid gap-4 sm:grid-cols-2">
             <Text id="mm-network" label="Network" value={mobile.network} max={60} onChange={(v) => set("payment", { ...s.payment, mobile: { ...mobile, network: v } })} />
             <Text id="mm-number" label="Number" value={mobile.number} max={30} onChange={(v) => set("payment", { ...s.payment, mobile: { ...mobile, number: v } })} />
             <Text id="mm-account" label="Registered name" value={mobile.account} max={120} onChange={(v) => set("payment", { ...s.payment, mobile: { ...mobile, account: v } })} />
-            <Field><FieldLabel htmlFor="mm-currency">Currency</FieldLabel><select id="mm-currency" className={selectClass} value={mobile.currency} onChange={(e) => set("payment", { ...s.payment, mobile: { ...mobile, currency: e.target.value as "UGX" | "USD" } })}><option>UGX</option><option>USD</option></select></Field>
+            <Field><FieldLabel htmlFor="mm-currency">Currency</FieldLabel><NativeSelect wrapperClassName="w-full" id="mm-currency" value={mobile.currency} onChange={(e) => set("payment", { ...s.payment, mobile: { ...mobile, currency: e.target.value as "UGX" | "USD" } })}><option>UGX</option><option>USD</option></NativeSelect></Field>
           </div>}
         </FieldGroup>
       </FieldSet>
       <FieldSet><FieldLegend>Operational defaults</FieldLegend><FieldGroup>
-        <Field><FieldLabel htmlFor="def-currency">Default currency for new expense requests</FieldLabel><select id="def-currency" className={selectClass} value={s.defaults.defaultCurrency} onChange={(e) => set("defaults", { defaultCurrency: e.target.value as "UGX" | "USD" })}><option>UGX</option><option>USD</option></select></Field>
+        <Field><FieldLabel htmlFor="def-currency">Default currency for new expense requests</FieldLabel><NativeSelect wrapperClassName="w-full" id="def-currency" value={s.defaults.defaultCurrency} onChange={(e) => set("defaults", { defaultCurrency: e.target.value as "UGX" | "USD" })}><option>UGX</option><option>USD</option></NativeSelect></Field>
       </FieldGroup></FieldSet>
       <Field><FieldLabel htmlFor="set-note">Reason for this change</FieldLabel><Textarea id="set-note" name="note" required minLength={5} maxLength={1000} /></Field>
-      {paymentChanged && <p className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-sm">Payment instructions changed: this will be saved as a proposal and will not take effect until another administrator approves it.</p>}
+      {paymentChanged && <p className="rounded-(--card-radius-inner) border border-warning-border bg-warning-soft p-3 text-sm">Payment instructions changed: this will be saved as a proposal and will not take effect until another administrator approves it.</p>}
       <div><Button type="submit" disabled={pending || locked}>{pending ? "Saving..." : paymentChanged ? "Submit for approval" : "Save settings"}</Button></div>
       {locked && <p className="text-sm text-muted-foreground">Editing is paused while a payment-instruction proposal awaits a decision.</p>}
       <Message state={state} />

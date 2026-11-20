@@ -38,7 +38,7 @@ export default async function FeaturedDesigns() {
         >
           Good design.
           <br />
-          <span className="text-black/55 dark:text-white/55">
+          <span className="text-brand-black-600 dark:text-brand-black-300">
             Great places to live.
           </span>
         </h2>
@@ -71,7 +71,7 @@ function FeaturedDesignsMessage({
         >
           Your next chapter,
           <br />
-          <span className="text-black/55 dark:text-white/55">
+          <span className="text-brand-black-600 dark:text-brand-black-300">
             thoughtfully designed.
           </span>
         </h2>

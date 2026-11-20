@@ -76,7 +76,7 @@ export function ClientForm({ initial }: { initial?: ClientInput }) {
             </FieldGroup>
           </FieldSet>)}
           {form.kind === "company" && <Button type="button" variant="outline" disabled={form.contacts.length >= 20} onClick={() => update("contacts",[...form.contacts,{name:"",email:"",phone:"",isPrimary:false}])}>Add contact</Button>}
-          <details className="rounded-md border p-3">
+          <details className="rounded-(--card-radius-inner) border border-card-edge bg-card-nested p-3">
             <summary className="cursor-pointer text-sm font-medium">Billing address (optional)</summary>
             <FieldGroup className="mt-4">
               {([["line1","Address"],["city","City"],["country","Country"]] as const).map(([key,label]) => <TextField key={key} label={label} value={form.billingAddress[key]} onChange={v => update("billingAddress",{...form.billingAddress,[key]:v})}/>)}

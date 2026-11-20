@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MonthlyActivityChart } from "@/components/finance/monthly-activity-chart";
-
-const selectClass = "h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
+import { NativeSelect } from "@/components/ui/native-select";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageContainer } from "@/components/layout/page-container";
 const divisions = ["estates", "architecture", "painting", "interiors", "tech"];
 
 function Section({ title, description, children }: { title: string; description: string; children: ReactNode }) {
@@ -28,7 +29,7 @@ function CurrencyFigures({ rows }: { rows: { currency: string; label: string; va
   return (
     <dl className="grid gap-3 sm:grid-cols-2">
       {rows.map((r) => (
-        <div key={`${r.currency}-${r.label}`} className="rounded-lg border p-3">
+        <div key={`${r.currency}-${r.label}`} className="rounded-(--card-radius-inner) border border-card-edge bg-card-nested p-3">
           <dt className="text-xs text-muted-foreground">{r.label} ({r.currency})</dt>
           <dd className="text-lg font-semibold tabular-nums">{formatAmount(r.currency, r.value)}</dd>
           {r.note && <dd className="text-xs text-muted-foreground">{r.note}</dd>}
@@ -60,22 +61,19 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
   const r = await readFinancialReports(await searchParams);
   const f = r.filters;
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6">
+    <PageContainer>
+      <PageHeader
+        title="Financial reports"
+        description="Operational reports from invoices, customer payments and expense records. These are not accounting statements or profit figures: no general ledger, accrual accounting or revenue-recognition policy is configured. UGX and USD are always reported separately."
+      />
       <Card>
-        <CardHeader>
-          <CardTitle as="h1">Financial reports</CardTitle>
-          <CardDescription>
-            Operational reports from invoices, customer payments and expense records. These are not accounting statements or profit figures:
-            no general ledger, accrual accounting or revenue-recognition policy is configured. UGX and USD are always reported separately.
-          </CardDescription>
-        </CardHeader>
         <CardContent>
           <form method="get" className="flex flex-wrap items-end gap-4" aria-label="Report filters">
             <div className="flex flex-col gap-2"><Label htmlFor="rf-from">From</Label><Input id="rf-from" name="from" type="date" defaultValue={f.from} /></div>
             <div className="flex flex-col gap-2"><Label htmlFor="rf-to">Through</Label><Input id="rf-to" name="to" type="date" defaultValue={f.to} /></div>
-            <div className="flex flex-col gap-2"><Label htmlFor="rf-division">Division</Label><select id="rf-division" name="division" defaultValue={f.division} className={`${selectClass} capitalize`}><option value="">All divisions</option>{divisions.map((d) => <option key={d} value={d}>{d}</option>)}</select></div>
-            <div className="flex flex-col gap-2"><Label htmlFor="rf-project">Project</Label><select id="rf-project" name="projectId" defaultValue={f.projectId} className={`${selectClass} max-w-64`}><option value="">All projects</option>{r.projectOptions.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}</select></div>
-            <div className="flex flex-col gap-2"><Label htmlFor="rf-currency">Currency</Label><select id="rf-currency" name="currency" defaultValue={f.currency} className={selectClass}><option value="">UGX and USD (separately)</option><option value="UGX">UGX</option><option value="USD">USD</option></select></div>
+            <div className="flex flex-col gap-2"><Label htmlFor="rf-division">Division</Label><NativeSelect className="capitalize" id="rf-division" name="division" defaultValue={f.division}><option value="">All divisions</option>{divisions.map((d) => <option key={d} value={d}>{d}</option>)}</NativeSelect></div>
+            <div className="flex flex-col gap-2"><Label htmlFor="rf-project">Project</Label><NativeSelect wrapperClassName="max-w-64" id="rf-project" name="projectId" defaultValue={f.projectId}><option value="">All projects</option>{r.projectOptions.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}</NativeSelect></div>
+            <div className="flex flex-col gap-2"><Label htmlFor="rf-currency">Currency</Label><NativeSelect id="rf-currency" name="currency" defaultValue={f.currency}><option value="">UGX and USD (separately)</option><option value="UGX">UGX</option><option value="USD">USD</option></NativeSelect></div>
             <Button type="submit">Apply</Button>
             <Button variant="outline" render={<Link href="?" />}>Reset</Button>
           </form>
@@ -147,6 +145,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
 
       {/* Design System V1 Phase 3: chart per currency; the original monthly table sits behind "View as table". */}
       <MonthlyActivityChart rows={r.monthly} from={f.from} to={f.to} today={r.today} />
-    </div>
+    </PageContainer>
   );
 }

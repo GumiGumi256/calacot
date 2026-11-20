@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { NativeSelect } from "@/components/ui/native-select";
 
 const initial = { ok: false, message: "" };
-const selectClass = "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 function Message({ state }: { state: { ok: boolean; message: string } }) {
   if (!state.message) return null;
   return <p role={state.ok ? "status" : "alert"} className={state.ok ? "text-sm" : "text-sm text-destructive"}>{state.message}</p>;
@@ -95,9 +95,9 @@ export function RecordDisbursement({ expenseId, version, currency, outstanding, 
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field>
                   <FieldLabel htmlFor="disb-method">Payment method</FieldLabel>
-                  <select id="disb-method" name="method" value={method} onChange={(e) => setMethod(e.target.value)} className={selectClass}>
+                  <NativeSelect wrapperClassName="w-full" id="disb-method" name="method" value={method} onChange={(e) => setMethod(e.target.value)}>
                     {disbursementMethods.map((m) => <option key={m} value={m}>{disbursementMethodLabels[m]}</option>)}
-                  </select>
+                  </NativeSelect>
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="disb-date">Payment date</FieldLabel>
@@ -107,10 +107,10 @@ export function RecordDisbursement({ expenseId, version, currency, outstanding, 
               {needsAccount && (
                 <Field>
                   <FieldLabel htmlFor="disb-account">Paid from (verified company account)</FieldLabel>
-                  <select key={method} id="disb-account" name="sourceAccountId" required defaultValue="" className={selectClass} aria-describedby="disb-account-hint">
+                  <NativeSelect wrapperClassName="w-full" key={method} id="disb-account" name="sourceAccountId" required defaultValue="" aria-describedby="disb-account-hint">
                     <option value="" disabled>{methodAccounts.length ? "Select an account" : "No verified account for this method and currency"}</option>
                     {methodAccounts.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
-                  </select>
+                  </NativeSelect>
                   <FieldDescription id="disb-account-hint">Only active, verified {currency} accounts are listed. An administrator registers accounts under Payment accounts.</FieldDescription>
                 </Field>
               )}
@@ -121,17 +121,17 @@ export function RecordDisbursement({ expenseId, version, currency, outstanding, 
               </Field>
               <Field>
                 <FieldLabel htmlFor="disb-responsible">Responsible employee</FieldLabel>
-                <select id="disb-responsible" name="responsibleStaffId" required defaultValue={defaultResponsible} className={selectClass}>
+                <NativeSelect wrapperClassName="w-full" id="disb-responsible" name="responsibleStaffId" required defaultValue={defaultResponsible}>
                   <option value="" disabled>Select an employee</option>
                   {staff.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
+                </NativeSelect>
               </Field>
               <Field>
                 <FieldLabel htmlFor="disb-evidence">Supporting evidence</FieldLabel>
-                <select id="disb-evidence" name="evidenceDocumentId" defaultValue="" className={selectClass} aria-describedby="disb-evidence-hint">
+                <NativeSelect wrapperClassName="w-full" id="disb-evidence" name="evidenceDocumentId" defaultValue="" aria-describedby="disb-evidence-hint">
                   <option value="">No document selected</option>
                   {documents.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-                </select>
+                </NativeSelect>
                 <FieldDescription id="disb-evidence-hint">Upload proof of payment under Documents first, then select it here.</FieldDescription>
               </Field>
               <Field>

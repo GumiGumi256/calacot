@@ -113,7 +113,7 @@ export default async function Page({
             <CardContent className="flex flex-col gap-4">
               <p className="type-body whitespace-pre-wrap [overflow-wrap:anywhere]">{String(v.scope)}</p>
               {!q.project_id && (
-                <p role="note" className="rounded-lg border border-warning-border bg-warning-soft p-3 type-body text-warning">
+                <p role="note" className="rounded-(--card-radius-inner) border border-warning-border bg-warning-soft p-3 type-body text-warning">
                   This historical record needs a verified project before it can be sent.
                 </p>
               )}

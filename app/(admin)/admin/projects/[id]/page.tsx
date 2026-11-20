@@ -21,6 +21,9 @@ import { ProjectTaskComment } from "@/components/admin/project-task-comment";
 import { CreateMilestone, EditMilestone, MilestoneReview, ProjectTransition } from "@/components/admin/project-milestones";
 import { ProjectExpenses } from "@/components/finance/project-expenses";
 import { RecordDocuments } from "@/components/documents/record-documents";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageContainer } from "@/components/layout/page-container";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 function displayDate(value: unknown) {
   if (!value) return "Not scheduled";
@@ -44,15 +47,13 @@ export default async function Page({
   const workspace = await readProjectWorkspace(ctx.organizationId, id, ctx.permissions);
   const staff = ctx.permissions.includes("projects_write") ? (await db.execute<{ id: string; name: string }>(sql`SELECT id,coalesce(display_name,clerk_user_id) AS name FROM staff_memberships WHERE organization_id=${ctx.organizationId} AND status='active' ORDER BY name,id LIMIT 100`)).rows : [];
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6">
+    <PageContainer>
+      <PageHeader
+        title={String(p.name)}
+        description={<>{String(p.code)} · Agreement: {p.quotation_version_id ? "Confirmed" : "Pre-sales"}</>}
+        meta={<StatusBadge domain="project" status={String(p.status)} />}
+      />
       <Card>
-        <CardHeader>
-          <CardTitle as="h1">{String(p.name)}</CardTitle>
-          <CardDescription>
-            {String(p.code)} · Execution: {String(p.status)} · Agreement:{" "}
-            {p.quotation_version_id ? "Confirmed" : "Pre-sales"}
-          </CardDescription>
-        </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {ctx.permissions.includes("clients_read") ? <Link className="underline underline-offset-4" href={`/admin/clients/${p.client_id}`}>{String(p.client_name)}</Link> : <span>{String(p.client_name)}</span>}
           <p>{String(p.scope || "")}</p>
@@ -77,6 +78,6 @@ export default async function Page({
         <RecordDocuments type="project" id={id} label={`${String(p.code)} ${String(p.name)}`} />
         {workspace.expenses && <ProjectExpenses projectId={id} expenses={workspace.expenses} summary={workspace.expenseSummary ?? []} activity={workspace.expenseActivity ?? []} />}
       </div>
-    </div>
+    </PageContainer>
   );
 }

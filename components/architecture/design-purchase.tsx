@@ -39,7 +39,7 @@ export default function DesignPurchase({
 
   return (
     <aside className="rounded-2xl border border-current/15 p-6 lg:sticky lg:top-28 lg:self-start lg:p-8">
-      <p className="text-xs uppercase tracking-[.16em] opacity-55">
+      <p className="type-eyebrow opacity-55">
         Make it yours
       </p>
 
@@ -84,7 +84,7 @@ export default function DesignPurchase({
                 </span>
 
                 {item.recommended && (
-                  <span className="mt-1 block text-[10px] uppercase tracking-wider opacity-60">
+                  <span className="type-eyebrow mt-1 block opacity-60">
                     Recommended
                   </span>
                 )}

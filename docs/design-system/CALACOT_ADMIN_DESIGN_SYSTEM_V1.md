@@ -242,6 +242,19 @@ The admin radius is scoped with a `data-surface="admin"` attribute on the shell,
 - **Never stack** a ring, a border and a shadow on the same element.
 - **Replace the card ring.** `Card`'s `ring-1 ring-foreground/10` is replaced by elevation 1.
 
+**Current card geometry (supersedes the card rows above).** Admin cards are now soft, large-radius surfaces:
+
+| Token / utility | Value | Use |
+|---|---|---|
+| `--card-radius` | 1.75rem (28px) | `Card`, `surface-card` (tables, hand-built sections, skeletons) |
+| `--card-radius-sm` | 1.25rem (20px) | `Card size="sm"`, `variant="flat"` |
+| `--card-radius-inner` | 1rem (16px) | Panels, rows, notes and alerts nested inside a card, so corners stay concentric |
+| `--elevation-card` / `shadow-card` | hairline highlight + wide diffused shadow | Every floating card |
+| `--elevation-card-hover` / `shadow-card-hover` | stronger diffusion | Interactive cards on hover |
+| `border-card-edge`, `bg-card-nested` | white edge / pure white (light) | Card edge; nested panel fill |
+
+Use `surface-card` for any hand-built card container, and `rounded-(--card-radius-inner) border border-card-edge bg-card-nested` for nested panels. Notes keep their tone (`border-warning-border bg-warning-soft`) with the inner radius. Inputs and selects keep `rounded-md`: they are controls, not cards. `npm run test:design-system` fails on raw `rounded-xl border bg-card` or `rounded-lg border p-*` containers in admin code.
+
 ### C5. Components
 
 **Buttons (admin scope)**
@@ -878,8 +891,8 @@ Insight sentences are generated only from computed values, with thresholds that 
 **Still open**
 
 - **Item catalogue fails before rendering.** It queries `services.updated_by_clerk_user_id`, which the connected database does not have. The page needs the unapplied migration `drizzle-current/0014_quotation_item_catalogue.sql` from earlier work; it is not a design-system issue.
-- **Most pages still put their title in a card** (marked `as="h1"`). Moving them to `PageHeader`, with primary actions in the header, happens module by module in Phases 5–6.
-- **Design purchases still uses its marketing-style layout** inside the shell (Phase 6).
+- ~~Most pages still put their title in a card~~: resolved in Phase 6.
+- ~~Design purchases still uses its marketing-style layout~~: resolved in Phase 6.
 
 ---
 
@@ -925,3 +938,103 @@ Insight sentences are generated only from computed values, with thresholds that 
 - **The quotation email for `CAL-Q-2026-000001` has been Queued since 6 Oct 2026 and never attempted.** The sales outbox worker does not appear to be running against this database. This is operational, not design-system. The attention strip counts failed or blocked deliveries; a "stuck in queue" signal would need a delivery timestamp in the list query.
 - **Browser back/forward is not intercepted** by the unsaved-changes guard, because the App Router has no blocking API for it.
 - **The dashboard has no chart yet.** "Outstanding by age" needs a new aging query, planned with Phase 6 Financial reports.
+
+---
+
+## Phase 6 status (20 November 2026)
+
+**Admin-wide rollout delivered**
+
+| Module | What changed |
+|---|---|
+| Clients, Projects, Invoices, Delivery operations | Moved from the old TanStack list (`components/sales/entity-list.tsx`, `columns.tsx`, `data-table.tsx`, `table-features.ts`, now removed) to the shared `DataTable` via `components/sales/sales-table.tsx`. `SalesListPage` now renders a `PageHeader`: Export CSV is a secondary action, and Create client or Create planned project is the primary action. Status, payment and delivery use `StatusBadge`; money uses `formatMoney`. There are status chips, row actions (open, open client, PDF), mobile cards and a matching-total footer. Data, permissions and URL parameters are unchanged. |
+| Tasks | `PageHeader`; filters with Apply (secondary) and Reset (ghost, only when filtered); task rows on a card surface with `StatusBadge`, Kampala dates and overdue in the destructive tone; empty and filtered-out states. |
+| Catalogue, Documents, Expenses, Financial reports, Leads, Payment accounts, Reports | Title and primary action moved from the first card into `PageHeader` (Reports: Print is a secondary action). |
+| Settings | `PageHeader` with the version as meta, a reading-width container, and the pending payment-instruction proposal as an attention card. |
+| Client, invoice, project, document and staff detail pages; New expense | `PageHeader` with status in `meta` (`StatusBadge`) and a plain description line. |
+| Design purchases (list and detail) | Marketing layout removed. Uses `PageHeader`, status chips, the shared table surface and `StatusBadge` (purchase and payment), with an empty state and Previous/Next paging. The detail page has the reference as `h1`, both statuses in `meta`, and the retry section titled "Messages to resend" with a warning icon. |
+| Customer care | Chat layout kept (documented exception). Arbitrary pixel sizes and opacity text replaced with `type-*` utilities and brand shades. |
+| Every module | Standard `loading.tsx` (`PageSkeleton` with the page title) and `error.tsx` (`RouteError`, `components/feedback/route-error.tsx`, which retries with `unstable_retry`). |
+| Forms | All 54 admin `<select>` elements now use `NativeSelect`, which gained `wrapperClassName` for full-width fields. |
+
+**Static scan (admin):** the baselines are now locked at 0 raw palette colours, 0 arbitrary font sizes and 0 native `<select>` elements. A new check fails on hand-built card or nested-panel containers that bypass the card radius tokens. The sales status lists live in `lib/sales/contracts.ts` (`listStatuses`, `invoicePaymentStates`) and remain the status registry's source of truth.
+
+**Verification**
+
+- Typecheck shows 0 errors. Lint shows 0 errors and 44 warnings, all already present.
+- `test:design-system`, `test:sales`, `test:org-routing` and `test:customer-care` pass.
+- **Signed in with live data:**
+  - Clients, Projects, Invoices (matching total and outstanding footer), Delivery operations, Tasks (empty state), Design purchases list and detail, and the client, invoice, project, document and staff detail pages each render one visible `<h1>`.
+  - These pages, plus Settings, Catalogue, Expenses, Leads, Financial reports and Customer care, have no page-level horizontal overflow at 375px.
+  - The Design purchases table fits without scrolling at 1280px.
+
+**Limits**
+
+- Responsive checks covered 375px and 1280px, not all five widths.
+- Leads, Catalogue, Documents, Expenses, Payment accounts and Reports keep their in-card tables and `FilterBar`; moving them onto `DataTable` needs their queries to adopt the shared list contract.
+- The dashboard still has no chart: "Outstanding by age" needs an aging query.
+
+---
+
+## Public site: foundations and forms (20 November 2026)
+
+**Approach (decided):**
+- Each division keeps its own character: layout, mood and photography.
+- Colours, shades, type and components are shared.
+- Foundations first, then the customer forms and flows. The division marketing pages follow later.
+
+**Foundations**
+
+- **Transparency-based brand text replaced by brand shades** in 25 public files (101 classes):
+  - Light pages: `text-brand-black/45–65` becomes `brand-black-600` (6.28:1 on brand-white); `/70–75` becomes `700`.
+  - Dark pages: `text-brand-white/60–75` becomes `brand-black-200` (10.75:1 on brand-black); `/45–55` becomes `300`; `/35–40` becomes `400`.
+  - Borders and see-through overlays on photography keep their transparency.
+- **The theme's secondary grey (`--muted-foreground`) is now a brand shade:** `brand-black-600` in light mode and `brand-black-300` in dark. This also lifts it above 4.5:1 everywhere, admin included.
+- **Off-brand colours replaced:**
+  - Tech "Why Calacot": the radar and tool icons now use lavender, primary, grey-olive and onyx shades.
+  - Tech hero glow: lavender and gold on onyx.
+  - Real-estate amber link and label: `primary-800`.
+  - Architecture lime circles: `brand-green`.
+  - Beige and near-black hex backgrounds: onyx shades.
+  - Painting hero cream: `primary-50`.
+- **New `type-eyebrow` style** for small uppercase labels, used in the footer, forms and real estate.
+
+**Forms and flows**
+
+- **Schedule a call and Start a project, rebuilt:**
+  - Every label is linked to its control.
+  - Invalid fields are marked and point at an announced message.
+  - Autofill hints added for name, email and phone.
+  - Loading state on submit.
+  - Server and connection failures keep what was typed and say what to do.
+  - Fixed: an invalid toast type (`"destructive"` became `"error"`) and a button nested inside a button in the date picker.
+  - Removed: a stray Node `process` import from a browser component.
+- **Property search card** (not currently rendered on `/real-estate`): its labels are now linked, it uses brand shades, and the search button uses the primary style instead of "glass", which made it hard to read on the white card.
+- **Already compliant, unchanged:** the estate enquiry and property lead forms. The account, checkout, thank-you and access pages needed only the shade and theme-grey changes.
+
+**Verification**
+
+- `test:design-system` adds public-site checks:
+  - no transparency-based brand text;
+  - no off-brand palette or hex colours;
+  - no invalid toast types;
+  - the theme grey is a brand shade;
+  - contrast for every new text shade.
+- Typecheck shows 0 errors; lint shows 0 errors and 44 warnings (down from 48).
+- In the browser: the schedule form's empty submit marks 6 fields invalid with linked messages, and there are no nested buttons. The Tech radar renders in lavender. The start-project form at 375px in dark mode has linked labels and no overflow.
+
+**Next:** the division marketing pages (home, architecture, painting, interior design, real estate, tech): type scale, eyebrow use and component consistency, keeping each division's look.
+
+### Division pages (20 November 2026)
+
+**Pages:** home, architecture (and the designs list), painting, interior design, real estate and Calacot Tech. Each keeps its own layout, photography and type character.
+
+- **Eyebrow labels unified:** 37 small uppercase labels (10 different letter spacings, sizes from 9px to 12px) now use `type-eyebrow`. The 9–10px labels grew to the shared 11px.
+- **Plain white and black text moved to brand colours:** 37 `text-white`, `text-black` and `text-white/…` classes in 14 files now use brand-white, brand-black or onyx shades. The theme-aware `text-foreground/…` and `text-background/…` are unchanged.
+- **Buttons:** the navbar menu button and the possibility-section tabs gained `type="button"`, and the tabs gained a visible keyboard focus ring. The other buttons already had labels and focus styles.
+- **Checks added to `test:design-system`:**
+  - no plain `text-white/black` on public pages;
+  - no hand-rolled small uppercase labels (use `type-eyebrow`).
+- **Browser:** all 7 pages at 1280px and 375px have exactly one `<h1>`, no skipped heading levels and no horizontal overflow. All images have alt text. (An automated contrast sweep could not read the browser's `lab()` colours, so contrast relies on the token checks.)
+
+**Found, not changed:** the fixed public navbar has no background once the page scrolls, so the Calacot logo can sit over page headings.

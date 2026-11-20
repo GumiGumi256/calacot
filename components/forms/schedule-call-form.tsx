@@ -1,40 +1,46 @@
 "use client";
 
-import { buttonVariants } from "@/components/ui/button";
 import React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { format } from "date-fns";
-import { ChevronDownIcon } from "lucide-react";
+import { CalendarIcon, ChevronDownIcon } from "lucide-react";
 
-import { Field, FieldLabel } from "../ui/field";
+import { Field, FieldError, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import { formatService } from "./start-project-form";
-import Link from "next/link";
 import { createScheduledCallLead } from "@/app/actions/schedule-call";
 import { toast } from "../ui/toast";
-import { title } from "process";
-import { useRouter } from "next/navigation";
 import { scheduleCallSchema, type ScheduleCallFormData } from "@/lib/validations/schedule-call";
-
 
 interface ScheduleCallFormProps {
   initialService?: string;
   onSubmit?: (data: ScheduleCallFormData) => void;
 }
 
+const services = [
+  { value: "real-estate", label: "Real Estate" },
+  { value: "architecture", label: "Architecture" },
+  { value: "painting", label: "Painting" },
+  { value: "interior-design", label: "Interior Design" },
+  { value: "calacot-tech", label: "Calacot Tech" },
+];
 
-
-export default function ScheduleCallForm({
-  initialService,
-  onSubmit,
-}: ScheduleCallFormProps) {
+/*
+ * Schedule a consultation (Design System V1, public site).
+ * Every label is linked to its control; invalid fields are marked aria-invalid and point at
+ * their message; failures (including network errors) say what happened and keep the input.
+ * Validation (scheduleCallSchema) and the server action are unchanged.
+ */
+export default function ScheduleCallForm({ initialService, onSubmit }: ScheduleCallFormProps) {
+  const router = useRouter();
   const {
     register,
     control,
@@ -53,121 +59,131 @@ export default function ScheduleCallForm({
     },
     mode: "onChange",
   });
- const router = useRouter();
-const onValidSubmit = async (data: ScheduleCallFormData) => {
-  if (onSubmit) {
-    onSubmit(data);
-    return;
-  }
 
-  const result = await createScheduledCallLead(data);
+  const onValidSubmit = async (data: ScheduleCallFormData) => {
+    if (onSubmit) {
+      onSubmit(data);
+      return;
+    }
+    try {
+      const result = await createScheduledCallLead(data);
+      if (result.success) {
+        toast.add({
+          title: "Call requested",
+          description: "Thank you. Our team will contact you to confirm the time.",
+          type: "success",
+        });
+        router.push("/thank-you?type=call");
+      } else {
+        toast.add({
+          title: "We couldn't schedule your call",
+          description: result.error || "Please check your details and try again. Nothing was sent.",
+          type: "error",
+          timeout: 0,
+        });
+      }
+    } catch {
+      toast.add({
+        title: "Connection problem",
+        description: "Your request didn't reach us. Check your connection and try again; your details are still here.",
+        type: "error",
+        timeout: 0,
+      });
+    }
+  };
 
-  if (result.success) {
-    toast.add({
-      title: "Call Scheduled",
-      description: "Your consultation has been scheduled successfully. We will contact you soon.",
-      type: "success"
-    });
-    // Reset form state or navigate to a thank-you page here
-      // Redirect to thank-you page upon success
-      router.push("/thank-you?type=call");
-  } else {
-    toast.add({
-      title: "Failed to Schedule Call",
-      description: result.error || "Failed to schedule call. Please try again.",
-      type: "destructive"
-    });
-  }
-};
+  // Accessible wiring for each field: invalid state + the id of its message.
+  const a11y = (name: keyof ScheduleCallFormData) => ({
+    id: `call-${name}`,
+    "aria-invalid": errors[name] ? true : undefined,
+    "aria-describedby": errors[name] ? `call-${name}-error` : undefined,
+  });
+  const error = (name: keyof ScheduleCallFormData) =>
+    errors[name] ? <FieldError id={`call-${name}-error`}>{errors[name]?.message as string}</FieldError> : null;
 
   return (
-    <div className="mx-auto max-w-3xl px-8 md:px-0">
-      <h1 className="text-4xl font-semibold tracking-tight">
+    <div className="mx-auto max-w-3xl px-2 md:px-0">
+      <p className="type-eyebrow text-brand-primary-800 dark:text-brand-primary">Free consultation</p>
+      <h1 className="mt-3 text-4xl font-semibold tracking-tight text-brand-black dark:text-brand-white">
         Schedule a Consultation
       </h1>
-      <p className="mt-4 text-muted-foreground">
+      <p className="mt-4 text-brand-black-600 dark:text-brand-black-300">
         Book a call with our team to discuss your project, goals, timeline, and next steps.
       </p>
 
-      <form onSubmit={handleSubmit(onValidSubmit)} className="mt-8 grid w-full gap-8">
-        {/* Service field */}
+      <form onSubmit={handleSubmit(onValidSubmit)} noValidate className="mt-10 space-y-6">
         {initialService ? (
           <Field>
-            <FieldLabel>Selected Service</FieldLabel>
-            <Input value={formatService(initialService)} readOnly />
+            <FieldLabel htmlFor="call-service-readonly">Selected service</FieldLabel>
+            <Input id="call-service-readonly" value={formatService(initialService)} readOnly />
             <input type="hidden" {...register("service")} value={initialService} />
           </Field>
         ) : (
-          <Field>
-            <FieldLabel>Service</FieldLabel>
+          <Field data-invalid={errors.service ? true : undefined}>
+            <FieldLabel htmlFor="call-service">Service</FieldLabel>
             <Controller
               name="service"
               control={control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
+                  <SelectTrigger {...a11y("service")} className="w-full">
                     <SelectValue placeholder="Choose a service" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="real-estate">Real Estate</SelectItem>
-                    <SelectItem value="architecture">Architecture</SelectItem>
-                    <SelectItem value="painting">Painting</SelectItem>
-                    <SelectItem value="interior-design">Interior Design</SelectItem>
-                    <SelectItem value="calacot-tech">Calacot Tech</SelectItem>
+                    {services.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               )}
             />
-            {errors.service && (
-              <p className="text-sm text-destructive">{errors.service.message}</p>
-            )}
+            {error("service")}
           </Field>
         )}
 
-        {/* Name + Email row */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <Field>
-            <FieldLabel>Full Name</FieldLabel>
-            <Input {...register("fullName")} />
-            {errors.fullName && (
-              <p className="text-sm text-destructive">{errors.fullName.message}</p>
-            )}
+        <div className="grid gap-6 md:grid-cols-2">
+          <Field data-invalid={errors.fullName ? true : undefined}>
+            <FieldLabel htmlFor="call-fullName">Full name</FieldLabel>
+            <Input {...a11y("fullName")} autoComplete="name" {...register("fullName")} />
+            {error("fullName")}
           </Field>
-          <Field>
-            <FieldLabel>Email</FieldLabel>
-            <Input type="email" {...register("email")} />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
+          <Field data-invalid={errors.email ? true : undefined}>
+            <FieldLabel htmlFor="call-email">Email</FieldLabel>
+            <Input {...a11y("email")} type="email" autoComplete="email" inputMode="email" {...register("email")} />
+            {error("email")}
           </Field>
         </div>
 
-        {/* Phone */}
-        <Field>
-          <FieldLabel>Phone Number</FieldLabel>
-          <Input type="tel" {...register("phone")} />
-          {errors.phone && (
-            <p className="text-sm text-destructive">{errors.phone.message}</p>
-          )}
+        <Field data-invalid={errors.phone ? true : undefined}>
+          <FieldLabel htmlFor="call-phone">Phone number</FieldLabel>
+          <Input {...a11y("phone")} type="tel" autoComplete="tel" inputMode="tel" {...register("phone")} />
+          {error("phone")}
         </Field>
 
-        {/* Date + Time row */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <Field>
-            <FieldLabel>Preferred Date</FieldLabel>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Field data-invalid={errors.date ? true : undefined}>
+            <FieldLabel htmlFor="call-date">Preferred date</FieldLabel>
             <Controller
               name="date"
               control={control}
               render={({ field }) => (
                 <Popover>
-                  <PopoverTrigger>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-between text-left font-normal"
-                    >
-                      {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                      <ChevronDownIcon className="ml-2 h-4 w-4" />
-                    </Button>
+                  {/* The trigger renders as the button itself: no button nested in a button. */}
+                  <PopoverTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="outline"
+                        {...a11y("date")}
+                        className="w-full justify-between rounded-(--control-radius) px-3.5 text-left font-normal shadow-none"
+                      />
+                    }
+                  >
+                    <span className="flex items-center gap-2">
+                      <CalendarIcon aria-hidden className="text-brand-black-600 dark:text-brand-black-300" />
+                      {field.value ? format(field.value, "PPP") : <span className="text-brand-black-600 dark:text-brand-black-300">Pick a date</span>}
+                    </span>
+                    <ChevronDownIcon aria-hidden className="h-4 w-4" />
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
@@ -175,54 +191,42 @@ const onValidSubmit = async (data: ScheduleCallFormData) => {
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                      
                     />
                   </PopoverContent>
                 </Popover>
               )}
             />
-            {errors.date && (
-              <p className="text-sm text-destructive">{errors.date.message}</p>
-            )}
+            {error("date")}
           </Field>
 
-          <Field>
-            <FieldLabel>Preferred Time</FieldLabel>
+          <Field data-invalid={errors.time ? true : undefined}>
+            <FieldLabel htmlFor="call-time">Preferred time</FieldLabel>
             <Controller
               name="time"
               control={control}
-              render={({ field }) => (
-                <Input type="time" {...field} />
-              )}
+              render={({ field }) => <Input {...a11y("time")} type="time" {...field} />}
             />
-            {errors.time && (
-              <p className="text-sm text-destructive">{errors.time.message}</p>
-            )}
+            {error("time")}
           </Field>
         </div>
 
-        {/* Project Overview */}
-        <Field>
-          <FieldLabel>Project Overview</FieldLabel>
-          <Textarea {...register("projectOverview")} className="min-h-32" />
-          {errors.projectOverview && (
-            <p className="text-sm text-destructive">{errors.projectOverview.message}</p>
-          )}
+        <Field data-invalid={errors.projectOverview ? true : undefined}>
+          <FieldLabel htmlFor="call-projectOverview">Project overview</FieldLabel>
+          <Textarea {...a11y("projectOverview")} {...register("projectOverview")} className="min-h-32" />
+          {error("projectOverview")}
         </Field>
- <Field
-              orientation="horizontal"
-              className="flex gap-4 justify-start items-center"
-            >
 
-  
-        {/* Submit Button */}
-        <Button type="submit" disabled={isSubmitting} >
-          {isSubmitting ? "Scheduling..." : "Schedule Call"}
-        </Button>
-        <Link href={`/start-project?service=${initialService || ""}`} className={buttonVariants({ variant: "outline", size: "lg" })}>
-            Start a Project Instead
+        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
+          <Button type="submit" size="lg" loading={isSubmitting}>
+            {isSubmitting ? "Sending request…" : "Schedule call"}
+          </Button>
+          <Link
+            href={`/start-project?service=${initialService || ""}`}
+            className={buttonVariants({ variant: "outline", size: "lg" })}
+          >
+            Start a project instead
           </Link>
-</Field>
+        </div>
       </form>
     </div>
   );

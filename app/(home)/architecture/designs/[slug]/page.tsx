@@ -59,7 +59,7 @@ export default async function DesignDetailsPage({ params }: Props) {
       <Link href="/architecture/designs" className="inline-flex min-h-11 items-center gap-2 text-sm opacity-65 hover:opacity-100"><ArrowLeft size={16} aria-hidden="true" />Explore architectural designs</Link>
       <header className="mb-9 mt-8 flex flex-wrap items-end justify-between gap-6">
         <div>
-          <p className="text-xs uppercase tracking-[.16em] opacity-55">{[design.architecturalStyle, design.designType].filter(Boolean).join(" / ")}</p>
+          <p className="type-eyebrow opacity-55">{[design.architecturalStyle, design.designType].filter(Boolean).join(" / ")}</p>
           <h1 className="mt-4 max-w-4xl text-[clamp(40px,6vw,80px)] leading-[1.05] tracking-[-.055em]">{design.title}</h1>
           {/* {design.designCode && <p className="mt-4 text-xs opacity-55">Design code: {design.designCode}</p>} */}
         </div>

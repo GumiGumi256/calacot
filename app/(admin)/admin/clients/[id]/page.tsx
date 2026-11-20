@@ -13,6 +13,9 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageContainer } from "@/components/layout/page-container";
+import { StatusBadge } from "@/components/ui/status-badge";
 export default async function Page({
   params,
 }: {
@@ -44,15 +47,13 @@ export default async function Page({
     })),
   };
   return (
-    <div className="flex flex-col gap-6 p-4 md:p-6">
+    <PageContainer>
+      <PageHeader
+        title={String(c.display_name)}
+        description={<>{String(c.department || "Department not assigned")} · {String(c.kind)[0].toUpperCase() + String(c.kind).slice(1)}</>}
+        meta={<StatusBadge domain="client" status={c.archived_at ? "archived" : "active"} />}
+      />
       <Card>
-        <CardHeader>
-          <CardTitle as="h1">{String(c.display_name)}</CardTitle>
-          <CardDescription>
-            {String(c.department || "Department not assigned")} ·{" "}
-            {String(c.kind)} · {c.archived_at ? "Archived" : "Active"}
-          </CardDescription>
-        </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <p>
             {initial.legalName} ·{" "}
@@ -130,6 +131,6 @@ export default async function Page({
       ))}
       <RecordDocuments type="client" id={id} label={String(d.client.display_name)} />
       <Activity events={d.activity} />
-    </div>
+    </PageContainer>
   );
 }

@@ -3,12 +3,14 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 /*
- * Design System V1 (admin only, via the admin: variant): elevation replaces the 10% ring,
- * padding grows to 20px from 640px up, and variants express function rather than decoration.
- *   default      level 1 elevation
- *   flat         nested panel, no elevation
+ * Design System V1 (admin only, via the admin: variant): soft, large-radius surfaces
+ * (--card-radius, 28px; 20px for size="sm"), a hairline edge and a wide diffused shadow replace
+ * the 10% ring. Padding grows to 24px from 640px up. Variants express function, not decoration.
+ *   default      floating card surface
+ *   flat         nested panel or row: tinted, no edge or shadow, smaller radius
  *   interactive  whole card is a link; lifts on hover
- *   attention    level 2 with a warning (or destructive, via tone) inline-start bar
+ *   attention    same surface as default; tone (warning/destructive) is exposed as data-tone
+ *                for the content's icon and badges rather than tinting the whole card
  * Outside the admin shell the card renders exactly as before.
  */
 type CardVariant = "default" | "flat" | "interactive" | "attention"
@@ -32,10 +34,10 @@ function Card({
       data-tone={variant === "attention" ? tone : undefined}
       className={cn(
         "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl bg-card py-(--card-spacing) text-sm text-card-foreground ring-1 ring-foreground/10 [--card-spacing:--spacing(4)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
-        "admin:border admin:border-border admin:shadow-e1 admin:ring-0 admin:data-[size=default]:sm:[--card-spacing:--spacing(5)]",
-        "admin:data-[variant=flat]:bg-surface-subtle admin:data-[variant=flat]:shadow-none",
-        "admin:data-[variant=interactive]:transition-shadow admin:data-[variant=interactive]:hover:shadow-e2 motion-reduce:transition-none",
-        "admin:data-[variant=attention]:border-s-4 admin:data-[variant=attention]:shadow-e2 admin:data-[tone=warning]:border-s-warning admin:data-[tone=destructive]:border-s-destructive",
+        "admin:rounded-(--card-radius) admin:border admin:border-card-edge admin:shadow-card admin:ring-0 admin:data-[size=sm]:rounded-(--card-radius-sm) admin:data-[size=default]:sm:[--card-spacing:--spacing(6)]",
+        "admin:data-[variant=flat]:rounded-(--card-radius-sm) admin:data-[variant=flat]:border-transparent admin:data-[variant=flat]:bg-card-nested admin:data-[variant=flat]:shadow-none",
+        "admin:data-[variant=interactive]:transition-[box-shadow,translate] admin:data-[variant=interactive]:duration-200 admin:data-[variant=interactive]:hover:-translate-y-0.5 admin:data-[variant=interactive]:hover:shadow-card-hover motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+        // attention keeps the plain card surface; the tone shows in the card's own icon and badges.
         className
       )}
       {...props}
@@ -115,7 +117,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-footer"
       className={cn(
-        "flex items-center rounded-b-xl border-t bg-muted/50 p-(--card-spacing) admin:bg-surface-subtle",
+        "flex items-center rounded-b-xl border-t bg-muted/50 p-(--card-spacing) admin:rounded-b-none admin:border-card-edge admin:bg-transparent",
         className
       )}
       {...props}

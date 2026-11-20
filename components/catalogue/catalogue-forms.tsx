@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-
-const selectClass = "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
+import { NativeSelect } from "@/components/ui/native-select";
 const label = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export type CatalogueDraft = { name: string; division: string; category: string; itemType: string; description: string; unit: string; unitPrice: string; currency: string };
@@ -23,9 +22,9 @@ function ItemFields({ value, onChange, categories, lockScope }: { value: Catalog
     <FieldGroup className="grid gap-4 sm:grid-cols-2">
       <Field className="sm:col-span-2"><FieldLabel htmlFor="cat-name">Item name</FieldLabel><Input id="cat-name" required maxLength={200} value={value.name} onChange={set("name")} /></Field>
       <Field><FieldLabel htmlFor="cat-division">Division</FieldLabel>
-        <select id="cat-division" className={selectClass} value={value.division} onChange={set("division")} disabled={lockScope}>{divisions.map((d) => <option key={d} value={d}>{label(d)}</option>)}</select></Field>
+        <NativeSelect wrapperClassName="w-full" id="cat-division" value={value.division} onChange={set("division")} disabled={lockScope}>{divisions.map((d) => <option key={d} value={d}>{label(d)}</option>)}</NativeSelect></Field>
       <Field><FieldLabel htmlFor="cat-type">Type</FieldLabel>
-        <select id="cat-type" className={selectClass} value={value.itemType} onChange={set("itemType")}>{catalogueItemTypes.map((t) => <option key={t} value={t}>{catalogueTypeLabels[t]}</option>)}</select></Field>
+        <NativeSelect wrapperClassName="w-full" id="cat-type" value={value.itemType} onChange={set("itemType")}>{catalogueItemTypes.map((t) => <option key={t} value={t}>{catalogueTypeLabels[t]}</option>)}</NativeSelect></Field>
       <Field><FieldLabel htmlFor="cat-category">Category</FieldLabel><Input id="cat-category" list="cat-categories" maxLength={80} placeholder="e.g. Interior paint" value={value.category} onChange={set("category")} />
         <datalist id="cat-categories">{categories.map((c) => <option key={c} value={c} />)}</datalist></Field>
       <Field><FieldLabel htmlFor="cat-unit">Unit of measurement</FieldLabel><Input id="cat-unit" list="cat-units" required maxLength={40} value={value.unit} onChange={set("unit")} />
@@ -33,7 +32,7 @@ function ItemFields({ value, onChange, categories, lockScope }: { value: Catalog
       <Field><FieldLabel htmlFor="cat-price">Default selling price per unit</FieldLabel><Input id="cat-price" required inputMode="decimal" pattern="\d{1,15}(\.\d{1,2})?" value={value.unitPrice} onChange={set("unitPrice")} />
         <FieldDescription>A default for new quotation lines. Issued quotations never change.</FieldDescription></Field>
       <Field><FieldLabel htmlFor="cat-currency">Currency</FieldLabel>
-        <select id="cat-currency" className={selectClass} value={value.currency} onChange={set("currency")} disabled={lockScope}>{currencies.map((c) => <option key={c} value={c}>{c}</option>)}</select></Field>
+        <NativeSelect wrapperClassName="w-full" id="cat-currency" value={value.currency} onChange={set("currency")} disabled={lockScope}>{currencies.map((c) => <option key={c} value={c}>{c}</option>)}</NativeSelect></Field>
       <Field className="sm:col-span-2"><FieldLabel htmlFor="cat-description">Description</FieldLabel><Textarea id="cat-description" maxLength={2000} rows={3} value={value.description} onChange={set("description")} /></Field>
     </FieldGroup>
   );

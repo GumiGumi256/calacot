@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageContainer } from "@/components/layout/page-container";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const bytes = (n: string) => { const b = Number(n); return b >= 1048576 ? `${(b / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`; };
 const when = (v: string) => new Intl.DateTimeFormat("en-UG", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Kampala" }).format(new Date(v));
@@ -15,16 +18,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const { id } = await params;
   const { doc, versions, history, can } = await readDocumentDetail(id);
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6">
+    <PageContainer>
       <Link href="/admin/documents" className="text-sm underline-offset-4 hover:underline">Back to documents</Link>
+      <PageHeader
+        title={doc.name}
+        description={<>{kindLabels[doc.kind] ?? doc.kind} · version {doc.version} · {bytes(doc.size_bytes)}</>}
+        meta={doc.archived_at ? <StatusBadge domain="client" status="archived" /> : doc.financial ? <Badge variant="outline">Financial record</Badge> : null}
+      />
       <Card>
-        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <CardTitle as="h1" className="break-words">{doc.name}</CardTitle>
-            <CardDescription>{kindLabels[doc.kind] ?? doc.kind} · version {doc.version} · {bytes(doc.size_bytes)}</CardDescription>
-          </div>
-          {doc.archived_at ? <Badge variant="secondary">Archived</Badge> : doc.financial ? <Badge variant="outline">Financial record</Badge> : <Badge>Active</Badge>}
-        </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <dl className="grid gap-3 text-sm sm:grid-cols-3">
             <div><dt className="text-muted-foreground">Linked to</dt><dd>{recordLabels[doc.record_type] ?? doc.record_type}: {doc.record_href ? <Link className="underline underline-offset-4" href={doc.record_href}>{doc.record_label}</Link> : doc.record_label}</dd></div>
@@ -66,6 +67,6 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageContainer>
   );
 }

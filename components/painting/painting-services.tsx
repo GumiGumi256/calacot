@@ -34,7 +34,7 @@ export default function PaintingServices() {
                 {service.title}
               </h3>
 
-              <p className="mt-3 text-sm leading-relaxed text-brand-black/70 dark:text-brand-white/70">
+              <p className="mt-3 text-sm leading-relaxed text-brand-black-700 dark:text-brand-black-200">
                 {service.description}
               </p>
             </div>

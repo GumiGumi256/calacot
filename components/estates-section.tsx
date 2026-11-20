@@ -109,7 +109,7 @@ export default function EstatesSection() {
 
               <span className="h-px w-12 bg-border" />
 
-              <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <span className="type-eyebrow text-muted-foreground">
                 Calacot Estates
               </span>
             </div>
@@ -188,25 +188,25 @@ export default function EstatesSection() {
 
               
                 <div className="absolute left-6 top-6">
-                  <span className="text-xs tracking-[0.2em] text-white/70">
+                  <span className="text-xs tracking-[0.2em] text-brand-black-200">
                     {property.id}
                   </span>
                 </div>
 
               
                 <div className="absolute inset-x-0 bottom-0 p-7 md:p-9">
-                  <div className="mb-4 flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-white/60">
+                  <div className="type-eyebrow mb-4 flex items-center gap-3 text-brand-black-200">
                     <span>{property.location}</span>
                     <span className="h-px w-6 bg-white/30" />
                     <span>{property.type}</span>
                   </div>
 
                   <div className="flex items-end justify-between gap-6">
-                    <h3 className="max-w-lg text-3xl font-light leading-tight tracking-tight text-white md:text-4xl">
+                    <h3 className="max-w-lg text-3xl font-light leading-tight tracking-tight text-brand-white md:text-4xl">
                       {property.title}
                     </h3>
 
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/10 backdrop-blur-md transition-all duration-300 group-hover:bg-white group-hover:text-black">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/10 backdrop-blur-md transition-all duration-300 group-hover:bg-white group-hover:text-brand-black">
                       <ArrowUpRight className="h-4 w-4" />
                     </div>
                   </div>
@@ -225,7 +225,7 @@ export default function EstatesSection() {
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-20">
             {/* Left */}
             <div className="lg:col-span-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <p className="type-eyebrow text-muted-foreground">
                 The Calacot Estates Experience
               </p>
               <Image 

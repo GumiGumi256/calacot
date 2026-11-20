@@ -3,13 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { label } from "@/lib/admin/options";
+import { NativeSelect } from "@/components/ui/native-select";
 
 export type FilterField =
   | { name: string; label: string; type: "search" | "date" }
-  | { name: string; label: string; type: "select"; options: readonly string[] };
-
-const selectClass =
-  "h-9 rounded-md border border-input bg-transparent px-3 text-sm capitalize shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
+  /** `labels` maps option values to display text (e.g. "org:admin" -> "Administrator"). */
+  | { name: string; label: string; type: "select"; options: readonly string[]; labels?: Record<string, string> };
 
 export function FilterBar({
   fields,
@@ -31,19 +30,18 @@ export function FilterBar({
         <div key={f.name} className="flex flex-col gap-2">
           <Label htmlFor={`f-${f.name}`}>{f.label}</Label>
           {f.type === "select" ? (
-            <select
+            <NativeSelect className="capitalize"
               id={`f-${f.name}`}
               name={f.name}
               defaultValue={values[f.name] ?? ""}
-              className={selectClass}
             >
               <option value="">All</option>
               {f.options.map((o) => (
                 <option key={o} value={o}>
-                  {label(o)}
+                  {f.labels?.[o] ?? label(o)}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           ) : (
             <Input
               id={`f-${f.name}`}
@@ -55,10 +53,14 @@ export function FilterBar({
           )}
         </div>
       ))}
-      <Button type="submit">Apply</Button>
-      <Button variant="outline" render={<Link href={reset} />}>
-        Reset
-      </Button>
+      {/* Filters are a supporting control: secondary styling keeps the page's one gold primary action clear. */}
+      {/* Kept together so Reset never wraps away from Apply. */}
+      <div className="flex items-center gap-2">
+        <Button type="submit" variant="secondary">Apply</Button>
+        <Button variant="ghost" render={<Link href={reset} />}>
+          Reset
+        </Button>
+      </div>
     </form>
   );
 }

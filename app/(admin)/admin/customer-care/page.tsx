@@ -25,6 +25,7 @@ import { listTime, MODE_LABEL, previewText } from "@/components/customer-care/fo
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { NativeSelect } from "@/components/ui/native-select";
 
 export const metadata = {
   title: "Customer care inbox",
@@ -48,7 +49,7 @@ function inboxHref(params: { phone?: string | null; mode?: Mode; page?: number }
 
 const MODE_STYLE: Record<string, string> = {
   bot: "bg-brand-primary/25 text-brand-black dark:text-brand-primary",
-  human: "bg-brand-accent/15 text-brand-accent dark:bg-brand-accent/30 dark:text-orange-200",
+  human: "bg-brand-accent/15 text-brand-accent dark:bg-brand-accent/30 dark:text-brand-accent",
   closed: "bg-muted text-muted-foreground",
 };
 
@@ -66,7 +67,7 @@ function ChatAvatar({ mode, size = "md" }: { mode: string; size?: "md" | "lg" })
 
 function ModePill({ mode }: { mode: string }) {
   return (
-    <span className={cn("inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10.5px] font-medium", MODE_STYLE[mode])}>
+    <span className={cn("inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium", MODE_STYLE[mode])}>
       {MODE_LABEL[mode] || mode}
     </span>
   );
@@ -88,7 +89,7 @@ function ContactInfo({ conversation, contact, canReply, requests }: {
     <div className="flex flex-col gap-2 bg-muted/40 pb-6">
       <div className="flex flex-col items-center gap-2 bg-card px-6 py-7 text-center">
         <ChatAvatar mode={conversation.mode} size="lg" />
-        <p className="mt-2 text-xl font-medium tracking-tight">+{conversation.phone}</p>
+        <p className="mt-2 type-section-title">+{conversation.phone}</p>
         <ModePill mode={conversation.mode} />
       </div>
 
@@ -129,10 +130,10 @@ function ContactInfo({ conversation, contact, canReply, requests }: {
             const fields = r.fields && typeof r.fields === "object" && !Array.isArray(r.fields)
               ? Object.entries(r.fields as Record<string, unknown>) : [];
             return (
-              <li key={r.id} className="rounded-lg border p-3">
+              <li key={r.id} className="rounded-(--card-radius-inner) border border-card-edge bg-card-nested p-3">
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-medium capitalize">{r.kind.replaceAll("_", " ")}</p>
-                  <span className="shrink-0 text-[11px] text-muted-foreground">{listTime(r.createdAt)}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">{listTime(r.createdAt)}</span>
                 </div>
                 <p className="text-xs text-muted-foreground">{r.businessUnit || "Customer care"}</p>
                 {fields.length > 0 ? (
@@ -150,12 +151,11 @@ function ContactInfo({ conversation, contact, canReply, requests }: {
                 <form action={updateCareRequest} className="mt-3 flex items-center gap-2">
                   <input type="hidden" name="id" value={r.id} />
                   <label htmlFor={`request-status-${r.id}`} className="sr-only">Request status</label>
-                  <select id={`request-status-${r.id}`} name="status" defaultValue={r.status}
-                    className="h-8 flex-1 rounded-md border bg-background px-2 text-sm capitalize">
+                  <NativeSelect wrapperClassName="flex-1" className="capitalize" id={`request-status-${r.id}`} name="status" defaultValue={r.status}>
                     <option value="new">New</option>
                     <option value="contacted">Contacted</option>
                     <option value="closed">Closed</option>
-                  </select>
+                  </NativeSelect>
                   <Button type="submit" size="xs" variant="outline">Save</Button>
                 </form>
               </li>
@@ -268,7 +268,7 @@ export default async function CustomerCareInbox({
       </Link>
       <ChatAvatar mode={selected.mode} />
       <div className="min-w-0 flex-1">
-        <h2 className="truncate text-[15px] font-medium leading-tight">+{selected.phone}</h2>
+        <h2 className="truncate type-body-strong">+{selected.phone}</h2>
         <p className="truncate text-xs text-muted-foreground">
           {MODE_LABEL[selected.mode]} · {contact?.optedOutAt ? "Opted out" : canReply ? "Reply window open" : "Reply window closed"}
           {selected.assignedTo ? ` · ${selected.assignedTo}` : ""}
@@ -312,18 +312,18 @@ export default async function CustomerCareInbox({
         className={cn("w-full min-w-0 flex-col border-r bg-card lg:flex lg:w-[360px] lg:shrink-0 xl:w-[400px]", phone ? "hidden" : "flex")}>
         <div className="bg-brand-black px-4 pb-3 pt-4 text-brand-white">
           <div className="flex items-center justify-between gap-2">
-            <h1 className="text-xl font-medium tracking-tight">Chats</h1>
+            <h1 className="type-section-title text-brand-white">Chats</h1>
             <Link href="/admin/customer-care/knowledge" title="Assistant knowledge"
-              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs text-brand-white/80 hover:bg-white/10 hover:text-brand-white">
+              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs text-brand-black-200 hover:bg-white/10 hover:text-brand-white">
               <BookOpen className="size-4" /> Knowledge
             </Link>
           </div>
           <form method="get" action="/admin/customer-care" className="relative mt-3">
             {mode && <input type="hidden" name="mode" value={mode} />}
-            <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand-white/50" />
+            <Search aria-hidden className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand-black-300" />
             <input name="phone" type="search" inputMode="tel" defaultValue=""
               aria-label="Search by WhatsApp phone number" placeholder="Search phone number"
-              className="h-9 w-full rounded-lg bg-white/10 pl-9 pr-3 text-sm text-brand-white outline-none placeholder:text-brand-white/50 focus-visible:ring-2 focus-visible:ring-brand-primary" />
+              className="h-9 w-full rounded-lg bg-white/10 pl-9 pr-3 text-sm text-brand-white outline-none placeholder:text-brand-black-300 focus-visible:ring-2 focus-visible:ring-brand-primary" />
           </form>
         </div>
 
@@ -349,7 +349,7 @@ export default async function CustomerCareInbox({
                 <AlertTriangle className="size-5" />
               </span>
               <span className="flex-1 font-medium">Queue attention</span>
-              <span className="rounded-full bg-destructive px-2 py-0.5 text-[11px] font-medium text-white">{failures.length}</span>
+              <span className="rounded-full bg-destructive px-2 py-0.5 text-xs font-medium text-brand-white">{failures.length}</span>
               <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" />
             </summary>
             <ul className="max-h-52 overflow-y-auto pb-2">
@@ -378,13 +378,13 @@ export default async function CustomerCareInbox({
                   <ChatAvatar mode={c.mode} />
                   <div className="min-w-0 flex-1 border-b py-3 pr-1">
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="truncate text-[15px] font-medium">+{c.phone}</span>
-                      <span className={cn("shrink-0 text-[11px]", awaitingStaff ? "font-medium text-brand-accent dark:text-brand-primary" : "text-muted-foreground")}>
+                      <span className="truncate type-body-strong">+{c.phone}</span>
+                      <span className={cn("shrink-0 text-xs", awaitingStaff ? "font-medium text-brand-accent dark:text-brand-primary" : "text-muted-foreground")}>
                         {listTime(latest?.eventAt ?? c.updatedAt, now)}
                       </span>
                     </div>
                     <div className="mt-0.5 flex items-center gap-2">
-                      <p className="flex min-w-0 flex-1 items-center gap-1 truncate text-[13px] text-muted-foreground">
+                      <p className="flex min-w-0 flex-1 items-center gap-1 truncate type-caption">
                         {latest?.direction === "outbound" && <CheckCheck aria-hidden className="size-4 shrink-0 opacity-70" />}
                         <span className="truncate">{latest ? previewText(latest) : "No messages yet"}</span>
                       </p>
@@ -393,7 +393,7 @@ export default async function CustomerCareInbox({
                         : <ModePill mode={c.mode} />}
                     </div>
                     {c.businessUnit && (
-                      <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                         <Tag aria-hidden className="size-3 text-brand-accent dark:text-brand-primary" /> {c.businessUnit}
                       </p>
                     )}
@@ -433,7 +433,7 @@ export default async function CustomerCareInbox({
             <span className="flex size-24 items-center justify-center rounded-full bg-card shadow-sm">
               <Image src="/calacot-logo-icon-black.png" alt="" width={56} height={56} className="dark:invert" />
             </span>
-            <h2 className="text-2xl font-medium tracking-tight">Calacot Customer Care</h2>
+            <h2 className="type-page-title">Calacot Customer Care</h2>
             <p className="max-w-sm text-sm text-muted-foreground">
               {phone
                 ? `No conversation found for +${phone}.`
@@ -449,7 +449,7 @@ export default async function CustomerCareInbox({
       {/* Contact info (wide screens) */}
       {selected && (
         <aside aria-label="Contact info" className="hidden w-[340px] shrink-0 flex-col overflow-y-auto border-l xl:flex">
-          <div className="flex h-[57px] shrink-0 items-center border-b bg-card px-5 text-[15px] font-medium">Contact info</div>
+          <div className="flex h-[57px] shrink-0 items-center border-b bg-card px-5 type-body-strong">Contact info</div>
           <ContactInfo conversation={selected} contact={contact} canReply={canReply} requests={requests} />
         </aside>
       )}

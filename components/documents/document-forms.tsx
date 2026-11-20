@@ -8,8 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-
-const selectClass = "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
+import { NativeSelect } from "@/components/ui/native-select";
 const MAX = 20 * 1024 * 1024;
 const uploadKinds = ["contract", "drawing", "brief", "permit", "photo", "report", "policy", "staff_record", "property_document", "other"];
 type Target = { id: string; label: string };
@@ -72,10 +71,10 @@ export function UploadDocument({ targets, fixed, supersedesId, triggerLabel }: {
                 <>
                   <Field>
                     <FieldLabel htmlFor="doc-kind">Category</FieldLabel>
-                    <select id="doc-kind" name="kind" required defaultValue="" className={selectClass}>
+                    <NativeSelect wrapperClassName="w-full" id="doc-kind" name="kind" required defaultValue="">
                       <option value="" disabled>Select a category</option>
                       {uploadKinds.map((k) => <option key={k} value={k}>{kindLabels[k]}</option>)}
-                    </select>
+                    </NativeSelect>
                   </Field>
                   {fixed ? (
                     <p className="text-sm">Linked to: <span className="font-medium">{fixed.label}</span></p>
@@ -83,17 +82,17 @@ export function UploadDocument({ targets, fixed, supersedesId, triggerLabel }: {
                     <>
                       <Field>
                         <FieldLabel htmlFor="doc-link-type">Belongs to</FieldLabel>
-                        <select id="doc-link-type" value={linkType} onChange={(e) => setLinkType(e.target.value)} className={selectClass}>
+                        <NativeSelect wrapperClassName="w-full" id="doc-link-type" value={linkType} onChange={(e) => setLinkType(e.target.value)}>
                           {types.map((t) => <option key={t} value={t}>{recordLabels[t]}</option>)}
-                        </select>
+                        </NativeSelect>
                       </Field>
                       {linkType !== "company" && (
                         <Field>
                           <FieldLabel htmlFor="doc-link">{recordLabels[linkType] ?? "Record"}</FieldLabel>
-                          <select key={linkType} id="doc-link" name="linkId" required defaultValue="" className={selectClass}>
+                          <NativeSelect wrapperClassName="w-full" key={linkType} id="doc-link" name="linkId" required defaultValue="">
                             <option value="" disabled>Select…</option>
                             {(targets?.[linkType] ?? []).map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
-                          </select>
+                          </NativeSelect>
                         </Field>
                       )}
                     </>

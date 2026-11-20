@@ -83,6 +83,12 @@ export const statusRegistry = {
     captured: s("Captured (test)", "neutral"),
     skipped: s("Skipped", "neutral"),
   },
+  staff: {
+    active: s("Active", "success"),
+    invited: s("Invited", "info"),
+    suspended: s("Suspended", "destructive"),
+    removed: s("Removed", "neutral"),
+  },
   designPurchase: {
     awaiting_payment: s("Awaiting payment", "neutral"),
     awaiting_contact: s("Awaiting Calacot", "warning"),

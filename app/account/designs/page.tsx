@@ -22,7 +22,7 @@ export default async function MyDesignsPage() {
     .orderBy(desc(designPurchases.createdAt));
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-5 pb-24 pt-28 text-foreground sm:px-8">
-      <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+      <p className="type-eyebrow text-muted-foreground">
         Your Calacot account
       </p>
       <div className="mt-3 flex flex-wrap items-end justify-between gap-5">

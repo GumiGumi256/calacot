@@ -16,7 +16,7 @@ function Busy({ label, className, children }: { label: string; className?: strin
 
 export function TableSkeleton({ rows = 8, columns = 5, className }: { rows?: number; columns?: number; className?: string }) {
   return (
-    <Busy label="Loading records" className={cn("overflow-hidden rounded-xl border bg-card", className)}>
+    <Busy label="Loading records" className={cn("overflow-hidden surface-card", className)}>
       <div className="flex gap-4 border-b bg-surface-subtle px-4 py-3">
         {Array.from({ length: columns }, (_, i) => (
           <Skeleton key={i} className="h-3 flex-1" />
@@ -37,7 +37,7 @@ export function MetricSkeleton({ count = 4, className }: { count?: number; class
   return (
     <Busy label="Loading figures" className={cn("grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4", className)}>
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="flex flex-col gap-3 rounded-xl border bg-card p-5">
+        <div key={i} className="flex flex-col gap-3 surface-card p-5">
           <Skeleton className="h-3 w-24" />
           <Skeleton className="h-7 w-32" />
           <Skeleton className="h-3 w-20" />
@@ -62,7 +62,7 @@ export function ChartSkeleton({ height = 280, className }: { height?: number; cl
 
 export function CardSkeleton({ lines = 3, className }: { lines?: number; className?: string }) {
   return (
-    <Busy label="Loading" className={cn("flex flex-col gap-3 rounded-xl border bg-card p-5", className)}>
+    <Busy label="Loading" className={cn("flex flex-col gap-3 surface-card p-5", className)}>
       <Skeleton className="h-4 w-40" />
       {Array.from({ length: lines }, (_, i) => (
         <Skeleton key={i} className={cn("h-3", i === lines - 1 ? "w-2/3" : "w-full")} />

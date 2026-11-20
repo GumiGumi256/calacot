@@ -60,15 +60,16 @@ check("fonts remain Plus Jakarta Sans (sans) and Outfit (heading)", () => {
 
 // 2. Status registry ------------------------------------------------------------------------
 console.log("Status registry");
-const entityList = read("components/sales/entity-list.tsx");
+const salesContracts = read("lib/sales/contracts.ts");
+const entityList = salesContracts.slice(salesContracts.indexOf("export const listStatuses"));
 const salesStatuses = (key: string) => {
   const m = entityList.match(new RegExp(`${key}:\\s*\\[([^\\]]*)\\]`));
-  assert.ok(m, `statuses for ${key} not found in entity-list.tsx`);
+  assert.ok(m, `statuses for ${key} not found in lib/sales/contracts.ts listStatuses`);
   return [...m[1].matchAll(/"([a-z_]+)"/g)].map((x) => x[1]);
 };
 const taskEnum = [...(read("database/schema/tasks.ts").match(/enum: \[([^\]]*)\]/)?.[1] ?? "").matchAll(/"([a-z_]+)"/g)].map((x) => x[1]);
 const purchaseStatuses = [...(read("lib/design-purchases/model.ts").match(/purchaseStatuses = \[([^\]]*)\]/)?.[1] ?? "").matchAll(/"([a-z_]+)"/g)].map((x) => x[1]);
-const invoicePayment = [...(entityList.match(/"paid", "unpaid", "partial", "overdue"/)?.[0] ?? "").matchAll(/"([a-z_]+)"/g)].map((x) => x[1]);
+const invoicePayment = [...(entityList.match(/invoicePaymentStates = \[[^\]]*\]/)?.[0] ?? "").matchAll(/"([a-z_]+)"/g)].map((x) => x[1]);
 const sources: Record<keyof typeof statusRegistry, readonly string[]> = {
   lead: leadStatuses,
   payment: paymentStatuses,
@@ -81,6 +82,8 @@ const sources: Record<keyof typeof statusRegistry, readonly string[]> = {
   invoicePayment,
   task: taskEnum,
   designPurchase: purchaseStatuses,
+  // Staff directory statuses (lib/admin/staff.ts StaffRow.status) plus the "invited" filter value on the Staff page.
+  staff: [...[...(read("lib/admin/staff.ts").match(/status: ("[a-z]+"(?: \| "[a-z]+")+);/)?.[1] ?? "").matchAll(/"([a-z]+)"/g)].map((x) => x[1]), "invited"],
 };
 for (const [domain, values] of Object.entries(sources)) {
   check(`${domain}: ${values.length} statuses covered`, () => {
@@ -251,11 +254,11 @@ check("the shell header has no heading; every page provides exactly one <h1>", (
   for (const f of adminPages.filter((p) => p.endsWith("page.tsx"))) {
     const src = read(f);
     if (/^\s*redirect\(/m.test(src) && !/return\s*\(?\s*</.test(src)) continue; // redirect-only routes
-    if (src.includes("SalesListPage")) continue; // its CardTitle is as="h1" (checked below)
+    if (src.includes("SalesListPage")) continue; // renders PageHeader (checked below)
     const sources = (src.match(/<h1\b/g)?.length ?? 0) + (src.match(/as="h1"/g)?.length ?? 0) + (src.match(/<PageHeader\b/g)?.length ?? 0);
     if (sources !== 1) problems.push(`${f}: ${sources}`);
   }
-  assert.ok(read("components/sales/list-page.tsx").includes('as="h1"'), "SalesListPage title must be the h1");
+  assert.ok(read("components/sales/list-page.tsx").includes("<PageHeader"), "SalesListPage must render a PageHeader (its h1)");
   assert.deepEqual(problems, [], "pages without exactly one h1 source");
 });
 check("breadcrumbs follow legacy and organization-scoped URLs", () => {
@@ -299,9 +302,11 @@ const contrast = (x: Lab, y: Lab) => {
 };
 const mix = (x: Lab, y: Lab, xShare: number): Lab => [0, 1, 2].map((i) => x[i] * xShare + y[i] * (1 - xShare)) as Lab;
 const tokenIn = (block: string, name: string): Lab => {
-  const m = block.match(new RegExp(`${name}:\\s*oklch\\(([\\d.]+) ([\\d.]+) ([\\d.]+)`));
+  // Lightness may be written as 0.47 or 47.41% (the brand shade scales use percentages).
+  const m = block.match(new RegExp(`${name}:\\s*oklch\\(([\\d.]+)(%?) ([\\d.]+) ([\\d.]+)`));
   assert.ok(m, `token ${name} not found as a literal oklch value`);
-  return oklchToOklab(Number(m[1]), Number(m[2]), Number(m[3]));
+  const l = m[2] === "%" ? Number(m[1]) / 100 : Number(m[1]);
+  return oklchToOklab(l, Number(m[3]), Number(m[4]));
 };
 const v1 = css.slice(css.indexOf("Calacot Admin Design System V1"));
 const lightBlock = v1.slice(v1.indexOf(":root {"), v1.indexOf(".dark {"));
@@ -327,6 +332,16 @@ pairs.push(["destructive text on dark card", darkDestructive, darkCard, 4.5]);
 pairs.push(["primary button label (brand black on gold)", brandBlack, gold, 4.5]);
 pairs.push(["admin focus ring on light canvas (non-text)", tokenIn(v1, "--ring"), brandWhite, 3]);
 pairs.push(["gold focus ring on dark canvas (non-text)", gold, brandBlack, 3]);
+// Public site text shades (replacing opacity-based colours) and the brand-tinted muted text.
+const onyx = (step: string) => tokenIn(css, `--color-brand-black-${step}`);
+pairs.push(["brand-black-600 secondary text on brand-white", onyx("600"), brandWhite, 4.5]);
+pairs.push(["brand-black-600 secondary text on white", onyx("600"), white, 4.5]);
+pairs.push(["brand-black-700 text on brand-white", onyx("700"), brandWhite, 4.5]);
+pairs.push(["brand-black-200 secondary text on brand-black", onyx("200"), brandBlack, 4.5]);
+pairs.push(["brand-black-300 tertiary text on brand-black", onyx("300"), brandBlack, 4.5]);
+pairs.push(["brand-black-400 faint text on brand-black", onyx("400"), brandBlack, 4.5]);
+pairs.push(["muted text (dark) on admin dark card", onyx("300"), darkCard, 4.5]);
+pairs.push(["primary-800 eyebrow text on brand-white", tokenIn(css, "--color-brand-primary-800"), brandWhite, 4.5]);
 pairs.push(["light chart primary vs card (graphics, 1.4.11)", tokenIn(lightBlock, "--chart-primary"), white, 3]);
 for (const [name, fg, bg, min] of pairs) {
   check(`${name} >= ${min}:1`, () => {
@@ -337,6 +352,66 @@ for (const [name, fg, bg, min] of pairs) {
 // The existing light --destructive (shadcn) passes on plain cards; tinted badges use --destructive-text.
 const lightDestructiveOnWhite = contrast(lightDestructive, white);
 console.log(`  info destructive text on light card is ${lightDestructiveOnWhite.toFixed(2)}:1`);
+
+// 4b. Public site (brand shades, no off-brand colours) ------------------------------------------
+console.log("Public site");
+const publicRoots = [
+  "components/architecture", "components/painting", "components/real-estate", "components/tech",
+  "components/interior-design", "components/forms", "app/(home)", "app/(real-estate)", "app/(calacot-tech)",
+  "app/contact", "app/schedule-call", "app/start-project", "app/thank-you", "app/list-property",
+  "app/privacy-policy", "app/account", "app/access-pending",
+];
+const publicFiles: string[] = [];
+const walkPublic = (dir: string) => {
+  for (const entry of readdirSync(join(root, dir))) {
+    const rel = join(dir, entry);
+    if (statSync(join(root, rel)).isDirectory()) walkPublic(rel);
+    else if (/\.tsx?$/.test(entry)) publicFiles.push(rel);
+  }
+};
+publicRoots.forEach(walkPublic);
+["footer", "navbar", "hero-section", "possibility-section", "estates-section", "world-view-section", "construction-process-section", "showcase-slider"].forEach((n) => publicFiles.push(`components/${n}.tsx`));
+const offenders = (re: RegExp) => publicFiles.filter((f) => re.test(read(f)));
+check("public pages use brand shades, not opacity, for text", () => {
+  assert.deepEqual(offenders(/\btext-brand-(black|white)\/\d+/), []);
+  assert.deepEqual(offenders(/(?:^|[\s"'`:])text-(?:white|black)(?:\/\d+)?(?=[\s"'`]|$)/m), [], "use text-brand-white / text-brand-black or an onyx shade");
+});
+check("small uppercase labels use the shared eyebrow style", () => {
+  const size = /^(?:text-xs|text-\[(?:9|10|11)px\]|text-\[0\.\d+rem\])$/;
+  const track = /^tracking-(?:\[[^\]]+\]|wide|wider|widest)$/;
+  const handRolled = publicFiles.filter((f) =>
+    [...read(f).matchAll(/className="([^"]*)"/g)].some(([, cls]) => {
+      const t = cls.split(/\s+/).filter((x) => !x.includes(":"));
+      return t.includes("uppercase") && t.some((x) => size.test(x)) && t.some((x) => track.test(x));
+    }),
+  );
+  assert.deepEqual(handRolled, [], "use type-eyebrow");
+});
+check("public pages use no off-brand palette colours or hard-coded hex colours", () => {
+  assert.deepEqual(offenders(/\b(?:bg|text|border|ring|from|to|via|fill|stroke)-(?:amber|emerald|green|red|blue|yellow|orange|sky|rose|zinc|slate|gray|stone|violet|purple|lime|indigo|teal)-\d{2,3}\b|#[0-9a-fA-F]{6}\b/), []);
+});
+const adminFiles: string[] = [];
+const walkAdmin = (dir: string) => {
+  for (const entry of readdirSync(join(root, dir))) {
+    const rel = join(dir, entry);
+    if (statSync(join(root, rel)).isDirectory()) walkAdmin(rel);
+    else if (/\.tsx$/.test(entry)) adminFiles.push(rel);
+  }
+};
+["app/(admin)", "components/admin", "components/finance", "components/sales", "components/feedback", "components/layout"].forEach(walkAdmin);
+check("admin cards and nested panels use the card radius tokens", () => {
+  // Containers only: inputs and selects keep rounded-md because they are controls, not cards.
+  const raw = /<(?:div|section|details|p|li|FieldSet)\b[^>]*className="[^"]*\brounded-(?:md|lg|xl) border(?: bg-(?:card|surface-subtle|muted\/40))?(?: px?-\d)/;
+  assert.deepEqual(adminFiles.filter((f) => raw.test(read(f))), [], "use surface-card or rounded-(--card-radius-inner) border-card-edge bg-card-nested");
+});
+check("toasts only use types the toast system understands", () => {
+  const all = publicFiles.filter((f) => /type: "destructive"/.test(read(f)));
+  assert.deepEqual(all, [], 'use type: "error"');
+});
+check("muted text is a brand shade in both themes", () => {
+  assert.match(css, /--muted-foreground: var\(--color-brand-black-600\)/);
+  assert.match(css, /--muted-foreground: var\(--color-brand-black-300\)/);
+});
 
 // 5. Regression scan --------------------------------------------------------------------------
 console.log("Admin regression scan");
@@ -353,9 +428,9 @@ adminRoots.forEach(walk);
 const count = (re: RegExp) => files.reduce((n, f) => n + (read(f).match(re)?.length ?? 0), 0);
 // Baselines measured when Phase 2 landed (19 Nov 2026). They may only go down as modules migrate.
 const baselines = {
-  "raw Tailwind palette colours": [/\b(?:bg|text|border|ring|fill|stroke)-(?:amber|emerald|green|red|blue|yellow|orange|sky|rose|zinc|slate|gray|neutral|stone|violet|lime)-\d{2,3}/g, 12],
-  "arbitrary font sizes": [/\btext-\[\d+(?:\.\d+)?px\]/g, 9],
-  "native <select> elements": [/<select\b/g, 54],
+  "raw Tailwind palette colours": [/\b(?:bg|text|border|ring|fill|stroke)-(?:amber|emerald|green|red|blue|yellow|orange|sky|rose|zinc|slate|gray|neutral|stone|violet|lime)-\d{2,3}/g, 0],
+  "arbitrary font sizes": [/\btext-\[\d+(?:\.\d+)?px\]/g, 0],
+  "native <select> elements": [/<select\b/g, 0],
 } as const;
 for (const [name, [re, max]] of Object.entries(baselines)) {
   check(`${name}: at most ${max}`, () => {

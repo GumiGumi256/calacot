@@ -190,7 +190,7 @@ export function OurProcess() {
                           : "opacity-35"
                     }`}
                   >
-                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                    <p className="type-eyebrow text-muted-foreground">
                       {step.subtitle}
                     </p>
 

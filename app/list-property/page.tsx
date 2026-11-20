@@ -29,7 +29,7 @@ export default function ListPropertyPage(props: PageProps) {
     <main className="min-h-svh bg-brand-white text-brand-black dark:bg-brand-black dark:text-brand-white">
       <div className="mx-auto max-w-3xl px-6 pb-16 pt-28 md:px-10 md:pb-20 md:pt-32">
         <header className="mb-9">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-brand-black/60 dark:text-brand-white/60">
+          <p className="type-eyebrow text-brand-black-600 dark:text-brand-black-200">
             For owners and developers
           </p>
 
@@ -37,7 +37,7 @@ export default function ListPropertyPage(props: PageProps) {
             Introduce your property.
           </h1>
 
-          <p className="mt-4 max-w-xl text-base leading-7 text-brand-black/65 dark:text-brand-white/65">
+          <p className="mt-4 max-w-xl text-base leading-7 text-brand-black-600 dark:text-brand-black-200">
             Share a few details and our team will contact you to discuss
             listing and selling with Calacot Estates.
           </p>

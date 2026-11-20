@@ -103,11 +103,12 @@ export default function PossibilitySection() {
                 <button
                   key={item.id}
                   id={`tab-${item.id}`}
+                  type="button"
                   role="tab"
                   aria-selected={isActive}
                   aria-controls={`panel-${item.id}`}
                   onClick={() => setActiveIndex(index)}
-                  className={`group flex items-center justify-between border-b border-border py-6 text-left transition-colors ${
+                  className={`group flex items-center justify-between border-b border-border py-6 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none ${
                     isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -160,7 +161,7 @@ export default function PossibilitySection() {
                   </p>
 
                   <div className="mt-8 border-t border-border pt-6">
-                    <p className="mb-3 text-xs font-semibold tracking-wider uppercase text-muted-foreground">
+                    <p className="type-eyebrow mb-3 text-muted-foreground">
                       Core Capabilities
                     </p>
                     <ul className="flex flex-wrap gap-2" aria-label="Capabilities list">

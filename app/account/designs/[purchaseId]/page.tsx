@@ -40,7 +40,7 @@ export default async function DesignPurchasePage({
         ← My designs
       </Link>
       <header className="my-9">
-        <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="type-eyebrow text-muted-foreground">
           Calacot Architecture
         </p>
         <h1 className="mt-3 max-w-3xl text-3xl font-medium tracking-tight sm:text-5xl">
@@ -132,7 +132,7 @@ export default async function DesignPurchasePage({
                   Calacot for help.
                 </p>
               )}
-              <h2 className="mt-9 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              <h2 className="type-eyebrow mt-9 text-muted-foreground">
                 How to pay
               </h2>
               <p className="mt-3 text-2xl font-medium">

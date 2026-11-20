@@ -93,7 +93,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .painting-hero-light {
-  background: linear-gradient(to bottom, #f8f5f0, #ffffff);
+  background: linear-gradient(to bottom, var(--color-brand-primary-50), oklch(1 0 0));
 }
 
 .dark .painting-hero-light {
@@ -110,7 +110,8 @@ h1, h2, h3, h4, h5, h6 {
     --secondary: oklch(0.97 0 0);
     --secondary-foreground: oklch(0.205 0 0);
     --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
+    /* Brand onyx shade instead of neutral grey: on-brand and 6.3:1 on brand-white (was ~4.4:1). */
+    --muted-foreground: var(--color-brand-black-600);
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
@@ -148,7 +149,8 @@ h1, h2, h3, h4, h5, h6 {
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
+    /* Brand onyx shade for secondary text on dark surfaces (about 7.9:1 on brand-black). */
+    --muted-foreground: var(--color-brand-black-300);
     --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
@@ -344,6 +346,10 @@ h1, h2, h3, h4, h5, h6 {
   --elevation-1: 0 1px 2px oklch(0.1941 0.012 285.23 / 0.05), 0 1px 1px oklch(0.1941 0.012 285.23 / 0.03);
   --elevation-2: 0 4px 12px oklch(0.1941 0.012 285.23 / 0.07), 0 1px 3px oklch(0.1941 0.012 285.23 / 0.05);
   --elevation-3: 0 12px 32px oklch(0.1941 0.012 285.23 / 0.12), 0 2px 6px oklch(0.1941 0.012 285.23 / 0.06);
+  /* Card surfaces: a wide, very soft drop plus a hairline edge, so white cards float on the canvas. */
+  --elevation-card: 0 1px 2px oklch(0.1941 0.012 285.23 / 0.03), 0 16px 40px -16px oklch(0.1941 0.012 285.23 / 0.1);
+  --elevation-card-hover: 0 2px 4px oklch(0.1941 0.012 285.23 / 0.04), 0 24px 48px -16px oklch(0.1941 0.012 285.23 / 0.16);
+  --card-edge: color-mix(in oklch, var(--color-brand-black) 6%, transparent);
 
   /* Control geometry. Public defaults equal the previous hard-coded values. */
   --control-h: 2.75rem;
@@ -379,6 +385,9 @@ h1, h2, h3, h4, h5, h6 {
   --elevation-1: 0 1px 2px oklch(0 0 0 / 0.3);
   --elevation-2: 0 4px 12px oklch(0 0 0 / 0.35), 0 1px 3px oklch(0 0 0 / 0.3);
   --elevation-3: 0 12px 32px oklch(0 0 0 / 0.5), 0 2px 6px oklch(0 0 0 / 0.35);
+  --elevation-card: 0 1px 2px oklch(0 0 0 / 0.25), 0 16px 40px -16px oklch(0 0 0 / 0.55);
+  --elevation-card-hover: 0 2px 4px oklch(0 0 0 / 0.3), 0 24px 48px -16px oklch(0 0 0 / 0.7);
+  --card-edge: color-mix(in oklch, white 7%, transparent);
 }
 
 /* Admin surfaces: 60% canvas (background), 30% surfaces (card, sidebar), 10% gold accent. */
@@ -393,6 +402,10 @@ h1, h2, h3, h4, h5, h6 {
   --btn-px-sm: 0.75rem;
   --btn-px: 1rem;
   --btn-px-lg: 1.25rem;
+  /* Card geometry: generous, soft corners. Nested panels and rows step down so corners stay concentric. */
+  --card-radius: 1.75rem;
+  --card-radius-sm: 1.25rem;
+  --card-radius-inner: 1rem;
 }
 @media (pointer: coarse) {
   :root:has([data-surface="admin"]) {
@@ -403,12 +416,19 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 :root:not(.dark):has([data-surface="admin"]) {
+  /* Soft frosted look: cards sit just a shade lighter than the canvas, set apart by a white
+     highlight edge and a diffused shadow; pure white rows/pills nest inside them. */
   --background: var(--color-brand-white);
-  --card: oklch(1 0 0);
+  --card: var(--color-brand-white);
+  --card-nested: oklch(1 0 0);
+  --card-edge: oklch(1 0 0 / 0.85);
+  --elevation-card: inset 0 1px 0 oklch(1 0 0 / 0.9), 0 1px 2px oklch(0.1941 0.012 285.23 / 0.03), 0 16px 40px -16px oklch(0.1941 0.012 285.23 / 0.12);
+  --elevation-card-hover: inset 0 1px 0 oklch(1 0 0 / 0.9), 0 2px 4px oklch(0.1941 0.012 285.23 / 0.04), 0 24px 48px -16px oklch(0.1941 0.012 285.23 / 0.18);
   --popover: oklch(1 0 0);
   --ring: oklch(0.62 0.13 85);
-  --sidebar: color-mix(in oklch, var(--color-brand-white), var(--color-brand-black) 4%);
-  --sidebar-accent: color-mix(in oklch, var(--color-brand-white), var(--color-brand-black) 8%);
+  /* Sidebar and the frame around the content panel: brand lavender. Active item one step deeper. */
+  --sidebar: var(--color-brand-lavender-50);
+  --sidebar-accent: var(--color-brand-lavender-100);
   --sidebar-primary: var(--color-brand-primary);
   --sidebar-primary-foreground: var(--color-brand-black);
 }
@@ -447,6 +467,18 @@ h1, h2, h3, h4, h5, h6 {
   --shadow-e1: var(--elevation-1);
   --shadow-e2: var(--elevation-2);
   --shadow-e3: var(--elevation-3);
+  --color-card-nested: var(--card-nested, var(--surface-subtle));
+  --shadow-card: var(--elevation-card);
+  --shadow-card-hover: var(--elevation-card-hover);
+  --color-card-edge: var(--card-edge);
+}
+
+/* Hand-built admin card surfaces (tables, detail sections) share the Card primitive's look. */
+@utility surface-card {
+  border-radius: var(--card-radius, 0.875rem);
+  border: 1px solid var(--card-edge);
+  background-color: var(--card);
+  box-shadow: var(--elevation-card);
 }
 
 /* Admin type scale. Families are the existing Outfit (--font-heading) and Plus Jakarta Sans (--font-sans). */
@@ -498,4 +530,13 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes table-progress {
   from { transform: translateX(-100%); }
   to { transform: translateX(300%); }
+}
+
+/* Public site: small uppercase label above a heading ("eyebrow"). One size and spacing everywhere. */
+@utility type-eyebrow {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }

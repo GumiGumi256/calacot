@@ -149,7 +149,7 @@ if (isMobile) {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-dvh overflow-hidden bg-black text-white"
+      className="relative min-h-dvh overflow-hidden bg-black text-brand-white"
     >
       {/* Background */}
       <div className="absolute inset-0">
@@ -169,7 +169,7 @@ if (isMobile) {
         {/* Header */}
         <div className="flex items-start justify-between gap-10">
           <div className="max-w-4xl">
-            <h2 className="text-white section-heading">
+            <h2 className="text-brand-white section-heading">
               <span className="block text-[4.5rem] font-light md:text-[8rem]">
                 Steps to your
               </span>
@@ -194,7 +194,7 @@ if (isMobile) {
     border border-white/10
     bg-white/[0.08]
     p-5
-    text-white
+    text-brand-white
     shadow-2xl
     backdrop-blur-2xl
 
@@ -205,7 +205,7 @@ if (isMobile) {
     ${isLeft ? "md:left-[12%]" : "md:left-auto md:right-[12%]"}
   `}
 >
-                <div className="text-6xl font-light leading-none text-white/90">
+                <div className="text-6xl font-light leading-none text-brand-black-50">
                   {step.number}
                 </div>
 
@@ -214,7 +214,7 @@ if (isMobile) {
                     {step.title}
                   </h3>
 
-                  <p className="mt-3 text-base leading-relaxed text-white/70">
+                  <p className="mt-3 text-base leading-relaxed text-brand-black-200">
                     {step.description}
                   </p>
                 </div>

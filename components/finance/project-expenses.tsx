@@ -29,7 +29,7 @@ export function ProjectExpenses({ projectId, expenses, summary, activity }: { pr
         {summary.length ? (
           <dl className="grid gap-3 sm:grid-cols-2">
             {summary.map((s) => (
-              <div key={s.currency} className="rounded-lg border p-3 text-sm">
+              <div key={s.currency} className="rounded-(--card-radius-inner) border border-card-edge bg-card-nested p-3 text-sm">
                 <dt className="font-medium">{s.currency}</dt>
                 <dd className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 tabular-nums">
                   <span className="text-muted-foreground">Pending review</span><span>{formatAmount(s.currency, s.requested)}</span>

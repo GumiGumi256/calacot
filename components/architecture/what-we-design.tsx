@@ -101,7 +101,7 @@ export default function WhatWeDesignSection() {
 
                       <div
                         className={cn(
-                          "flex h-12 w-12 items-center justify-center rounded-full bg-lime-300 text-black transition-all duration-500 md:max-lg:absolute md:max-lg:right-6 md:max-lg:top-6 md:max-lg:size-10",
+                          "flex h-12 w-12 items-center justify-center rounded-full bg-brand-green text-brand-black transition-all duration-500 md:max-lg:absolute md:max-lg:right-6 md:max-lg:top-6 md:max-lg:size-10",
                           isActive
                             ? "translate-y-0 opacity-100"
                             : "translate-y-4 opacity-0"
@@ -113,7 +113,7 @@ export default function WhatWeDesignSection() {
 
                     <p
                       className={cn(
-                        "max-w-sm overflow-hidden text-sm leading-relaxed text-brand-white/75 transition-all duration-700",
+                        "max-w-sm overflow-hidden text-sm leading-relaxed text-brand-black-200 transition-all duration-700",
                         isActive
                           ? "max-h-40 opacity-100"
                           : "max-h-0 opacity-0"
@@ -145,11 +145,11 @@ export default function WhatWeDesignSection() {
               <div className="absolute inset-0 bg-black/45" />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
               <div className="relative flex h-full flex-col justify-end p-6">
-                <h3 className="mb-4 whitespace-pre-line text-4xl font-light uppercase leading-[0.9] text-white md:max-lg:text-3xl md:max-lg:leading-tight">
+                <h3 className="mb-4 whitespace-pre-line text-4xl font-light uppercase leading-[0.9] text-brand-white md:max-lg:text-3xl md:max-lg:leading-tight">
                   {service.title}
                 </h3>
 
-                <p className="mb-6 text-sm leading-relaxed text-white/70">
+                <p className="mb-6 text-sm leading-relaxed text-brand-black-200">
                   {service.description}
                 </p>
 

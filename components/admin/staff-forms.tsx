@@ -1,4 +1,5 @@
 "use client";
+import { UserPlusIcon } from "lucide-react";
 import { useActionState, useState } from "react";
 import { changeStaffRole, inviteStaff, removeStaffMember, revokeInvitation, saveStaffProfile, setEmployeeEligibility, setStaffStatus } from "@/lib/admin/staff-actions";
 import { divisionsList, staffRoles } from "@/lib/admin/roles";
@@ -7,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { NativeSelect } from "@/components/ui/native-select";
 
 const initial = { ok: false, message: "" };
-const selectClass = "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 function Message({ state }: { state: { ok: boolean; message: string } }) {
   return state.message ? <p role={state.ok ? "status" : "alert"} className={state.ok ? "text-sm" : "text-sm text-destructive"}>{state.message}</p> : null;
 }
@@ -27,7 +28,7 @@ export function InviteStaff({ available, actorIsAdmin }: { available: string[]; 
   const [role, setRole] = useState("org:member");
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button />}>Invite staff</DialogTrigger>
+      <DialogTrigger render={<Button />}><UserPlusIcon /> Invite staff</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Invite an employee</DialogTitle>
@@ -39,10 +40,10 @@ export function InviteStaff({ available, actorIsAdmin }: { available: string[]; 
               <Field><FieldLabel htmlFor="invite-email">Work email</FieldLabel><Input id="invite-email" name="email" type="email" required maxLength={254} autoComplete="off" /></Field>
               <Field>
                 <FieldLabel htmlFor="invite-role">Role</FieldLabel>
-                <select id="invite-role" name="role" value={role} onChange={(e) => setRole(e.target.value)} className={selectClass} aria-describedby="invite-role-hint"><RoleOptions available={available} actorIsAdmin={actorIsAdmin} /></select>
+                <NativeSelect wrapperClassName="w-full" id="invite-role" name="role" value={role} onChange={(e) => setRole(e.target.value)} aria-describedby="invite-role-hint"><RoleOptions available={available} actorIsAdmin={actorIsAdmin} /></NativeSelect>
                 <FieldDescription id="invite-role-hint">{staffRoles.find((r) => r.key === role)?.summary} Start with the least access needed.{role === "org:member" ? " Staff/employee members get no access until you approve them on their staff page after they join." : ""}</FieldDescription>
               </Field>
-              <Field><FieldLabel htmlFor="invite-division">Division (optional)</FieldLabel><select id="invite-division" name="division" defaultValue="" className={`${selectClass} capitalize`}><option value="">Not assigned</option>{divisionsList.map((d) => <option key={d} value={d}>{d}</option>)}</select></Field>
+              <Field><FieldLabel htmlFor="invite-division">Division (optional)</FieldLabel><NativeSelect wrapperClassName="w-full" className="capitalize" id="invite-division" name="division" defaultValue=""><option value="">Not assigned</option>{divisionsList.map((d) => <option key={d} value={d}>{d}</option>)}</NativeSelect></Field>
             </FieldGroup>
             <DialogFooter><Button type="submit" disabled={pending}>{pending ? "Sending..." : "Send invitation"}</Button></DialogFooter>
             <Message state={state} />
@@ -72,7 +73,7 @@ export function StaffProfileForm({ staffId, version, division, jobTitle, respons
       <input type="hidden" name="staffId" value={staffId} /><input type="hidden" name="version" value={String(version)} />
       <FieldGroup>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field><FieldLabel htmlFor="profile-division">Division</FieldLabel><select id="profile-division" name="division" defaultValue={division} className={`${selectClass} capitalize`}><option value="">Not assigned</option>{divisionsList.map((d) => <option key={d} value={d}>{d}</option>)}</select></Field>
+          <Field><FieldLabel htmlFor="profile-division">Division</FieldLabel><NativeSelect wrapperClassName="w-full" className="capitalize" id="profile-division" name="division" defaultValue={division}><option value="">Not assigned</option>{divisionsList.map((d) => <option key={d} value={d}>{d}</option>)}</NativeSelect></Field>
           <Field><FieldLabel htmlFor="profile-title">Job title</FieldLabel><Input id="profile-title" name="jobTitle" defaultValue={jobTitle} maxLength={120} /></Field>
         </div>
         <Field><FieldLabel htmlFor="profile-resp">Responsibilities</FieldLabel><Textarea id="profile-resp" name="responsibilities" defaultValue={responsibilities} maxLength={2000} aria-describedby="profile-resp-hint" /><FieldDescription id="profile-resp-hint">For coordination only. Responsibilities never grant system access; the role does.</FieldDescription></Field>
@@ -91,7 +92,7 @@ export function ChangeRole({ userId, current, available, actorIsAdmin }: { userI
       <input type="hidden" name="userId" value={userId} />
       <Field>
         <FieldLabel htmlFor="role-select">Role</FieldLabel>
-        <select id="role-select" name="role" value={role} onChange={(e) => setRole(e.target.value)} className={selectClass} aria-describedby="role-hint"><RoleOptions available={available} actorIsAdmin={actorIsAdmin} /></select>
+        <NativeSelect wrapperClassName="w-full" id="role-select" name="role" value={role} onChange={(e) => setRole(e.target.value)} aria-describedby="role-hint"><RoleOptions available={available} actorIsAdmin={actorIsAdmin} /></NativeSelect>
         <FieldDescription id="role-hint">{staffRoles.find((r) => r.key === role)?.summary}</FieldDescription>
       </Field>
       <Field><FieldLabel htmlFor="role-reason">Reason for the change</FieldLabel><Input id="role-reason" name="reason" required minLength={5} maxLength={1000} /></Field>
