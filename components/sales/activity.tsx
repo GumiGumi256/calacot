@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/feedback/empty-state";
 import { TransitionControls } from "./transition-controls";
 import type { Permission } from "@/lib/sales/permissions";
 import { formatDateTime } from "@/lib/format";
+import { WhatsAppRetry } from "./whatsapp-consent";
 
 /** Audit actions ("quotation.confirm") in plain language; unknown actions are humanised. */
 const actionLabels: Record<string, string> = {
@@ -94,7 +95,7 @@ export function Deliveries({
             </div>
             {!!d.error_code && (
               <p role="note" className="type-body text-destructive-text">
-                Needs attention: {String(d.error_code).replaceAll("_", " ")}
+                {d.error_code === "consent_missing" ? "WhatsApp consent is missing for this phone number. Record the client's permission on their contact before retrying." : `Needs attention: ${String(d.error_code).replaceAll("_", " ")}`}
               </p>
             )}
             <p className="type-caption">
@@ -118,6 +119,7 @@ export function Deliveries({
                 permissions={permissions}
               />
             )}
+            {d.channel === "whatsapp" && d.status === "skipped" && d.error_code === "consent_missing" && permissions.includes("notifications_manage") && <WhatsAppRetry id={String(d.id)} />}
           </div>
         ))}
       </CardContent>

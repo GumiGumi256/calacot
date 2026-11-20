@@ -19,6 +19,7 @@ import { pickers } from "./reads";
 import { headers } from "next/headers";
 import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { expireOrgData } from "@/lib/cache-tags";
+import { liveStaffContext } from "@/lib/admin/clerk-auth";
 const json = (value: unknown) => sql`${JSON.stringify(value)}::jsonb`;
 const messages: Record<string, string> = {
   manager_unavailable: "The selected project manager is unavailable or could not be verified. Refresh staff and try again.",
@@ -56,6 +57,8 @@ const messages: Record<string, string> = {
   payment_unavailable: "Select a payment that belongs to this invoice's client and currency.",
   payment_rejected: "This payment was rejected and cannot be allocated.",
   verification_evidence_required: "Enter the verification evidence before verifying a payment.",
+  whatsapp_contact_changed: "The contact or phone number changed. Refresh and try again.",
+  whatsapp_retry_unavailable: "Unable to retry. Check that this invoice is issued, the original phone has documented consent, and the recipient has not opted out.",
   credit_requires_unallocated_balance:
     "Credit amount exceeds the unallocated balance, or this invoice requires a refund process.",
 };
@@ -292,6 +295,57 @@ export async function deliveryCommand(input: unknown) {
       sql`SELECT sales_delivery_command(${ctx.organizationId},${ctx.actor},${p.id}::uuid,${p.command},${json(p)},${c}) AS result`,
     );
     return r.rows[0].result;
+  });
+}
+/** Record documented permission for this exact phone number; never infer customer consent. */
+export async function updateWhatsAppConsent(input: unknown) {
+  return mutation("clients_write", async (session, correlation) => {
+    const ctx = await liveStaffContext("clients_write");
+    if (ctx.organizationId !== session.organizationId || ctx.actor !== session.actor) throw new Error("Access changed");
+    const p = z.object({ clientId: z.uuid(), contactId: z.uuid(), phone: z.string().regex(/^\+[1-9]\d{7,14}$/), granted: z.boolean(), evidence: z.string().trim().min(10).max(1000) }).parse(input);
+    const r = await db.execute(sql`WITH changed AS (
+      UPDATE client_contacts SET whatsapp_consent_at=CASE WHEN ${p.granted} THEN now() ELSE NULL END,
+        whatsapp_consent_source=CASE WHEN ${p.granted} THEN ${p.evidence} ELSE NULL END,updated_at=now()
+      WHERE organization_id=${ctx.organizationId} AND client_id=${p.clientId}::uuid AND id=${p.contactId}::uuid AND phone=${p.phone}
+      RETURNING id,client_id
+    ), audit AS (
+      INSERT INTO audit_logs(organization_id,actor_clerk_user_id,actor_type,action,entity_type,entity_id,changes,request_id)
+      SELECT ${ctx.organizationId},${ctx.actor},'staff',${p.granted ? "client.whatsapp_consent_granted" : "client.whatsapp_consent_revoked"},'client',client_id::text,
+        jsonb_build_object('contactId',id,'phone',${p.phone},'evidence',${p.evidence}),${correlation} FROM changed RETURNING id
+    ) SELECT id FROM changed`);
+    if (!r.rows.length) throw new Error("whatsapp_contact_changed");
+    return p.contactId;
+  });
+}
+
+/** Requeue only a message known never to have been sent, after consent is recorded. */
+export async function retryWhatsAppAfterConsent(id: string) {
+  return mutation("notifications_manage", async (session, correlation) => {
+    const ctx = await liveStaffContext("notifications_manage");
+    if (ctx.organizationId !== session.organizationId || ctx.actor !== session.actor) throw new Error("Access changed");
+    z.uuid().parse(id);
+    const r = await db.execute(sql`WITH eligible AS (
+      SELECT d.id,d.entity_id,cc.whatsapp_consent_at,cc.whatsapp_consent_source
+      FROM delivery_intents d JOIN invoices i ON i.id=d.entity_id AND i.organization_id=d.organization_id AND i.status='issued'
+      JOIN quotation_versions v ON v.id=i.quotation_version_id AND v.organization_id=i.organization_id
+      JOIN client_contacts cc ON cc.id=v.delivery_contact_id AND cc.client_id=i.client_id AND cc.organization_id=i.organization_id AND cc.phone=d.recipient
+      WHERE d.id=${id}::uuid AND d.organization_id=${ctx.organizationId} AND d.channel='whatsapp' AND d.entity_type='invoice'
+        AND d.status='skipped' AND d.error_code='consent_missing' AND d.provider_id IS NULL AND d.first_attempt_at IS NULL
+        AND cc.whatsapp_consent_at IS NOT NULL AND nullif(trim(cc.whatsapp_consent_source),'') IS NOT NULL
+        AND NOT EXISTS(SELECT 1 FROM whatsapp_contacts w WHERE w.phone=regexp_replace(d.recipient,'^\\+','') AND w.opted_out_at IS NOT NULL)
+      FOR UPDATE OF d,cc
+    ), requeued AS (
+      UPDATE automation_outbox o SET status='pending',attempts=0,available_at=now(),completed_at=NULL,locked_at=NULL,locked_by=NULL,lease_expires_at=NULL,last_error_code=NULL,updated_at=now()
+      FROM eligible e WHERE o.organization_id=${ctx.organizationId} AND o.event_type='sales.delivery' AND o.payload->>'intentId'=e.id::text AND o.status='completed' RETURNING e.*
+    ), changed AS (
+      UPDATE delivery_intents d SET status='queued',error_code=NULL,payload=d.payload||jsonb_build_object('consentAt',r.whatsapp_consent_at,'consentSource',r.whatsapp_consent_source),updated_at=now()
+      FROM requeued r WHERE d.id=r.id AND d.organization_id=${ctx.organizationId} RETURNING d.id,d.entity_id
+    ), audit AS (
+      INSERT INTO audit_logs(organization_id,actor_clerk_user_id,actor_type,action,entity_type,entity_id,changes,request_id)
+      SELECT ${ctx.organizationId},${ctx.actor},'staff','delivery.retry_after_consent','invoice',entity_id::text,jsonb_build_object('intentId',id),${correlation} FROM changed RETURNING id
+    ) SELECT id FROM changed`);
+    if (!r.rows.length) throw new Error("whatsapp_retry_unavailable");
+    return id;
   });
 }
 export async function paymentCommand(input: unknown) {

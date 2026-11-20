@@ -6,6 +6,7 @@ import type { z } from "zod";
 import { ClientForm } from "@/components/sales/client-form";
 import { TransitionControls } from "@/components/sales/transition-controls";
 import { Activity } from "@/components/sales/activity";
+import { WhatsAppConsent } from "@/components/sales/whatsapp-consent";
 import {
   Card,
   CardHeader,
@@ -75,6 +76,7 @@ export default async function Page({
                 {String(contact.name)} · {String(contact.email || "")} ·{" "}
                 {String(contact.phone || "")}
                 {contact.is_primary ? " · Primary" : ""}
+                {d.permissions.includes("clients_write") && <WhatsAppConsent clientId={id} contactId={String(contact.id)} phone={String(contact.phone || "")} hasConsent={!!contact.whatsapp_consent_at && !!contact.whatsapp_consent_source} />}
               </li>
             ))}
           </ul>

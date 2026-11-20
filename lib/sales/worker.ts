@@ -102,11 +102,17 @@ async function attempt(job: SalesJob, d: Intent) {
   )
     throw new DeliveryFailure("staging_recipient_not_allowed", true);
   if (d.channel === "whatsapp") {
+    const consent = await db.execute<{ whatsapp_consent_at: string | null; whatsapp_consent_source: string | null }>(
+      sql`SELECT cc.whatsapp_consent_at,cc.whatsapp_consent_source FROM invoices i
+        JOIN quotation_versions v ON v.id=i.quotation_version_id AND v.organization_id=i.organization_id
+        JOIN client_contacts cc ON cc.id=v.delivery_contact_id AND cc.client_id=i.client_id AND cc.organization_id=i.organization_id
+        WHERE i.organization_id=${d.organization_id} AND i.id=${d.entity_id}::uuid AND i.status='issued' AND cc.phone=${d.recipient} LIMIT 1`,
+    );
     const contact = await db.execute<{ opted_out_at: string | null }>(
       sql`SELECT opted_out_at FROM whatsapp_contacts WHERE phone=${d.recipient.replace(/^\+/, "")}`,
     );
     const reason = whatsappEligible(
-      { recipient: d.recipient, ...d.payload },
+      { recipient: d.recipient, ...d.payload, consentAt: consent.rows[0]?.whatsapp_consent_at, consentSource: consent.rows[0]?.whatsapp_consent_source },
       !!contact.rows[0]?.opted_out_at,
     );
     if (reason) return finish(job, d, "skipped", reason);
