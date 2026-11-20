@@ -35,8 +35,15 @@ export async function POST(request: Request) {
   const secret = process.env.CALACOT_VERIFICATION_RATE_SECRET;
   const ip = process.env.CALACOT_VERIFICATION_TRUST_VERCEL === "true" && process.env.VERCEL === "1" ? request.headers.get("x-real-ip")
     : process.env.CALACOT_VERIFICATION_TRUST_CLOUDFLARE === "true" ? request.headers.get("cf-connecting-ip") : null;
-  if (process.env.CALACOT_VERIFICATION_ENABLED !== "true" || !secret || secret.length < 32 || !ip || !isIP(ip))
+  const misconfigured = process.env.CALACOT_VERIFICATION_ENABLED !== "true" ? "enabled_flag"
+    : !secret || secret.length < 32 ? "rate_secret"
+    : !ip ? (process.env.CALACOT_VERIFICATION_TRUST_VERCEL === "true" && process.env.VERCEL !== "1" ? "not_on_vercel" : "client_ip_header")
+    : !isIP(ip) ? "client_ip_format" : null;
+  if (misconfigured || !secret || !ip) {
+    // Names the failing check only; never logs values or the client IP.
+    console.warn("[verification] unavailable:", misconfigured);
     return response({ error: "unavailable" }, 503);
+  }
   try {
     const key = "verification/ip/" + createHmac("sha256", secret).update(ip).digest("hex");
     const counts = await db.execute<{ key: string; count: number }>(sql`
@@ -72,7 +79,8 @@ export async function POST(request: Request) {
     }
     return response({ found: true, type: record.document_type, number: record.document_number, issuer: record.issuer_name, issuedAt: record.issued_at, status,
       integrity: fileDigest ? (matchesDigest(fileDigest, record.pdf_sha256) ? "match" : "mismatch") : "not_checked" });
-  } catch {
+  } catch (error) {
+    console.error("[verification] lookup failed:", error instanceof Error ? error.message.slice(0, 200) : "unknown");
     return response({ error: "unavailable" }, 503);
   }
 }
