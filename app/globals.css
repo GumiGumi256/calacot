@@ -17,7 +17,10 @@ h1, h2, h3, h4, h5, h6 {
 --color-brand-white: oklch(0.9741 0.008 278.64);
 --color-brand-black:oklch(0.1941 0.012 285.23);
 --color-brand-green: oklch(0.8803 0.2765 138.82);
---color-brand-accent: oklch(0.4778 0.1433 40.83)
+--color-brand-accent: oklch(0.4778 0.1433 40.83);
+--color-brand-lavender: oklch(59.7% 0.145 302.1);
+--color-brand-grey-olive: oklch(63.8% 0.029 152.1)
+
 }
 
 .painting-hero-light {
