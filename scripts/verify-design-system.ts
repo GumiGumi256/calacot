@@ -70,7 +70,23 @@ const salesStatuses = (key: string) => {
 const taskEnum = [...(read("database/schema/tasks.ts").match(/enum: \[([^\]]*)\]/)?.[1] ?? "").matchAll(/"([a-z_]+)"/g)].map((x) => x[1]);
 const purchaseStatuses = [...(read("lib/design-purchases/model.ts").match(/purchaseStatuses = \[([^\]]*)\]/)?.[1] ?? "").matchAll(/"([a-z_]+)"/g)].map((x) => x[1]);
 const invoicePayment = [...(entityList.match(/invoicePaymentStates = \[[^\]]*\]/)?.[0] ?? "").matchAll(/"([a-z_]+)"/g)].map((x) => x[1]);
+// Phase 2A accounting statuses come straight from the migration's CHECK constraints.
+const accountingSql = read("drizzle-current/0018_accounting_foundation.sql") + read("drizzle-current/0019_accounting_integration.sql");
+const checkValues = (table: string, column = "status") => {
+  const body = accountingSql.slice(accountingSql.indexOf(`CREATE TABLE ${table} (`));
+  return [...(body.match(new RegExp(`${column} text NOT NULL[^,]*CHECK \\(${column} IN \\(([^)]*)\\)\\)`))?.[1] ?? "").matchAll(/'([a-z_]+)'/g)].map((x) => x[1]);
+};
+// Reconciliation outcomes come from accounting_integration_reconciliation() in 0019.
+const reconciliationStatuses = [...(accountingSql.match(/status := CASE WHEN op = led THEN '([a-z]+)' WHEN op - led = unp THEN '([a-z]+)' ELSE '([a-z]+)' END/) ?? []).slice(1)];
 const sources: Record<keyof typeof statusRegistry, readonly string[]> = {
+  journal: checkValues("accounting_journals"),
+  account: checkValues("accounting_accounts"),
+  period: checkValues("accounting_periods"),
+  accountingProposal: [...new Set([...checkValues("accounting_policy_versions"), ...checkValues("accounting_exchange_rates"), ...checkValues("accounting_posting_rules"),
+    ...checkValues("accounting_integration_settings"), ...checkValues("accounting_event_mappings")])],
+  integrationEvent: checkValues("accounting_integration_events"),
+  integrationStage: checkValues("accounting_integration_settings", "stage"),
+  reconciliation: reconciliationStatuses,
   lead: leadStatuses,
   payment: paymentStatuses,
   expense: expenseStatuses,

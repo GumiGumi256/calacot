@@ -13,7 +13,13 @@ const detailLabels: Record<string, string> = {
   "design-purchases": "Design order",
   payments: "Payment",
 };
-const actionLabels: Record<string, string> = { new: "New", edit: "Edit", knowledge: "Knowledge" };
+const actionLabels: Record<string, string> = {
+  new: "New", edit: "Edit", knowledge: "Knowledge",
+  accounts: "Chart of accounts", journals: "Journals", periods: "Periods", "trial-balance": "Trial balance", policy: "Policy and rates",
+  integration: "Integration", mappings: "Event mappings", reconciliation: "Reconciliation",
+};
+/** Third-level detail pages, e.g. /admin/accounting/journals/<id> -> "Journal". */
+const nestedDetailLabels: Record<string, string> = { journals: "Journal", accounts: "Account", integration: "Accounting event" };
 
 export type Crumb = { label: string; href: string };
 
@@ -42,7 +48,8 @@ export function adminBreadcrumbs(pathname: string): Crumb[] {
       crumbs.push({ label: item?.name ?? humanize(segment), href: path });
       return;
     }
-    const label = actionLabels[segment] ?? (index === 1 ? detailLabels[segments[0]] ?? "Details" : humanize(segment));
+    const label = actionLabels[segment]
+      ?? (index === 1 ? detailLabels[segments[0]] ?? "Details" : index === 2 && nestedDetailLabels[segments[1]] ? nestedDetailLabels[segments[1]] : humanize(segment));
     crumbs.push({ label, href: path });
   });
   return crumbs;

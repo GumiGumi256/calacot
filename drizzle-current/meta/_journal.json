@@ -127,6 +127,20 @@
       "when": 1795400000000,
       "tag": "0017_document_verification",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1795500000000,
+      "tag": "0018_accounting_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1795600000000,
+      "tag": "0019_accounting_integration",
+      "breakpoints": true
     }
   ]
 }

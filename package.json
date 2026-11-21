@@ -26,7 +26,9 @@
     "test:org-routing": "node scripts/verify-org-routing.mjs",
     "test:design-system": "tsx scripts/verify-design-system.ts",
     "test:seo": "tsx scripts/verify-seo.ts",
-    "test:verification": "node scripts/verify-document-verification-crypto.mjs && node scripts/verify-document-verification-db.mjs && node scripts/verify-document-verification-route.mjs && node scripts/verify-document-verification-actions.mjs && node scripts/verify-document-verification-artifacts.mjs"
+    "test:accounting": "tsx scripts/verify-accounting-engine.mts && tsx scripts/verify-accounting-db.mts && node scripts/verify-accounting-actions.mjs",
+    "test:accounting:integration": "tsx scripts/verify-accounting-integration-engine.mts && tsx scripts/verify-accounting-integration-db.mts && node scripts/verify-accounting-integration-actions.mjs",
+    "test:verification":"node scripts/verify-document-verification-crypto.mjs && node scripts/verify-document-verification-db.mjs && node scripts/verify-document-verification-route.mjs && node scripts/verify-document-verification-actions.mjs && node scripts/verify-document-verification-artifacts.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

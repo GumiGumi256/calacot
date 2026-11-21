@@ -12,6 +12,7 @@ export const navigation: NavigationItem[] = [
   { name: "Invoices", url: "/admin/invoices", group: "finance", permission: "invoices_read" },
   { name: "Payments", url: "/admin/payments", group: "finance", permission: "payments_read" },
   { name: "Expenses", url: "/admin/expenses", group: "finance", anyPermission: ["expenses_read", "expenses_create"] },
+  { name: "Accounting", url: "/admin/accounting", group: "finance", permission: "accounting_read" },
   { name: "Financial reports", url: "/admin/financial-reports", group: "finance", permission: "finance_reports" },
   { name: "Payment accounts", url: "/admin/payment-accounts", group: "finance", permission: "finance_accounts_manage" },
   { name: "Projects", url: "/admin/projects", group: "operations", permission: "projects_read" },

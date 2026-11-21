@@ -55,6 +55,24 @@ export const permissions = [
   "catalogue_read",
   "catalogue_manage",
   "quotation_price_override",
+  // Phase 2A accounting. Record-level rules (balance, no self-approval, closed periods,
+  // immutability) are enforced in drizzle-current/0018_accounting_foundation.sql. Approval,
+  // reversal, period closing/reopening and policy approval are administrator-only by default;
+  // delegate them to the company accountant with org:calacot:<permission> in Clerk.
+  "accounting_read",
+  "accounting_manage",
+  "accounting_journal_prepare",
+  "accounting_journal_post",
+  "accounting_journal_approve",
+  "accounting_journal_reverse",
+  "accounting_period_close",
+  "accounting_period_reopen",
+  "accounting_policy_approve",
+  // Phase 2B accounting integration. Operating the source-to-ledger queue (process, retry,
+  // re-date into an open period, backfill) is Admin and Finance. Proposing rollout settings and
+  // event mappings uses accounting_manage; approving them uses accounting_policy_approve. Every
+  // record-level rule is enforced in drizzle-current/0019_accounting_integration.sql.
+  "accounting_integration_operate",
 ] as const;
 export type Permission = (typeof permissions)[number];
 export function roleAllows(role: string | null | undefined, p: Permission) {
@@ -94,6 +112,11 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
       "finance_reports",
       "documents_read",
       "documents_write",
+      "accounting_read",
+      "accounting_manage",
+      "accounting_journal_prepare",
+      "accounting_journal_post",
+      "accounting_integration_operate",
     ],
     "org:viewer": [
       "clients_read",
@@ -105,6 +128,7 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
       "payments_read",
       "expenses_read",
       "documents_read",
+      "accounting_read",
     ],
     // Phase 1E. org:project_manager must exist in Clerk before it can be assigned.
     "org:project_manager": [
@@ -134,6 +158,9 @@ export const sensitivePermissions: ReadonlySet<Permission> = new Set<Permission>
   "documents_read", "documents_write", "documents_archive",
   "verification_issue", "verification_revoke",
   "catalogue_manage", "quotation_price_override",
+  "accounting_read", "accounting_manage", "accounting_journal_prepare", "accounting_journal_post", "accounting_journal_approve",
+  "accounting_journal_reverse", "accounting_period_close", "accounting_period_reopen", "accounting_policy_approve",
+  "accounting_integration_operate",
 ]);
 
 type LocalAccess = { status: string; eligibility: string } | null;
