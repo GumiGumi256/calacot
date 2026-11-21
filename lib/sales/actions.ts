@@ -20,6 +20,7 @@ import { headers } from "next/headers";
 import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { expireOrgData } from "@/lib/cache-tags";
 import { liveStaffContext } from "@/lib/admin/clerk-auth";
+import { whatsAppConsentSchema, whatsAppConsentStatement } from "./whatsapp-consent";
 const json = (value: unknown) => sql`${JSON.stringify(value)}::jsonb`;
 const messages: Record<string, string> = {
   manager_unavailable: "The selected project manager is unavailable or could not be verified. Refresh staff and try again.",
@@ -302,17 +303,8 @@ export async function updateWhatsAppConsent(input: unknown) {
   return mutation("clients_write", async (session, correlation) => {
     const ctx = await liveStaffContext("clients_write");
     if (ctx.organizationId !== session.organizationId || ctx.actor !== session.actor) throw new Error("Access changed");
-    const p = z.object({ clientId: z.uuid(), contactId: z.uuid(), phone: z.string().regex(/^\+[1-9]\d{7,14}$/), granted: z.boolean(), evidence: z.string().trim().min(10).max(1000) }).parse(input);
-    const r = await db.execute(sql`WITH changed AS (
-      UPDATE client_contacts SET whatsapp_consent_at=CASE WHEN ${p.granted} THEN now() ELSE NULL END,
-        whatsapp_consent_source=CASE WHEN ${p.granted} THEN ${p.evidence} ELSE NULL END,updated_at=now()
-      WHERE organization_id=${ctx.organizationId} AND client_id=${p.clientId}::uuid AND id=${p.contactId}::uuid AND phone=${p.phone}
-      RETURNING id,client_id
-    ), audit AS (
-      INSERT INTO audit_logs(organization_id,actor_clerk_user_id,actor_type,action,entity_type,entity_id,changes,request_id)
-      SELECT ${ctx.organizationId},${ctx.actor},'staff',${p.granted ? "client.whatsapp_consent_granted" : "client.whatsapp_consent_revoked"},'client',client_id::text,
-        jsonb_build_object('contactId',id,'phone',${p.phone},'evidence',${p.evidence}),${correlation} FROM changed RETURNING id
-    ) SELECT id FROM changed`);
+    const p = whatsAppConsentSchema.parse(input);
+    const r = await db.execute(whatsAppConsentStatement(ctx, p, correlation));
     if (!r.rows.length) throw new Error("whatsapp_contact_changed");
     return p.contactId;
   });

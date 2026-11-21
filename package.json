@@ -17,6 +17,7 @@
     "customer-care:diagnose": "tsx scripts/diagnose-customer-care.ts",
     "test:sales": "node scripts/test-sales-worker-bundle.mjs && tsx scripts/verify-sales.ts && tsx scripts/verify-sales-resume.ts",
     "test:sales:postgres": "tsx scripts/verify-sales-postgres.ts",
+    "test:whatsapp-consent": "tsx scripts/verify-whatsapp-consent-db.ts",
     "sales:worker": "tsx scripts/sales-worker.ts",
     "sales:migrate": "tsx scripts/migrate-sales.ts",
     "sales:diagnose": "tsx scripts/diagnose-sales-schema.ts",
