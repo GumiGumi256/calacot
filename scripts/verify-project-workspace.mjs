@@ -6,8 +6,8 @@ import { resolve } from "node:path";
 import { PgDialect } from "drizzle-orm/pg-core";
 const calls = globalThis.__projectWorkspaceTest = [];
 const result = await build({entryPoints:["lib/projects/workspace.ts"],bundle:true,platform:"node",format:"cjs",write:false,packages:"external",plugins:[{name:"fixture",setup(b){
-  b.onResolve({filter:/^(server-only|@\/database\/db)$/},({path})=>({path,namespace:"fixture"}));
-  b.onLoad({filter:/.*/,namespace:"fixture"},({path})=>({loader:"js",contents:path==="server-only"?"":"export const db={async execute(q){globalThis.__projectWorkspaceTest.push(q);return {rows:[]}}};"}));
+  b.onResolve({filter:/^(server-only|next\/cache|@\/database\/db)$/},({path})=>({path,namespace:"fixture"}));
+  b.onLoad({filter:/.*/,namespace:"fixture"},({path})=>({loader:"js",contents:path==="server-only"?"":path==="next/cache"?"export function cacheLife(){} export function cacheTag(){} export function revalidateTag(){} export function updateTag(){} export function revalidatePath(){}":"export const db={async execute(q){globalThis.__projectWorkspaceTest.push(q);return {rows:[]}}};"}));
 }}]});
 const file=resolve("tmp/phase1c-workspace-test.cjs");await writeFile(file,result.outputFiles[0].contents);
 const {readProjectWorkspace}=createRequire(import.meta.url)(file);const dialect=new PgDialect();
