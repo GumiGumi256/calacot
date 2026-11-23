@@ -69,13 +69,16 @@ export async function documentLink(
   jobId: string,
 ) {
   const artifact = await finalArtifact(org, entity, id, snapshot);
-  return artifactShare(
+  const url = await artifactShare(
     org,
     artifact.id,
     jobId,
     new Date().toISOString(),
     snapshot.customer.email,
   );
+  // Client-facing invoice pages provide a preview and an optional PDF download.
+  // Quotations retain their existing download link.
+  return entity === "invoice" ? url.replace("/api/sales/share/", "/shared/") : url;
 }
 export async function invoices(org: string, user: string, outstanding = false) {
   return (

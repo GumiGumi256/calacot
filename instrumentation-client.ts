@@ -3,12 +3,16 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import { containsSharedDocumentUrl } from "./lib/sales/share-privacy";
 
 Sentry.init({
+  beforeSend: (event) => containsSharedDocumentUrl(event) ? null : event,
+  beforeSendTransaction: (event) => containsSharedDocumentUrl(event) ? null : event,
+  beforeBreadcrumb: (breadcrumb) => containsSharedDocumentUrl(breadcrumb) ? null : breadcrumb,
   dsn: "https://053c6cea05fbb7fa72bae2132a0d9cf4@o4512210964316160.ingest.de.sentry.io/4512210971459664",
 
   // Add optional integrations for additional features
-  integrations: [Sentry.replayIntegration()],
+  integrations: typeof window !== "undefined" && window.location.pathname.startsWith("/shared/") ? [] : [Sentry.replayIntegration()],
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,

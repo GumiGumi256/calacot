@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { statusRegistry } from "@/lib/ui/status";
 import { formatDate, formatMoney } from "@/lib/format";
 import type { PaymentRow } from "@/lib/admin/reads";
+import { ShareDocument } from "@/components/sales/share-document";
 
 const methodLabels: Record<string, string> = { mobile_money: "Mobile money", bank_transfer: "Bank transfer", cash: "Cash", other: "Other" };
 
@@ -24,6 +25,7 @@ export function PaymentsTable({
   summary,
   canSeeClients,
   canSeeInvoices,
+  canShareReceipts,
 }: {
   rows: PaymentRow[];
   total: number;
@@ -32,6 +34,7 @@ export function PaymentsTable({
   summary: { currency: string; status: string; total: string }[];
   canSeeClients: boolean;
   canSeeInvoices: boolean;
+  canShareReceipts: boolean;
 }) {
   const invoiceLinks = (row: PaymentRow) =>
     row.invoices.length === 0 ? (
@@ -52,6 +55,7 @@ export function PaymentsTable({
     );
 
   const columns: DataColumn<PaymentRow>[] = [
+    { id: "share", label: "Share receipt", mobile: "meta", cell: (row) => canShareReceipts && row.status === "confirmed" && row.receipt_number ? <ShareDocument kind="receipt" id={row.id} /> : null },
     {
       id: "receipt",
       label: "Receipt",
@@ -112,6 +116,7 @@ export function PaymentsTable({
   ];
 
   const rowActions = (row: PaymentRow): RowAction[] => [
+    ...(row.status === "confirmed" && row.receipt_number ? [{ label: "Download receipt", href: `/api/sales/payments/${row.id}/receipt`, icon: <ReceiptIcon /> }] : []),
     ...(canSeeInvoices
       ? row.invoices.map((invoice) => ({
           label: row.status === "submitted" ? `Verify on invoice ${invoice.number ?? ""}`.trim() : `Open invoice ${invoice.number ?? ""}`.trim(),

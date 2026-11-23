@@ -20,6 +20,9 @@ export function salesConfig() {
     template: process.env.WHATSAPP_PROJECT_CONFIRMATION_TEMPLATE || "",
     language: process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en",
     templateApproved: process.env.WHATSAPP_PROJECT_TEMPLATE_APPROVED === "true",
+    invoiceLinkApproved: process.env.WHATSAPP_PROJECT_LINK_BUTTON_APPROVED === "true",
+    receiptTemplate: process.env.WHATSAPP_RECEIPT_TEMPLATE || "",
+    receiptTemplateApproved: process.env.WHATSAPP_RECEIPT_TEMPLATE_APPROVED === "true",
     allowlist: (process.env.SALES_SEND_ALLOWLIST || "")
       .split(",")
       .map((s) => s.trim().toLowerCase())

@@ -32,6 +32,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
         summary={data.summary}
         canSeeClients={data.canSeeClients}
         canSeeInvoices={data.canSeeInvoices}
+        canShareReceipts={data.canShareReceipts}
       />
     </PageContainer>
   );

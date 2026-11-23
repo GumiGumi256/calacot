@@ -7,11 +7,12 @@ import { formatDateTime, formatMoney } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 import { TextField, ChoiceField, FormMessage } from "./form-controls";
+import { ShareDocument } from "./share-document";
 
 type Payment = Record<string, unknown>;
 
-export function PaymentForm({ invoiceId, payments, currency, balance }: {
-  invoiceId: string; payments: Payment[]; currency: string; balance: string;
+export function PaymentForm({ invoiceId, payments, currency, balance, canDownloadReceipts }: {
+  invoiceId: string; payments: Payment[]; currency: string; balance: string; canDownloadReceipts: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -76,6 +77,8 @@ export function PaymentForm({ invoiceId, payments, currency, balance }: {
         <ul className="divide-y rounded-lg border">{applied.map((p) => <li key={String(p.id)} className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm">
           <span><span className="font-medium">{String(p.reference)}</span><span className="block text-muted-foreground">{p.receipt_number ? `Receipt ${p.receipt_number} · ` : ""}{formatDateTime(String(p.received_at))}</span></span>
           <span className="font-medium tabular-nums">{formatMoney(currency, String(p.applied_here))} applied</span>
+          {canDownloadReceipts && p.status === "confirmed" && !!p.receipt_number && <a className="underline underline-offset-4" href={`/api/sales/payments/${p.id}/receipt`}>Download receipt</a>}
+          {canDownloadReceipts && p.status === "confirmed" && !!p.receipt_number && <ShareDocument kind="receipt" id={String(p.id)} />}
         </li>)}</ul>
       </div>}
       <div className="flex flex-wrap gap-2" aria-label="Payment steps">

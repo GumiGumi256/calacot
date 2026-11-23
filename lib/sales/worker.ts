@@ -1,5 +1,5 @@
 import "server-only";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { sql } from "drizzle-orm";
 import type { CreateEmailOptions } from "resend";
@@ -13,6 +13,9 @@ import { salesConfig } from "./config";
 import { backoff, recoveryDecision, whatsappEligible } from "./worker-policy";
 import type { DocumentSnapshot } from "./document-model";
 import { renderNotificationTemplate } from "@/lib/email/template";
+import { receiptDeliveryArtifact, shareOrigin } from "./shared-documents";
+import { z } from "zod";
+import type { TemplateComponent } from "@/lib/whatsapp/types";
 export type SalesJob = {
   id: string;
   organization_id: string;
@@ -75,6 +78,8 @@ async function finish(
 }
 async function attempt(job: SalesJob, d: Intent) {
   const cfg = salesConfig();
+  const isReceipt = d.channel === "whatsapp" && d.payload.notificationKind === "payment-receipt";
+  let whatsappPayload: { name: string; language: string; components: TemplateComponent[] } | undefined;
   if (
     [
       "provider_accepted",
@@ -112,23 +117,39 @@ async function attempt(job: SalesJob, d: Intent) {
       sql`SELECT opted_out_at FROM whatsapp_contacts WHERE phone=${d.recipient.replace(/^\+/, "")}`,
     );
     const reason = whatsappEligible(
-      { recipient: d.recipient, ...d.payload, consentAt: consent.rows[0]?.whatsapp_consent_at, consentSource: consent.rows[0]?.whatsapp_consent_source },
+      { recipient: d.recipient, ...d.payload, ...(isReceipt ? { template: cfg.receiptTemplate, approved: cfg.receiptTemplateApproved } : {}), consentAt: consent.rows[0]?.whatsapp_consent_at, consentSource: consent.rows[0]?.whatsapp_consent_source },
       !!contact.rows[0]?.opted_out_at,
     );
     if (reason) return finish(job, d, "skipped", reason);
     const liveTemplate = salesConfig();
-    if (
-      !liveTemplate.templateApproved ||
-      liveTemplate.template !== d.payload.template
-    )
+    if (isReceipt ? (!liveTemplate.receiptTemplateApproved || !liveTemplate.receiptTemplate) : (!liveTemplate.templateApproved || !liveTemplate.invoiceLinkApproved || liveTemplate.template !== d.payload.template))
       throw new DeliveryFailure("approved_template_missing", true);
     if (cfg.mode !== "capture") getWhatsAppConfig();
+    if (new Date(String(d.created_at)).getTime() + 30 * 86400000 <= Date.now()) throw new DeliveryFailure("document_link_expired", true);
+    let documentId: string;
+    if (isReceipt) {
+      const paymentId = z.uuid().parse(d.payload.paymentId);
+      const allocation = await db.execute(sql`SELECT 1 FROM payment_allocations WHERE organization_id=${d.organization_id} AND invoice_id=${d.entity_id}::uuid AND payment_id=${paymentId}::uuid`);
+      if (!allocation.rows.length) throw new DeliveryFailure("document_unavailable", true);
+      documentId = await receiptDeliveryArtifact(d.organization_id, paymentId, d.id);
+    } else {
+      const invoice = (await db.execute<{ document_snapshot: DocumentSnapshot | null }>(sql`SELECT document_snapshot FROM invoices WHERE organization_id=${d.organization_id} AND id=${d.entity_id}::uuid AND status='issued'`)).rows[0];
+      if (!invoice?.document_snapshot) throw new DeliveryFailure("document_unavailable", true);
+      documentId = (await finalArtifact(d.organization_id, "invoice", d.entity_id, invoice.document_snapshot)).id;
+    }
+    const url = new URL(await artifactShare(d.organization_id, documentId, d.id, String(d.created_at), ""));
+    if (url.origin !== shareOrigin() || !/^\/api\/sales\/share\/[a-f0-9]{64}$/.test(url.pathname)) throw new DeliveryFailure("document_link_configuration", true);
+    const token = url.pathname.split("/").pop()!;
+    const activeShare = await db.execute(sql`SELECT 1 FROM document_shares WHERE organization_id=${d.organization_id} AND document_id=${documentId}::uuid AND token_hash=${createHash("sha256").update(token).digest("hex")} AND revoked_at IS NULL AND expires_at>now()`);
+    if (!activeShare.rows.length) throw new DeliveryFailure("document_link_expired_or_revoked", true);
+    const body = isReceipt ? [d.payload.client, d.payload.receipt, d.payload.invoice, `${d.payload.currency} ${d.payload.amount}`] : [d.payload.client, d.payload.project, d.payload.quotation, d.payload.invoice];
+    whatsappPayload = { name: isReceipt ? cfg.receiptTemplate : String(d.payload.template), language: isReceipt ? cfg.language : String(d.payload.language), components: [{ type: "body", parameters: body.map((v) => ({ type: "text", text: String(v) })) }, { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: token }] }] };
     const w = await db.execute<{
       id: string;
       status: string | null;
       wamid: string | null;
     }>(
-      sql`INSERT INTO whatsapp_messages(id,dedupe_key,customer_phone,direction,message_type,template_name,status,event_at) VALUES(${d.id}::uuid,${"sales/" + d.organization_id + "/" + d.id},${d.recipient.replace(/^\+/, "")},'outbound','template',${String(d.payload.template)},'queued',now()) ON CONFLICT(dedupe_key) DO UPDATE SET dedupe_key=excluded.dedupe_key RETURNING id,status,wamid`,
+      sql`INSERT INTO whatsapp_messages(id,dedupe_key,customer_phone,direction,message_type,template_name,status,event_at) VALUES(${d.id}::uuid,${"sales/" + d.organization_id + "/" + d.id},${d.recipient.replace(/^\+/, "")},'outbound','template',${whatsappPayload.name},'queued',now()) ON CONFLICT(dedupe_key) DO UPDATE SET dedupe_key=excluded.dedupe_key RETURNING id,status,wamid`,
     );
     if (w.rows[0].wamid)
       return finish(job, d, "provider_accepted", null, w.rows[0].wamid);
@@ -213,7 +234,7 @@ async function attempt(job: SalesJob, d: Intent) {
     await writeFile(
       `tmp/sales-capture/${d.id}.json`,
       JSON.stringify(
-        sendPayload || { recipient: d.recipient, template: d.payload },
+        sendPayload || { recipient: d.recipient, template: whatsappPayload },
         null,
         2,
       ),
@@ -262,22 +283,10 @@ async function attempt(job: SalesJob, d: Intent) {
         "skipped",
         "recipient_opted_out_or_message_unavailable",
       );
-    const p = d.payload;
     const result = await sendWhatsAppTemplate(
       d.recipient.replace(/^\+/, ""),
       d.id,
-      {
-        name: String(p.template),
-        language: String(p.language),
-        components: [
-          {
-            type: "body",
-            parameters: [p.client, p.project, p.quotation, p.invoice].map(
-              (v) => ({ type: "text", text: String(v) }),
-            ),
-          },
-        ],
-      },
+      whatsappPayload!,
     );
     await db.execute(
       sql`UPDATE whatsapp_messages SET status=CASE WHEN status IN ('delivered','read') THEN status ELSE ${result.ok ? "sent" : result.uncertain ? "uncertain" : "failed"} END,wamid=coalesce(wamid,${result.ok ? result.wamid : null}),error_code=${result.ok ? null : result.uncertain ? "provider_ambiguous" : "provider_rejected"},updated_at=now() WHERE id=${d.id}::uuid AND ${fence(job)}`,

@@ -400,6 +400,7 @@ async function main() {
   );
   const key = randomUUID();
   await pg.exec(await readFile("drizzle-current/0016_payment_confirmations.sql", "utf8"));
+  await pg.exec(await readFile("drizzle-current/0020_whatsapp_receipt_notifications.sql", "utf8"));
   const payment = {
     command: "submit",
     invoiceId: iid,
@@ -435,8 +436,13 @@ async function main() {
   assert.equal(paymentConfirmations.rows[0].payload.amount, "75.00");
   assert.equal(Number(paymentConfirmations.rows[0].payload.balance), 125);
   assert.ok(paymentConfirmations.rows[0].payload.receipt);
+  const receiptMessages = await pg.query<{ payload: { paymentId: string; receipt: string } }>("SELECT payload FROM delivery_intents WHERE organization_id=$1 AND entity_id=$2 AND channel='whatsapp' AND payload->>'notificationKind'='payment-receipt'", [org, iid]);
+  assert.equal(receiptMessages.rows.length, 1);
+  assert.equal(receiptMessages.rows[0].payload.paymentId, pid);
+  assert.equal(receiptMessages.rows[0].payload.receipt, paymentConfirmations.rows[0].payload.receipt);
   await pg.query("SELECT sales_payment($1,$2,$3::jsonb,$4)", [org, actor, JSON.stringify(verification), randomUUID()]);
   assert.equal((await pg.query("SELECT id FROM delivery_intents WHERE organization_id=$1 AND entity_id=$2 AND payload->>'template'='payment-confirmation-v1'", [org, iid])).rows.length, 1);
+  assert.equal((await pg.query("SELECT id FROM delivery_intents WHERE organization_id=$1 AND entity_id=$2 AND payload->>'notificationKind'='payment-receipt'", [org, iid])).rows.length, 1);
   const list = listQueries(org, "invoices", parseQuery({ payment: "partial" }));
   const balance = await db.execute<{ balance: string }>(list.rows(1));
   assert.equal(balance.rows[0].balance, "125.00");
@@ -565,6 +571,28 @@ async function main() {
   assert.equal((await pg.query<{count:number}>("SELECT count(*)::int AS count FROM documents")).rows[0].count,artifacts);
   assert.equal((await pg.query<{status:string}>("SELECT status FROM delivery_intents WHERE entity_type='quotation'")).rows[0].status,"captured");
   console.log("PASS: actual outbox worker persists/reuses private PDF, captures email, skips unconsented WhatsApp and never repeats successful channels");
+  // Exercise both approved-template paths without making an external provider call.
+  process.env.WHATSAPP_PROJECT_CONFIRMATION_TEMPLATE="invoice_test";
+  process.env.WHATSAPP_PROJECT_TEMPLATE_APPROVED="true";
+  process.env.WHATSAPP_PROJECT_LINK_BUTTON_APPROVED="true";
+  process.env.WHATSAPP_RECEIPT_TEMPLATE="receipt_test";
+  process.env.WHATSAPP_RECEIPT_TEMPLATE_APPROVED="true";
+  await pg.query("UPDATE client_contacts SET phone='+256700000999',whatsapp_consent_at=now(),whatsapp_consent_source='Test consent' WHERE id=$1", [contact]);
+  await pg.query("UPDATE delivery_intents SET recipient='+256700000999',status='queued',first_attempt_at=NULL,payload=CASE WHEN payload->>'notificationKind'='payment-receipt' THEN payload ELSE payload||'{\"template\":\"invoice_test\",\"approved\":true,\"language\":\"en\"}'::jsonb END WHERE organization_id=$1 AND channel='whatsapp'", [org]);
+  await pg.query("UPDATE automation_outbox SET status='pending',attempts=0,available_at=now(),locked_by=NULL,lease_expires_at=NULL WHERE organization_id=$1 AND (payload->>'intentId')::uuid IN (SELECT id FROM delivery_intents WHERE organization_id=$1 AND channel='whatsapp')", [org]);
+  await runSalesWorker(10);
+  const whatsappDocs = await pg.query<{ id: string; status: string; kind: string | null }>("SELECT id,status,payload->>'notificationKind' AS kind FROM delivery_intents WHERE organization_id=$1 AND channel='whatsapp' ORDER BY id", [org]);
+  assert.equal(whatsappDocs.rows.length, 2);
+  for (const message of whatsappDocs.rows) {
+    assert.equal(message.status, "captured");
+    const captured = JSON.parse(await readFile(`tmp/sales-capture/${message.id}.json`, "utf8"));
+    const button = captured.template.components.find((component: { type: string }) => component.type === "button");
+    const token = button.parameters[0].text as string;
+    assert.match(token, /^[a-f0-9]{64}$/);
+    const share = await pg.query<{ kind: string }>("SELECT d.kind FROM document_shares s JOIN documents d ON d.id=s.document_id AND d.organization_id=s.organization_id WHERE s.token_hash=$1 AND s.revoked_at IS NULL AND s.expires_at>now()", [createHash("sha256").update(token).digest("hex")]);
+    assert.equal(share.rows[0]?.kind, message.kind === "payment-receipt" ? "receipt" : "invoice");
+  }
+  console.log("PASS: approved invoice and receipt WhatsApp payloads contain live scoped document links");
   await mkdir("tmp/pdfs", { recursive: true });
   const normal = await renderCommercialPdf(snap);
   await writeFile("tmp/pdfs/sales-invoice.pdf", normal);

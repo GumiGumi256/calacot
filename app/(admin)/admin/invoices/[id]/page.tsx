@@ -2,6 +2,7 @@ import Link from "next/link";
 import { documentDetail } from "@/lib/sales/reads";
 import { TransitionControls } from "@/components/sales/transition-controls";
 import { PaymentForm } from "@/components/sales/payment-form";
+import { ShareDocument } from "@/components/sales/share-document";
 import { Activity, Deliveries } from "@/components/sales/activity";
 import {
   Card,
@@ -45,6 +46,8 @@ export default async function Page({
           <Link href={`/api/sales/invoices/${id}/pdf`} target="_blank">
             Download immutable invoice PDF
           </Link>
+          {i.status === "issued" && d.permissions.includes("payments_read") && <a href={`/api/sales/invoices/${id}/statement`}>Download payment statement</a>}
+          {i.status === "issued" && d.permissions.includes("invoices_issue") && <ShareDocument kind="invoice" id={id} />}
           {!!i.project_id && (
             <Link href={`/admin/projects/${i.project_id}`}>Project</Link>
           )}
@@ -88,7 +91,7 @@ export default async function Page({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <PaymentForm invoiceId={id} payments={d.payments} currency={String(i.currency)} balance={String(i.balance)} />
+            <PaymentForm invoiceId={id} payments={d.payments} currency={String(i.currency)} balance={String(i.balance)} canDownloadReceipts={d.permissions.includes("payments_read")} />
           </CardContent>
         </Card>
       )}

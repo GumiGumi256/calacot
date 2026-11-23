@@ -190,6 +190,7 @@ async function cachedReadPayments(ctx: Awaited<ReturnType<typeof staffContext>>,
     summary: (await totalsBy(base, where, "amount")).rows,
     canSeeInvoices: ctx.permissions.includes("invoices_read"),
     canSeeClients: ctx.permissions.includes("clients_read"),
+    canShareReceipts: ctx.permissions.includes("payments_verify"),
   };
 }
 
