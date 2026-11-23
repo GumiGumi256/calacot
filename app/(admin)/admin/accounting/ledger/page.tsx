@@ -23,7 +23,7 @@ export default async function Page({ searchParams }: Props) {
       <AccountingNav current="/admin/accounting/ledger" />
       <Card>
         <CardContent>
-          <form method="get" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end" aria-label="Ledger filters">
+          <form key={`${d.account}|${d.from}|${d.to}`} method="get" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end" aria-label="Ledger filters">
             <label className="flex flex-col gap-1 text-sm lg:col-span-2">Account
               <NativeSelect wrapperClassName="w-full" name="account" defaultValue={d.account}><option value="">All accounts</option>{d.accounts.map((a) => <option key={a.id} value={a.id}>{a.code} {a.name}</option>)}</NativeSelect>
             </label>

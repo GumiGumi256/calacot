@@ -40,7 +40,7 @@ export default async function Page({ searchParams }: Props) {
 
       <Card className="print:hidden">
         <CardContent>
-          <form method="get" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6 lg:items-end" aria-label="Statement options">
+          <form key={`${q.report}|${q.from}|${q.to}|${q.compare}|${q.division}`} method="get" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6 lg:items-end" aria-label="Statement options">
             <label className="flex flex-col gap-1 text-sm lg:col-span-2">Report
               <NativeSelect wrapperClassName="w-full" name="report" defaultValue={q.report}>{Object.entries(reportTypes).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</NativeSelect>
             </label>
