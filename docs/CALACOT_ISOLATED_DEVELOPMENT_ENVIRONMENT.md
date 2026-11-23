@@ -39,7 +39,7 @@ CALACOT_CLERK_ORG_ID=org_...                      # the development organization
 DATABASE_URL=postgresql://...@ep-<branch>.neon.tech/neondb?sslmode=require
 CALACOT_ISOLATED_DATABASE_HOSTS=ep-<branch>.neon.tech
 CALACOT_PRODUCTION_DATABASE_HOSTS=ep-<production>.neon.tech   # refused if DATABASE_URL matches
-CALACOT_APP_URL=http://localhost:3000
+CALACOT_APP_URL=http://localhost:3100
 SALES_NOTIFICATION_MODE=capture                   # messages written to tmp/sales-capture, never sent
 CUSTOMER_CARE_NOTIFICATION_MODE=capture
 # Leave EMPTY: WHATSAPP_ACCESS_TOKEN, RESEND_API_KEY, META_APP_SECRET, SALES_SEND_ALLOWLIST,
@@ -63,6 +63,13 @@ node scripts/start-isolated-dev.mjs                                   # refuses 
 ```
 
 Synthetic user credentials are written to `tmp/acceptance-users.json`, which is git-ignored. Delete the worktree and branch when acceptance is finished.
+
+### Worktree-only adjustments (found during the first acceptance run; never commit them)
+
+1. **Local PostgreSQL needs a different driver.** The app uses Neon's HTTP driver (`@neondatabase/serverless`), which cannot reach a plain PostgreSQL. With a **Neon branch** nothing changes. With a **local** database, replace `database/db.ts` in the worktree with a version that uses `drizzle-orm/node-postgres` and `pg` when `CALACOT_ENVIRONMENT=isolated-test` and `DATABASE_URL` points at localhost. `pg` is only a development dependency, so this must not reach production.
+2. **Keep test sessions apart from your own.** Clerk development sessions on `localhost` are shared across ports, so a browser already signed in on `localhost:3000` overrides test sign-ins. Open the acceptance app at `http://127.0.0.1:3100` instead, and add `allowedDevOrigins: ["127.0.0.1"]` to `next.config.ts` in the worktree so Next.js serves its dev resources there.
+3. **Keep sign-in local.** Add `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in` and `NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up` to `.env.isolated`.
+4. **Sign in without typing passwords.** Create a one-time ticket per user with `clerk api /sign_in_tokens -d '{"user_id":"<id>","expires_in_seconds":900}' --instance dev`, then open `http://127.0.0.1:3100/sign-in?__clerk_ticket=<token>`. In Git Bash, set `MSYS_NO_PATHCONV=1` so the API path isn't rewritten.
 
 ## 6. Synthetic users
 

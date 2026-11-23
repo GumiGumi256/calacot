@@ -83,7 +83,7 @@ export default async function Page({ searchParams }: Props) {
                   <TableHeader><TableRow><TableHead>Status</TableHead><TableHead className="text-right">Result to retained earnings</TableHead><TableHead>Closing journal</TableHead><TableHead>Prepared</TableHead><TableHead>Decided</TableHead></TableRow></TableHeader>
                   <TableBody>{d.yearEnds.map((y) => (
                     <TableRow key={y.id}>
-                      <TableCell><StatusBadge domain="yearEnd" status={y.status} />{y.reopen_reason && <span className="block text-xs text-muted-foreground">Reopened: {y.reopen_reason}</span>}</TableCell>
+                      <TableCell className="whitespace-normal"><StatusBadge domain="yearEnd" status={y.status} />{y.reopen_reason && <span className="block text-xs text-muted-foreground">Reopened: {y.reopen_reason}</span>}</TableCell>
                       <TableCell className="text-right tabular-nums">{ledgerAmount(y.net_result)}</TableCell>
                       <TableCell>{y.journal_id ? <Link className="underline-offset-4 hover:underline" href={`/admin/accounting/journals/${y.journal_id}`}>{y.journal_number ?? "Awaiting approval"}</Link> : "No income or expense balances"}{y.reversal_number && <span className="block text-xs">Reversed by {y.reversal_number}</span>}</TableCell>
                       <TableCell className="text-sm">{y.prepared_by}<span className="block text-xs text-muted-foreground">{formatDateTime(y.prepared_at)}</span></TableCell>

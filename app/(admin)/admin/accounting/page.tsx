@@ -53,7 +53,10 @@ export default async function Page() {
           </CardContent>
         </Card>
       </div>
-      <p className="text-xs text-muted-foreground">Formal financial statements are not produced in this phase: they need approved accounting policies and transaction mappings first.</p>
+      <p className="text-xs text-muted-foreground">
+        Income statement, balance sheet, cash flow and changes in equity are under{" "}
+        <Link className="underline underline-offset-4" href="/admin/accounting/statements">Financial statements</Link>. They stay marked provisional, and cannot be approved, until a statement classification is approved.
+      </p>
     </PageContainer>
   );
 }

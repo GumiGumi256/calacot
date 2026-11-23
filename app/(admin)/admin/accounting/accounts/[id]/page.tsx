@@ -61,7 +61,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
                         <TableRow key={`${l.journal_id}-${i}`}>
                           <TableCell className="whitespace-nowrap">{formatDate(l.entry_date)}</TableCell>
                           <TableCell className="whitespace-nowrap"><Link href={`/admin/accounting/journals/${l.journal_id}`} className="font-medium underline-offset-4 hover:underline">{l.number}</Link>{l.journal_type === "reversal" && <div className="text-xs text-muted-foreground">Reversal</div>}</TableCell>
-                          <TableCell className="max-w-80"><span className="line-clamp-2 break-words">{l.line_description ?? l.description}</span>{(l.division || l.project) && <div className="text-xs capitalize text-muted-foreground">{[l.division, l.project].filter(Boolean).join(" · ")}</div>}</TableCell>
+                          <TableCell className="max-w-80 whitespace-normal"><span className="line-clamp-2 wrap-break-word">{l.line_description ?? l.description}</span>{(l.division || l.project) && <div className="text-xs capitalize text-muted-foreground">{[l.division, l.project].filter(Boolean).join(" · ")}</div>}</TableCell>
                           <TableCell className="text-right"><Amount value={l.functional_debit} /></TableCell>
                           <TableCell className="text-right"><Amount value={l.functional_credit} /></TableCell>
                           <TableCell className="text-right tabular-nums">{ledgerAmount(l.running)}</TableCell>

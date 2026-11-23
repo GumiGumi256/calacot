@@ -25,7 +25,7 @@ export default async function Page() {
               <TableBody>{d.batches.map((b) => (
                 <TableRow key={b.id}>
                   <TableCell><Link className="font-medium underline-offset-4 hover:underline" href={`/admin/accounting/migration/${b.id}`}>{b.cutoff_date}</Link></TableCell>
-                  <TableCell className="text-sm">{migrationSourceSystems[b.source_system as keyof typeof migrationSourceSystems] ?? b.source_system}<span className="block text-xs text-muted-foreground">{b.source_description}</span></TableCell>
+                  <TableCell className="min-w-56 whitespace-normal text-sm">{migrationSourceSystems[b.source_system as keyof typeof migrationSourceSystems] ?? b.source_system}<span className="block text-xs text-muted-foreground">{b.source_description}</span></TableCell>
                   <TableCell className="tabular-nums">{b.rows}</TableCell>
                   <TableCell><StatusBadge domain="migrationBatch" status={b.status} /></TableCell>
                   <TableCell className="text-sm">{b.prepared_by}</TableCell>

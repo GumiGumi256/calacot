@@ -66,8 +66,8 @@ export default async function Page() {
                   <TableRow key={p.id}>
                     <TableCell>{p.version}</TableCell>
                     <TableCell className="text-sm">{p.functional_currency}, starts {monthNames[p.fiscal_year_start_month - 1]}, posting {p.manual_posting_enabled ? "on" : "off"}</TableCell>
-                    <TableCell className="max-w-72 text-xs"><div>{p.proposed_by}, {formatDate(p.proposed_at)}</div><div className="text-muted-foreground break-words">{p.note}</div></TableCell>
-                    <TableCell className="max-w-72 text-xs">{p.decided_by ? <><div>{p.decided_by}, {formatDate(p.decided_at)}</div>{p.decision_note && <div className="text-muted-foreground break-words">{p.decision_note}</div>}</> : "—"}</TableCell>
+                    <TableCell className="max-w-72 whitespace-normal text-xs"><div>{p.proposed_by}, {formatDate(p.proposed_at)}</div><div className="text-muted-foreground wrap-break-word">{p.note}</div></TableCell>
+                    <TableCell className="max-w-72 whitespace-normal text-xs">{p.decided_by ? <><div>{p.decided_by}, {formatDate(p.decided_at)}</div>{p.decision_note && <div className="text-muted-foreground wrap-break-word">{p.decision_note}</div>}</> : "—"}</TableCell>
                     <TableCell><StatusBadge domain="accountingProposal" status={p.status} /></TableCell>
                   </TableRow>
                 ))}
@@ -93,7 +93,7 @@ export default async function Page() {
                       <TableCell className="whitespace-nowrap">1 {r.from_currency} = ? {r.to_currency}</TableCell>
                       <TableCell className="text-right tabular-nums">{r.rate}</TableCell>
                       <TableCell className="whitespace-nowrap">{formatDate(r.rate_date)}</TableCell>
-                      <TableCell className="max-w-64 text-xs">{r.source}<div className="text-muted-foreground">Entered by {r.entered_by}{r.decided_by ? `; decided by ${r.decided_by}` : ""}</div></TableCell>
+                      <TableCell className="max-w-64 whitespace-normal text-xs">{r.source}<div className="text-muted-foreground">Entered by {r.entered_by}{r.decided_by ? `; decided by ${r.decided_by}` : ""}</div></TableCell>
                       <TableCell><StatusBadge domain="accountingProposal" status={r.status} /></TableCell>
                       <TableCell className="min-w-56">{r.status === "proposed" && d.can.approvePolicy && r.entered_by_id !== d.me && <Decide kind="rate" id={r.id} requestKey={randomUUID()} label={`${r.from_currency}/${r.to_currency} ${r.rate_date}`} />}</TableCell>
                     </TableRow>
@@ -117,7 +117,7 @@ export default async function Page() {
                 const rule = d.rules.find((r) => r.source_type === e.type && r.status === "approved");
                 return (
                   <TableRow key={e.type}>
-                    <TableCell className="min-w-48"><div className="font-medium">{e.label}</div><div className="text-xs text-muted-foreground">{e.record}</div></TableCell>
+                    <TableCell className="min-w-48 whitespace-normal"><div className="font-medium">{e.label}</div><div className="text-xs text-muted-foreground">{e.record}</div></TableCell>
                     <TableCell className="whitespace-nowrap text-sm">{stageLabels[e.stage]}</TableCell>
                     <TableCell className="min-w-72 text-sm">{e.proposedTreatment}{e.openQuestions.length > 0 && <ul className="mt-1 list-disc pl-4 text-xs text-muted-foreground">{e.openQuestions.map((q) => <li key={q}>{q}</li>)}</ul>}</TableCell>
                     <TableCell className="text-sm">{rule ? `Version ${rule.version} (inactive)` : "None"}</TableCell>

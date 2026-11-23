@@ -48,7 +48,7 @@ export default async function Page({ searchParams }: Props) {
                     <TableCell className="whitespace-nowrap">{l.entry_date}</TableCell>
                     <TableCell><Link className="font-medium underline-offset-4 hover:underline" href={`/admin/accounting/journals/${l.journal_id}`}>{l.number}</Link></TableCell>
                     {!selected && <TableCell><Link className="underline-offset-4 hover:underline" href={`/admin/accounting/ledger?${new URLSearchParams({ account: l.account_id, from: d.from, to: d.to })}`}>{l.code} {l.name}</Link></TableCell>}
-                    <TableCell className="min-w-48">{l.line_description ?? l.description}{(l.division || l.project) && <span className="block text-xs text-muted-foreground">{[l.division, l.project].filter(Boolean).join(" · ")}</span>}</TableCell>
+                    <TableCell className="min-w-48 whitespace-normal">{l.line_description ?? l.description}{(l.division || l.project) && <span className="block text-xs text-muted-foreground">{[l.division, l.project].filter(Boolean).join(" · ")}</span>}</TableCell>
                     <TableCell className="text-right"><Amount value={l.debit} /></TableCell>
                     <TableCell className="text-right"><Amount value={l.credit} /></TableCell>
                     {selected && <TableCell className="text-right tabular-nums">{ledgerAmount(l.running)}</TableCell>}

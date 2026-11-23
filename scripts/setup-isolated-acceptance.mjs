@@ -43,6 +43,13 @@ const { createClerkClient } = await import("@clerk/backend");
 const { Client } = await import("pg");
 const clerk = createClerkClient({ secretKey: env.CLERK_SECRET_KEY });
 const org = env.CALACOT_CLERK_ORG_ID;
+// Role sets are not wrapped by @clerk/backend: call the Backend API directly (development key only).
+const clerkApi = async (path, body) => {
+  const r = await fetch(`https://api.clerk.com/v1${path}`, { method: body ? "POST" : "GET", headers: { Authorization: `Bearer ${env.CLERK_SECRET_KEY}`, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+  if (!r.ok) throw new Error(`Clerk ${path}: HTTP ${r.status}`);
+  return r.json();
+};
+const fetchRoleSets = async () => (await clerkApi("/role_sets?limit=20")).data ?? [];
 
 const perms = new Map((await clerk.organizationPermissions.getOrganizationPermissionList({ limit: 200 })).data.map((p) => [p.key, p.id]));
 for (const p of reviewerPermissions) {
@@ -60,16 +67,22 @@ for (const [key, name] of [["org:finance", "Finance"], ["org:viewer", "Read-only
   }
   roles.set(key, role);
 }
+// New organizations only offer roles in the instance role set: add any missing acceptance role to it.
+for (const rs of await fetchRoleSets()) {
+  const missing = ["org:finance", "org:viewer", "org:accounting_reviewer"].filter((k) => !(rs.roles ?? []).some((r) => r.key === k));
+  if (missing.length) await clerkApi(`/role_sets/${encodeURIComponent(rs.key)}/roles`, { role_keys: missing });
+}
 const credentials = [];
 for (const u of users) {
   const found = (await clerk.users.getUserList({ emailAddress: [u.email] })).data[0];
   const password = `Acc-${randomBytes(9).toString("base64url")}!9`;
-  const user = found ?? await clerk.users.createUser({ emailAddress: [u.email], firstName: u.first, lastName: u.last, password, skipPasswordChecks: false });
+  // Existing synthetic users get a fresh password so the credentials file is always usable.
+  const user = found ? await clerk.users.updateUser(found.id, { password, skipPasswordChecks: false }) : await clerk.users.createUser({ emailAddress: [u.email], firstName: u.first, lastName: u.last, password, skipPasswordChecks: false });
   const members = (await clerk.organizations.getOrganizationMembershipList({ organizationId: org, limit: 200 })).data;
   const m = members.find((x) => x.publicUserData?.userId === user.id);
   if (!m) await clerk.organizations.createOrganizationMembership({ organizationId: org, userId: user.id, role: u.role });
   else if (m.role !== u.role) await clerk.organizations.updateOrganizationMembership({ organizationId: org, userId: user.id, role: u.role });
-  credentials.push({ key: u.key, email: u.email, userId: user.id, role: u.role, password: found ? "(unchanged: existing user)" : password });
+  credentials.push({ key: u.key, email: u.email, userId: user.id, role: u.role, password });
 }
 
 const db = new Client({ connectionString: env.DATABASE_URL });

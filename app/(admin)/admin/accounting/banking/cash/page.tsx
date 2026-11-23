@@ -109,7 +109,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
                   <TableRow key={t.id}>
                     <TableCell className="whitespace-nowrap">{formatDate(t.txn_date)}</TableCell>
                     <TableCell className="whitespace-nowrap">{cashKindLabels[t.kind as CashKind]}</TableCell>
-                    <TableCell className="min-w-48">{t.description}{t.reference ? <span className="block text-xs text-muted-foreground">Ref {t.reference}</span> : null}{t.outstanding && t.outstanding !== "0.00" ? <span className="block text-xs text-warning">Outstanding {ledgerAmount(t.outstanding)}</span> : null}</TableCell>
+                    <TableCell className="min-w-48 whitespace-normal">{t.description}{t.reference ? <span className="block text-xs text-muted-foreground">Ref {t.reference}</span> : null}{t.outstanding && t.outstanding !== "0.00" ? <span className="block text-xs text-warning">Outstanding {ledgerAmount(t.outstanding)}</span> : null}</TableCell>
                     <TableCell className="min-w-40 text-sm">{[t.account, t.to_account && `→ ${t.to_account}`, t.counter, t.staff].filter(Boolean).join(" · ")}</TableCell>
                     <TableCell className="text-right"><Money currency={t.currency} value={t.amount} /></TableCell>
                     <TableCell><StatusBadge domain="cashTransaction" status={t.status} /></TableCell>

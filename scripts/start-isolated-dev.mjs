@@ -19,5 +19,9 @@ const problems = isolatedEnvironmentProblems(env);
 if (problems.length) { console.error("Refusing: .env.isolated is not isolated.\n - " + problems.join("\n - ")); process.exit(1); }
 const keep = ["PATH", "Path", "PATHEXT", "SYSTEMROOT", "SystemRoot", "TEMP", "TMP", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "ComSpec", "WINDIR"];
 const childEnv = { ...Object.fromEntries(keep.filter((k) => process.env[k] !== undefined).map((k) => [k, process.env[k]])), ...env, NEXT_TELEMETRY_DISABLED: "1" };
-console.log("Starting next dev with the isolated environment only (messaging in capture mode).");
-spawn("npx", ["next", "dev"], { env: childEnv, stdio: "inherit", shell: process.platform === "win32" }).on("exit", (code) => process.exit(code ?? 0));
+// Pin the port to CALACOT_APP_URL (default 3100) so the isolated app can never be confused with a
+// normal `next dev` on 3000, which loads the live .env.local.
+const port = (() => { try { return new URL(env.CALACOT_APP_URL || "http://localhost:3100").port || "3100"; } catch { return "3100"; } })();
+if (port === "3000") { console.error("Refusing port 3000: it is the default for a normal (live) dev server. Use CALACOT_APP_URL=http://localhost:3100."); process.exit(2); }
+console.log(`Starting next dev on http://localhost:${port} with the isolated environment only (messaging in capture mode).`);
+spawn("npx", ["next", "dev", "--port", port], { env: childEnv, stdio: "inherit", shell: process.platform === "win32" }).on("exit", (code) => process.exit(code ?? 0));

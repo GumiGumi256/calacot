@@ -147,14 +147,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
                 <TableBody>
                   {d.events.map((e) => (
                     <TableRow key={e.id}>
-                      <TableCell className="min-w-48">
+                      <TableCell className="min-w-48 whitespace-normal">
                         <Link href={`/admin/accounting/integration/${e.id}`} className="font-medium underline-offset-4 hover:underline">{eventLabel(e.event_type)}</Link>
                         <div className="text-xs text-muted-foreground">{e.document ?? e.source_id.slice(0, 8)}</div>
                       </TableCell>
                       <TableCell className="whitespace-nowrap">{formatDate(e.effective_date)}{e.posting_date && <div className="text-xs text-muted-foreground">posted {formatDate(e.posting_date)}</div>}</TableCell>
                       <TableCell className="text-right tabular-nums whitespace-nowrap">{e.currency} {ledgerAmount(e.amount)}</TableCell>
                       <TableCell><StatusBadge domain="integrationEvent" status={e.status} /></TableCell>
-                      <TableCell className="max-w-80 text-xs">
+                      <TableCell className="max-w-80 whitespace-normal text-xs">
                         {e.journal_number ? <Link href={`/admin/accounting/journals/${e.journal_id}`} className="underline-offset-4 hover:underline">{e.journal_number}</Link>
                           : e.last_error_code ? guidanceFor(e.last_error_code).problem : "—"}
                       </TableCell>
