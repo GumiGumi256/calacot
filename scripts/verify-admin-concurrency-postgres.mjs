@@ -9,6 +9,7 @@ import assert from "node:assert/strict";
 let input = ""; for await (const chunk of process.stdin) input += chunk;
 const url = new URL(input.trim());
 if (url.pathname !== "/phase1e_admin_fixture") throw Error("Refusing non-fixture database");
+if (!["localhost", "127.0.0.1", "::1", "[::1]"].includes(url.hostname)) throw Error("Refusing a non-local database: fixtures run on a throwaway local PostgreSQL");
 const a = new Client({ connectionString: url.toString() }), b = new Client({ connectionString: url.toString() });
 await a.connect(); await b.connect();
 const settle = (p) => { const s = { done: false }; s.result = p.then((v) => { s.done = true; return v; }, (e) => { s.done = true; return e; }); return s; };

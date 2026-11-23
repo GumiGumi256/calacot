@@ -12,6 +12,7 @@ import assert from "node:assert/strict";
 let input = ""; for await (const chunk of process.stdin) input += chunk;
 const url = new URL(input.trim());
 if (url.pathname !== "/phase2b_accounting_fixture") throw Error("Refusing non-fixture database");
+if (!["localhost", "127.0.0.1", "::1", "[::1]"].includes(url.hostname)) throw Error("Refusing a non-local database: fixtures run on a throwaway local PostgreSQL");
 const connect = async () => { const c = new Client({ connectionString: url.toString() }); await c.connect(); c.on("error", () => {}); return c; };
 let a = await connect();
 const settle = (p) => { const s = { done: false }; s.result = p.then((v) => { s.done = true; return v; }, (e) => { s.done = true; return e; }); return s; };

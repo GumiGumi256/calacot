@@ -33,7 +33,11 @@
     "test:banking": "tsx scripts/verify-statement-csv.mts && tsx scripts/verify-bank-reconciliation.mts && tsx scripts/verify-banking-db.mts && node scripts/verify-banking-actions.mjs",
     "test:tax-assets": "tsx scripts/verify-depreciation-model.mts && tsx scripts/verify-tax-assets-db.mts && node scripts/verify-tax-assets-actions.mjs",
     "test:statements": "tsx scripts/verify-statements-db.mts && node scripts/verify-statements-actions.mjs",
-    "test:migration": "tsx scripts/verify-migration-staging-db.mts && tsx scripts/verify-accounting-parallel.mts"
+    "test:migration": "tsx scripts/verify-migration-staging-db.mts && tsx scripts/verify-accounting-parallel.mts",
+    "test:migration-chain": "node scripts/verify-migration-chain.mjs",
+    "test:safe": "node scripts/run-safe-tests.mjs",
+    "check:isolated-env": "node scripts/check-isolated-env.mjs .env.isolated",
+    "dev:isolated": "node scripts/start-isolated-dev.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
