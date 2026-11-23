@@ -1,0 +1,23 @@
+import assert from "node:assert/strict";
+import { allocationResiduals, duplicateCandidates, reconciliationDifference, suggestMatches, type BankItem, type LedgerItem } from "../lib/accounting/bank-reconciliation";
+
+const b: BankItem = { id: "b", accountId: "a", currency: "UGX", date: "2026-01-02", amount: BigInt(10000), reference: " Ref 1 " };
+const line = (id: string, amount: number): LedgerItem => ({ ...b, id, amount: BigInt(amount), posted: true });
+assert.equal(suggestMatches(b, [line("l", 10000)])[0].score, 100);
+assert.equal(suggestMatches(b, [{ ...line("l", 9000), reference: "Ref 1" }]).length, 0);
+assert.equal(suggestMatches(b, [{ ...line("l", 10000), currency: "USD" }]).length, 0);
+assert.equal(suggestMatches(b, [{ ...line("l", 10000), posted: false }]).length, 0);
+const result = allocationResiduals([b], [line("l1", 6000), line("l2", 5000)], [{ bankId: "b", ledgerId: "l1", amount: BigInt(6000) }, { bankId: "b", ledgerId: "l2", amount: BigInt(4000) }]);
+assert.equal(result.bank[0].residual, BigInt(0));
+assert.equal(result.ledger[1].residual, BigInt(1000));
+const manyToOne = allocationResiduals([{ ...b, id: "b1", amount: BigInt(3000) }, { ...b, id: "b2", amount: BigInt(7000) }], [line("l", 10000)], [{ bankId: "b1", ledgerId: "l", amount: BigInt(3000) }, { bankId: "b2", ledgerId: "l", amount: BigInt(7000) }]);
+assert.equal(manyToOne.ledger[0].residual, BigInt(0));
+assert.throws(() => allocationResiduals([{ ...b, id: "b1", amount: BigInt(6000) }, { ...b, id: "b2", amount: BigInt(6000) }], [line("l", 10000)], [{ bankId: "b1", ledgerId: "l", amount: BigInt(6000) }, { bankId: "b2", ledgerId: "l", amount: BigInt(6000) }]));
+assert.throws(() => allocationResiduals([b], [line("l", -10000)], [{ bankId: "b", ledgerId: "l", amount: BigInt(1) }]));
+assert.throws(() => allocationResiduals([b], [line("l", 10000)], [{ bankId: "b", ledgerId: "l", amount: BigInt(10001) }]));
+assert.throws(() => allocationResiduals([b], [{ ...line("l", 10000), accountId: "other" }], [{ bankId: "b", ledgerId: "l", amount: BigInt(1) }]));
+assert.equal(reconciliationDifference(BigInt(100), BigInt(110), BigInt(20), BigInt(10)), BigInt(0));
+assert.equal(reconciliationDifference(BigInt(100), BigInt(111), BigInt(20), BigInt(10)), BigInt(-1));
+assert.equal(duplicateCandidates([{ ...b, description: "Deposit" }], [{ ...b, id: "old", description: "Different" }]).length, 1);
+assert.equal(duplicateCandidates([{ ...b, description: "Deposit" }], [{ ...b, id: "old", accountId: "other", description: "Deposit" }]).length, 0);
+console.log("Bank reconciliation calculation checks passed.");

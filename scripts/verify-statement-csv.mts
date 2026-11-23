@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import { mapStatementRows, parseStatementCsv, spreadsheetSafeCell, STATEMENT_MAX_BYTES } from "../lib/accounting/statement-csv";
+
+const parse = (s: string) => parseStatementCsv(new TextEncoder().encode(s));
+const rows = parse('Date,Description,Debit,Credit,Reference,Currency,Balance\r\n2026-01-02,"Deposit, customer",,100.25,ABC,UGX,100.25\r\n2026-01-03,"Fee ""monthly""",5.00,,XYZ,UGX,95.25');
+const mapped = mapStatementRows(rows, { date: 0, description: 1, debit: 2, credit: 3, reference: 4, currency: 5, balance: 6 }, "UGX");
+assert.equal(mapped[0].amountMinor, BigInt(10025));
+assert.equal(mapped[1].amountMinor, BigInt(-500));
+assert.equal(mapped[1].description, 'Fee "monthly"');
+assert.equal(mapped[1].balanceMinor, BigInt(9525));
+assert.throws(() => parse('A,B\n"unclosed,x'));
+assert.throws(() => parse('A,B\nx'));
+assert.throws(() => parseStatementCsv(new Uint8Array(STATEMENT_MAX_BYTES + 1)));
+assert.throws(() => parseStatementCsv(Uint8Array.from([0xff])));
+assert.throws(() => mapStatementRows(rows, { date: 0, description: 1, debit: 2, credit: 3, currency: 5 }, "USD"), /currency/);
+assert.throws(() => mapStatementRows(parse('Date,Description,Amount\n2026-02-30,x,1'), { date: 0, description: 1, amount: 2 }, "UGX"), /date/);
+assert.throws(() => mapStatementRows(parse('Date,Description,Amount\n2026-01-01,x,1.001'), { date: 0, description: 1, amount: 2 }, "UGX"), /amount/);
+assert.equal(spreadsheetSafeCell(" =1+1"), "' =1+1");
+assert.equal(spreadsheetSafeCell("Normal"), "Normal");
+console.log("Statement CSV parser checks passed.");

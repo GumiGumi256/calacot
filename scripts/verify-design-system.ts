@@ -15,6 +15,7 @@ import { formatMoney, formatDate, formatDateTime, formatMonth, formatPercent, fo
 import { periodChange, tickInterval } from "../lib/charts/config";
 import { leadStatuses, paymentStatuses } from "../lib/admin/options";
 import { expenseStatuses } from "../lib/finance/options";
+import { assetStates } from "../lib/assets/states";
 import { monthlySeries, monthRange, monthPeriod, type MonthlyActivityRow } from "../lib/charts/series";
 import { pageWindow, preferenceKey, resolveHidden } from "../components/data-table/preferences";
 import { adminBreadcrumbs, isActivePath } from "../lib/admin/breadcrumbs";
@@ -71,7 +72,10 @@ const taskEnum = [...(read("database/schema/tasks.ts").match(/enum: \[([^\]]*)\]
 const purchaseStatuses = [...(read("lib/design-purchases/model.ts").match(/purchaseStatuses = \[([^\]]*)\]/)?.[1] ?? "").matchAll(/"([a-z_]+)"/g)].map((x) => x[1]);
 const invoicePayment = [...(entityList.match(/invoicePaymentStates = \[[^\]]*\]/)?.[0] ?? "").matchAll(/"([a-z_]+)"/g)].map((x) => x[1]);
 // Phase 2A accounting statuses come straight from the migration's CHECK constraints.
-const accountingSql = read("drizzle-current/0018_accounting_foundation.sql") + read("drizzle-current/0019_accounting_integration.sql");
+const accountingSql = read("drizzle-current/0018_accounting_foundation.sql") + read("drizzle-current/0019_accounting_integration.sql") + read("drizzle-current/0021_banking_reconciliation.sql") + read("drizzle-current/0022_tax_assets_payroll.sql") + read("drizzle-current/0023_financial_statements_closing.sql") + read("drizzle-current/0024_opening_balance_staging.sql");
+// Close-check outcomes come from fs_check() in 0023.
+const closeCheckStatuses = [...(accountingSql.match(/'status', CASE WHEN ok IS NULL THEN '([a-z_]+)' WHEN ok THEN '([a-z_]+)' ELSE '([a-z_]+)' END/) ?? []).slice(1),
+  ...(accountingSql.match(/jsonb_set\(x, '\{status\}', '"([a-z_]+)"'\)/) ?? []).slice(1)];
 const checkValues = (table: string, column = "status") => {
   const body = accountingSql.slice(accountingSql.indexOf(`CREATE TABLE ${table} (`));
   return [...(body.match(new RegExp(`${column} text NOT NULL[^,]*CHECK \\(${column} IN \\(([^)]*)\\)\\)`))?.[1] ?? "").matchAll(/'([a-z_]+)'/g)].map((x) => x[1]);
@@ -87,6 +91,22 @@ const sources: Record<keyof typeof statusRegistry, readonly string[]> = {
   integrationEvent: checkValues("accounting_integration_events"),
   integrationStage: checkValues("accounting_integration_settings", "stage"),
   reconciliation: reconciliationStatuses,
+  // Phase 2C: from the CHECK constraints in 0021; cash transactions show their journal's status.
+  bankingAccount: checkValues("banking_accounts"),
+  statementLine: checkValues("bank_statement_lines", "review_status"),
+  bankReconciliation: checkValues("bank_reconciliations"),
+  cashTransaction: checkValues("accounting_journals"),
+  // Phase 2D: from the CHECK constraints in 0022; asset states are derived (lib/assets/states.ts).
+  taxComputation: checkValues("income_tax_computations"),
+  fixedAsset: assetStates,
+  payrollRecord: [...new Set([...checkValues("payroll_profiles"), ...checkValues("payroll_components"), ...checkValues("payroll_salary_structures")])],
+  // Phase 2E: from the CHECK constraints in 0023.
+  statementSet: checkValues("fs_statement_sets"),
+  periodClose: checkValues("period_closes"),
+  closeCheck: closeCheckStatuses,
+  yearEnd: checkValues("year_end_closes"),
+  migrationBatch: checkValues("migration_batches"),
+  fsPolicy: [...new Set([...checkValues("fs_classification_versions"), ...checkValues("overhead_allocation_versions"), ...checkValues("period_close_policy_versions")])],
   lead: leadStatuses,
   payment: paymentStatuses,
   expense: expenseStatuses,

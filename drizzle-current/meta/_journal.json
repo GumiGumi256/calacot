@@ -148,6 +148,34 @@
       "when": 1795700000000,
       "tag": "0020_whatsapp_receipt_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1795800000000,
+      "tag": "0021_banking_reconciliation",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1795900000000,
+      "tag": "0022_tax_assets_payroll",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1796000000000,
+      "tag": "0023_financial_statements_closing",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1796100000000,
+      "tag": "0024_opening_balance_staging",
+      "breakpoints": true
     }
   ]
 }

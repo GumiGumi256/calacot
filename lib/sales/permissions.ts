@@ -73,6 +73,52 @@ export const permissions = [
   // event mappings uses accounting_manage; approving them uses accounting_policy_approve. Every
   // record-level rule is enforced in drizzle-current/0019_accounting_integration.sql.
   "accounting_integration_operate",
+  // Phase 2C banking and cash. Viewing, importing, matching, preparing reconciliations and preparing
+  // cash transactions are Finance; registering accounts and proposing ledger/category mappings is
+  // banking_manage (Finance proposes, accounting_policy_approve decides). Approving cash and bank
+  // adjustments, finalizing and reopening reconciliations are administrator-only by default; delegate
+  // with org:calacot:<permission>. Record-level rules (no self-approval, availability, locks) are in
+  // drizzle-current/0021_banking_reconciliation.sql.
+  "banking_read",
+  "banking_manage",
+  "banking_import",
+  "banking_match",
+  "banking_reconcile",
+  "banking_reconcile_approve",
+  "banking_reconcile_reopen",
+  "cash_create",
+  "cash_approve",
+  // Phase 2D tax, fixed assets and payroll. Finance prepares (computations, policy proposals, payments,
+  // asset records); approvals (tax_approve, depreciation_approve) are administrator-only by default and
+  // delegable with org:calacot:<permission>. Payroll is administrator-only by default: salary data is
+  // never visible through staff-directory or accounting permissions. Record-level rules are in
+  // drizzle-current/0022_tax_assets_payroll.sql.
+  "tax_read",
+  "tax_compute",
+  "tax_approve",
+  "tax_payment_record",
+  "tax_policy_manage",
+  "assets_manage",
+  "depreciation_approve",
+  "payroll_admin",
+  "payroll_approve",
+  // Phase 2E financial statements, period closing and year-end. Finance views statements, prepares
+  // adjustments, statement sets and policy proposals, and starts closes; reviewing adjustments,
+  // approving statements, approving closes, reopening and approving year-end are administrator-only
+  // by default and delegable with org:calacot:<permission>. Record-level rules (no self-approval,
+  // stale ledgers, checklists) are in drizzle-current/0023_financial_statements_closing.sql.
+  "fs_read",
+  "fs_adjust_prepare",
+  "fs_adjust_review",
+  "fs_approve",
+  "close_start",
+  "close_approve",
+  "close_reopen",
+  "year_end_approve",
+  // Phase 2F staging-only historical migration: finance prepares opening-balance batches; approval is
+  // administrator-only by default and delegable. Nothing in staging posts to the ledger.
+  "migration_prepare",
+  "migration_approve",
 ] as const;
 export type Permission = (typeof permissions)[number];
 export function roleAllows(role: string | null | undefined, p: Permission) {
@@ -117,6 +163,21 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
       "accounting_journal_prepare",
       "accounting_journal_post",
       "accounting_integration_operate",
+      "banking_read",
+      "banking_manage",
+      "banking_import",
+      "banking_match",
+      "banking_reconcile",
+      "cash_create",
+      "tax_read",
+      "tax_compute",
+      "tax_payment_record",
+      "tax_policy_manage",
+      "assets_manage",
+      "fs_read",
+      "fs_adjust_prepare",
+      "close_start",
+      "migration_prepare",
     ],
     "org:viewer": [
       "clients_read",
@@ -129,6 +190,8 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
       "expenses_read",
       "documents_read",
       "accounting_read",
+      "banking_read",
+      "fs_read",
     ],
     // Phase 1E. org:project_manager must exist in Clerk before it can be assigned.
     "org:project_manager": [
@@ -161,6 +224,10 @@ export const sensitivePermissions: ReadonlySet<Permission> = new Set<Permission>
   "accounting_read", "accounting_manage", "accounting_journal_prepare", "accounting_journal_post", "accounting_journal_approve",
   "accounting_journal_reverse", "accounting_period_close", "accounting_period_reopen", "accounting_policy_approve",
   "accounting_integration_operate",
+  "banking_read", "banking_manage", "banking_import", "banking_match", "banking_reconcile", "banking_reconcile_approve", "banking_reconcile_reopen", "cash_create", "cash_approve",
+  "tax_read", "tax_compute", "tax_approve", "tax_payment_record", "tax_policy_manage", "assets_manage", "depreciation_approve", "payroll_admin", "payroll_approve",
+  "fs_read", "fs_adjust_prepare", "fs_adjust_review", "fs_approve", "close_start", "close_approve", "close_reopen", "year_end_approve",
+  "migration_prepare", "migration_approve",
 ]);
 
 type LocalAccess = { status: string; eligibility: string } | null;

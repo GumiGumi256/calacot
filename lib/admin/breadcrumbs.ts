@@ -17,9 +17,12 @@ const actionLabels: Record<string, string> = {
   new: "New", edit: "Edit", knowledge: "Knowledge",
   accounts: "Chart of accounts", journals: "Journals", periods: "Periods", "trial-balance": "Trial balance", policy: "Policy and rates",
   integration: "Integration", mappings: "Event mappings", reconciliation: "Reconciliation",
+  banking: "Banking & cash", setup: "Accounts and mappings", import: "Import statement", cash: "Cash", reports: "Reports",
+  tax: "Tax management", income: "Income tax", obligations: "Obligations", payments: "Payments & filings", settings: "Tax settings", assets: "Fixed assets", depreciation: "Depreciation", disposals: "Transfers & disposals", payroll: "Payroll",
+  ledger: "General ledger", statements: "Financial statements", closing: "Period closing", adjustments: "Adjustments", classification: "Statement settings", migration: "Opening balances",
 };
 /** Third-level detail pages, e.g. /admin/accounting/journals/<id> -> "Journal". */
-const nestedDetailLabels: Record<string, string> = { journals: "Journal", accounts: "Account", integration: "Accounting event" };
+const nestedDetailLabels: Record<string, string> = { journals: "Journal", accounts: "Account", integration: "Accounting event", banking: "Banking account", reconciliation: "Reconciliation period", assets: "Asset", income: "Computation", statements: "Statement set", closing: "Period close", migration: "Migration batch" };
 
 export type Crumb = { label: string; href: string };
 

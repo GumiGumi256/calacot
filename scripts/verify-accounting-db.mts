@@ -205,7 +205,9 @@ try {
     await assert.rejects(db.query("DELETE FROM accounting_journals WHERE id=$1", [j1]), /posted_journal_immutable/);
     await assert.rejects(db.query("UPDATE accounting_journal_lines SET debit=debit+1, functional_debit=functional_debit+1 WHERE journal_id=$1 AND line_number=1", [j1]), /journal_lines_locked/);
     await assert.rejects(db.query("INSERT INTO accounting_journal_lines(organization_id,journal_id,line_number,account_id,currency,debit,credit,functional_debit,functional_credit) VALUES('a',$1,9,$2,'UGX',5,0,5,0)", [j1, accounts["1110"]]), /journal_lines_locked/);
-    await assert.rejects(db.query("TRUNCATE accounting_journal_lines"), /accounting_history_immutable/);
+    // Phase 2C: bank_match_items references journal lines, so PostgreSQL refuses the TRUNCATE on the
+    // foreign key before the immutability trigger fires. Either way the lines cannot be truncated.
+    await assert.rejects(db.query("TRUNCATE accounting_journal_lines"), /accounting_history_immutable|referenced in a foreign key constraint/);
   });
 
   await check("direct SQL cannot post an unbalanced, unapproved or pre-numbered journal", async () => {
