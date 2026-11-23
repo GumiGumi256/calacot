@@ -176,6 +176,20 @@
       "when": 1796100000000,
       "tag": "0024_opening_balance_staging",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1796200000000,
+      "tag": "0025_staff_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1796300000000,
+      "tag": "0026_expense_payees",
+      "breakpoints": true
     }
   ]
 }

@@ -18,7 +18,7 @@ const when = (v: unknown) => (v ? formatDateTime(String(v)) : "Not recorded");
 const actionLabels: Record<string, string> = {
   created: "Draft created", updated: "Request edited", submit: "Submitted for review", withdraw: "Withdrawn to draft", cancel: "Cancelled",
   approve: "Approved", return: "Returned for correction", reject: "Rejected", disbursement_recorded: "Disbursement recorded",
-  disbursement_void: "Disbursement voided", disbursement_reconcile: "Disbursement reconciled", document_attached: "Document attached",
+  disbursement_void: "Disbursement voided", disbursement_reconcile: "Disbursement reconciled", document_attached: "Document attached", payees_updated: "Payment breakdown updated",
 };
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
@@ -82,6 +82,19 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             <div className="sm:col-span-2 lg:col-span-3"><dt className="text-muted-foreground">Business purpose</dt><dd className="whitespace-pre-wrap break-words">{String(e.purpose ?? "Not recorded")}</dd></div>
             {Boolean(e.review_note) && <div className="sm:col-span-2 lg:col-span-3"><dt className="text-muted-foreground">Latest review note{e.reviewer ? ` from ${String(e.reviewer)}` : ""}</dt><dd className="whitespace-pre-wrap break-words">{String(e.review_note)}</dd></div>}
           </dl>
+          {d.payees.length > 0 && (
+            <div className="flex flex-col gap-2 text-sm">
+              <h3 className="font-medium">Who received this money</h3>
+              <ul className="divide-y" aria-label="Payment breakdown by person">
+                {d.payees.map((l) => (
+                  <li key={l.member_id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                    <span>{l.name}{l.detail ? <span className="text-muted-foreground"> · {l.detail}</span> : null}</span>
+                    <span className="tabular-nums">{formatAmount(currency, l.amount)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </CardContent>
       </Card>
 

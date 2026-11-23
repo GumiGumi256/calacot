@@ -115,7 +115,12 @@ export async function readExpenseDetail(id: string) {
   const isRequester = !!me && expense.requested_by_id === me;
   // Least privilege: without expenses_read, staff only see their own requests.
   if (!ctx.can("expenses_read") && !isRequester) notFound();
-  const [disbursements, documents, history, staff, accounts] = await Promise.all([
+  const [payees, disbursements, documents, history, staff, accounts] = await Promise.all([
+    db.execute<{ member_id: string; name: string; detail: string | null; amount: string }>(sql`SELECT l.project_member_id AS member_id,coalesce(nullif(trim(s.display_name),''),m.external_name,s.clerk_user_id,'Staff member') AS name,
+        nullif(concat_ws(' · ',m.responsibility,m.external_company),'') AS detail,l.amount::text AS amount
+      FROM expense_payees l JOIN project_members m ON m.organization_id=l.organization_id AND m.id=l.project_member_id
+      LEFT JOIN staff_memberships s ON s.organization_id=m.organization_id AND s.id=m.staff_id
+      WHERE l.organization_id=${org} AND l.expense_id=${id}::uuid ORDER BY l.amount DESC,name,l.id`),
     db.execute(sql`SELECT d.id,d.amount::text AS amount,d.currency,d.method,d.reference,(SELECT fa.label||' ('||fa.provider||')' FROM finance_accounts fa WHERE fa.id=d.source_account_id AND fa.organization_id=d.organization_id) AS source_account,d.paid_on::text AS paid_on,d.status,d.notes,d.void_reason,d.reconciled_at::text AS reconciled_at,d.reconciliation_reference,d.evidence_document_id,d.recorded_by_id,
         coalesce(rs.display_name,rs.clerk_user_id) AS responsible,coalesce(rb.display_name,rb.clerk_user_id) AS recorded_by,coalesce(rc.display_name,rc.clerk_user_id) AS reconciled_by,d.created_at::text AS created_at
       FROM expense_disbursements d
@@ -132,7 +137,7 @@ export async function readExpenseDetail(id: string) {
   const status = expense.status;
   const own = isRequester;
   return {
-    expense, disbursements: disbursements.rows, documents: documents.rows, history: history.rows, staff: staff.rows, accounts: accounts.rows, me,
+    expense, payees: payees.rows, disbursements: disbursements.rows, documents: documents.rows, history: history.rows, staff: staff.rows, accounts: accounts.rows, me,
     can: {
       edit: own && ctx.can("expenses_create") && ["draft", "returned"].includes(status),
       submit: own && ctx.can("expenses_submit") && ["draft", "returned"].includes(status),
@@ -158,10 +163,23 @@ export async function expenseFormOptions() {
     db.execute<{ id: string; name: string; code: string; division: string; currency: string }>(sql`SELECT id,name,code,division,currency FROM projects WHERE organization_id=${org} AND archived_at IS NULL ORDER BY CASE WHEN status IN ('planned','active','on_hold') THEN 0 ELSE 1 END,name,id LIMIT 300`),
     db.execute<{ id: string; name: string }>(sql`SELECT id,name FROM suppliers WHERE organization_id=${org} AND archived_at IS NULL ORDER BY name,id LIMIT 500`),
   ]);
+  // Team members of the listed projects, for the per-person payment breakdown.
+  const members = projects.rows.length ? await readProjectPayeeOptions(org, projects.rows.map((p) => p.id)) : [];
   // Phase 1E company settings: enabled divisions (with display names) and default currency.
   const settings = await effectiveSettings(org);
   const divisionOptions = (settings?.divisions ?? ["estates", "architecture", "painting", "interiors", "tech"].map((key) => ({ key, label: key, enabled: true }))).filter((d) => d.enabled).map((d) => ({ key: d.key, label: d.label }));
-  return { projects: projects.rows, suppliers: suppliers.rows, divisionOptions, defaultCurrency: settings?.defaults.defaultCurrency ?? "UGX" };
+  return { projects: projects.rows, suppliers: suppliers.rows, members, divisionOptions, defaultCurrency: settings?.defaults.defaultCurrency ?? "UGX" };
+}
+
+export type PayeeOption = { id: string; project_id: string; name: string; detail: string | null };
+/** Project team members that can receive a share of a project expense. */
+export async function readProjectPayeeOptions(org: string, projectIds: string[]) {
+  const r = await db.execute<PayeeOption>(sql`SELECT m.id,m.project_id,coalesce(nullif(trim(s.display_name),''),m.external_name,s.clerk_user_id,'Staff member') AS name,
+      nullif(concat_ws(' · ',m.responsibility,m.external_company),'') AS detail
+    FROM project_members m LEFT JOIN staff_memberships s ON s.organization_id=m.organization_id AND s.id=m.staff_id
+    WHERE m.organization_id=${org} AND m.project_id IN (${sql.join(projectIds.map((id) => sql`${id}::uuid`), sql`,`)})
+    ORDER BY name,m.id LIMIT 3000`);
+  return r.rows;
 }
 
 /** Exceptions for finance staff on the expenses workspace. */

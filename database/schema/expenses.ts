@@ -10,7 +10,7 @@ import {
   scopedForeignKey,
 } from "./common";
 import { organizations } from "./organization";
-import { projects } from "./projects";
+import { projectMembers, projects } from "./projects";
 import { staffMemberships } from "./organization";
 
 export const suppliers = pgTable(
@@ -164,3 +164,29 @@ export const expenses = pgTable(
   ],
 );
 export type ExpensesRecord = typeof expenses.$inferSelect;
+
+// Per-person breakdown of a project expense (migration 0026). Lines add up to the expense
+// total and are replaced only by expense_save_with_payees while the expense is editable.
+// A line counts as paid once its expense is paid in full.
+export const expensePayees = pgTable(
+  "expense_payees",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    expenseId: uuid("expense_id").notNull(),
+    projectMemberId: uuid("project_member_id").notNull(),
+    amount: money("amount").notNull(),
+    createdAt: instant("created_at").notNull().defaultNow(),
+  },
+  (t) => [
+    unique("expense_payees_org_id_uq").on(t.organizationId, t.id),
+    unique("expense_payees_member_uq").on(t.organizationId, t.expenseId, t.projectMemberId),
+    scopedForeignKey("expense_payees_expense_fk", t.organizationId, t.expenseId, expenses.organizationId, expenses.id),
+    scopedForeignKey("expense_payees_member_fk", t.organizationId, t.projectMemberId, projectMembers.organizationId, projectMembers.id),
+    check("expense_payees_amount_check", sql`${t.amount} > 0`),
+    index("expense_payees_member_idx").on(t.organizationId, t.projectMemberId),
+  ],
+);
+export type ExpensePayeesRecord = typeof expensePayees.$inferSelect;

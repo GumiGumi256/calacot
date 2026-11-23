@@ -28,13 +28,14 @@
     "test:seo": "tsx scripts/verify-seo.ts",
     "test:accounting": "tsx scripts/verify-accounting-engine.mts && tsx scripts/verify-accounting-db.mts && node scripts/verify-accounting-actions.mjs",
     "test:accounting:integration": "tsx scripts/verify-accounting-integration-engine.mts && tsx scripts/verify-accounting-integration-db.mts && node scripts/verify-accounting-integration-actions.mjs",
-    "test:verification":"node scripts/verify-document-verification-crypto.mjs && node scripts/verify-document-verification-db.mjs && node scripts/verify-document-verification-route.mjs && node scripts/verify-document-verification-actions.mjs && node scripts/verify-document-verification-artifacts.mjs",
+    "test:verification": "node scripts/verify-document-verification-crypto.mjs && node scripts/verify-document-verification-db.mjs && node scripts/verify-document-verification-route.mjs && node scripts/verify-document-verification-actions.mjs && node scripts/verify-document-verification-artifacts.mjs",
     "test:shared-documents": "node scripts/verify-shared-documents.mjs",
     "test:banking": "tsx scripts/verify-statement-csv.mts && tsx scripts/verify-bank-reconciliation.mts && tsx scripts/verify-banking-db.mts && node scripts/verify-banking-actions.mjs",
     "test:tax-assets": "tsx scripts/verify-depreciation-model.mts && tsx scripts/verify-tax-assets-db.mts && node scripts/verify-tax-assets-actions.mjs",
     "test:statements": "tsx scripts/verify-statements-db.mts && node scripts/verify-statements-actions.mjs",
     "test:migration": "tsx scripts/verify-migration-staging-db.mts && tsx scripts/verify-accounting-parallel.mts",
     "test:migration-chain": "node scripts/verify-migration-chain.mjs",
+    "test:expense-payees": "node scripts/verify-expense-payees-db.mjs",
     "test:safe": "node scripts/run-safe-tests.mjs",
     "check:isolated-env": "node scripts/check-isolated-env.mjs .env.isolated",
     "dev:isolated": "node scripts/start-isolated-dev.mjs"
@@ -52,6 +53,7 @@
     "@sentry/nextjs": "^11.4.0",
     "@shadcn/react": "^0.3.1",
     "@tanstack/react-table": "^9.2.4",
+    "@types/web-push": "^3.6.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -80,6 +82,7 @@
     "styled-components": "^6.3.12",
     "tailwind-merge": "^3.6.0",
     "tw-animate-css": "^1.4.0",
+    "web-push": "^4.0.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {

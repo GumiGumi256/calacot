@@ -4,11 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ExpenseForm } from "./expense-form";
+import { ExpenseForm, type PayeeMember } from "./expense-form";
 
 type Project = { id: string; name: string; code: string; division: string; currency: string };
 
-export function ProjectExpenseCreate({ project, suppliers, today }: { project: Project; suppliers: { id: string; name: string }[]; today: string }) {
+export function ProjectExpenseCreate({ project, suppliers, members, today }: { project: Project; suppliers: { id: string; name: string }[]; members: PayeeMember[]; today: string }) {
   const [open, setOpen] = useState(false);
   const [requestKey, setRequestKey] = useState("");
   const [savedId, setSavedId] = useState("");
@@ -29,7 +29,7 @@ export function ProjectExpenseCreate({ project, suppliers, today }: { project: P
         <p>Draft saved for this project.</p>
         <Button render={<Link href={`/admin/expenses/${savedId}`} />}>Open draft to attach receipts and submit</Button>
         <Button variant="outline" onClick={() => changeOpen(false)}>Done</Button>
-      </div> : requestKey && <ExpenseForm requestKey={requestKey} projects={[]} suppliers={suppliers} today={today} fixedProject={project} onSaved={setSavedId} />}
+      </div> : requestKey && <ExpenseForm requestKey={requestKey} projects={[]} suppliers={suppliers} members={members} today={today} fixedProject={project} onSaved={setSavedId} />}
     </DialogContent>
   </Dialog>;
 }

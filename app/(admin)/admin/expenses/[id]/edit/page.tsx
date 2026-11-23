@@ -37,13 +37,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           <ExpenseForm
             requestKey={randomUUID()}
             projects={options.projects}
-            suppliers={options.suppliers} divisionOptions={options.divisionOptions} defaultCurrency={options.defaultCurrency}
+            suppliers={options.suppliers} members={options.members} divisionOptions={options.divisionOptions} defaultCurrency={options.defaultCurrency}
             today={today}
             initial={{
               id, version: Number(e.version), division: String(e.division), projectId: String(e.project_id ?? ""), category: String(e.category),
               supplierId: String(e.supplier_id ?? ""), description: String(e.description), purpose: String(e.purpose ?? ""), currency: String(e.currency),
               netAmount: String(e.net_amount), taxAmount: Number(e.tax_amount) ? String(e.tax_amount) : "", incurredOn: String(e.incurred_on),
               supplierInvoiceReference: String(e.supplier_invoice_reference ?? ""),
+              payees: detail.payees.map((l) => ({ memberId: l.member_id, amount: l.amount })),
             }}
           />
         </CardContent>

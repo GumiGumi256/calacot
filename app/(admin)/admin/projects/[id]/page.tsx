@@ -22,6 +22,7 @@ import { AddProjectMember, RemoveProjectMember } from "@/components/admin/projec
 import { CreateMilestone, EditMilestone, MilestoneReview, ProjectTransition } from "@/components/admin/project-milestones";
 import { ProjectExpenses } from "@/components/finance/project-expenses";
 import { ProjectExpenseCreate } from "@/components/finance/project-expense-create";
+import { ProjectTeamPayments } from "@/components/finance/project-team-payments";
 import { expenseFormOptions } from "@/lib/finance/expenses";
 import { RecordDocuments } from "@/components/documents/record-documents";
 import { PageHeader } from "@/components/layout/page-header";
@@ -57,7 +58,7 @@ export default async function Page({
   const workspace = await readProjectWorkspace(ctx.organizationId, id, ctx.permissions);
   const expenseOptions = ctx.permissions.includes("expenses_create") && !p.archived_at ? await expenseFormOptions() : null;
   const expenseToday = expenseOptions ? (await db.execute<{ d: string }>(sql`SELECT finance_kampala_today()::text AS d`)).rows[0].d : null;
-  const createExpense = expenseOptions && expenseToday ? <ProjectExpenseCreate project={{ id, name: String(p.name), code: String(p.code), division: String(p.division), currency: String(p.currency) }} suppliers={expenseOptions.suppliers} today={expenseToday} /> : null;
+  const createExpense = expenseOptions && expenseToday ? <ProjectExpenseCreate project={{ id, name: String(p.name), code: String(p.code), division: String(p.division), currency: String(p.currency) }} suppliers={expenseOptions.suppliers} members={workspace.members.map((m) => ({ id: String(m.id), project_id: id, name: String(m.name), detail: [m.responsibility, m.external_company].filter(Boolean).join(" · ") || null }))} today={expenseToday} /> : null;
   const staff = ctx.permissions.includes("projects_write") ? (await db.execute<{ id: string; name: string }>(sql`SELECT id,coalesce(display_name,clerk_user_id) AS name FROM staff_memberships WHERE organization_id=${ctx.organizationId} AND status='active' ORDER BY name,id LIMIT 100`)).rows : [];
   return (
     <PageContainer>
@@ -90,6 +91,7 @@ export default async function Page({
         {workspace.invoices && <Card><CardHeader><CardTitle>Invoices</CardTitle><CardDescription>Most recent 50 project invoices; balances use the existing ledger.</CardDescription></CardHeader><CardContent>{workspace.invoices.length ? <ul className="space-y-2 text-sm">{workspace.invoices.map(i => <li key={String(i.id)}><Link className="underline underline-offset-4" href={`/admin/invoices/${i.id}`}>{String(i.number || "Draft")}</Link> · {String(i.status)} · {String(i.currency)} {String(i.total)} · Due {String(i.balance)}</li>)}</ul> : <p className="text-sm text-muted-foreground">No invoices linked to this project.</p>}</CardContent></Card>}
         <RecordDocuments type="project" id={id} label={`${String(p.code)} ${String(p.name)}`} />
         {workspace.expenses ? <ProjectExpenses projectId={id} expenses={workspace.expenses} summary={workspace.expenseSummary ?? []} activity={workspace.expenseActivity ?? []} createAction={createExpense} /> : createExpense && <Card><CardHeader><CardTitle>Project expenses</CardTitle><CardDescription>Create an expense request for this project.</CardDescription></CardHeader><CardContent>{createExpense}</CardContent></Card>}
+        {workspace.teamPayments && <ProjectTeamPayments rows={workspace.teamPayments} />}
       </div>
     </PageContainer>
   );

@@ -8,7 +8,7 @@ type Row = Record<string, unknown>;
 type Summary = { currency: string; requested: string; approved: string; disbursed: string; outstanding: string; reconciled: string };
 const actionLabels: Record<string, string> = {
   created: "draft created", updated: "edited", submit: "submitted", withdraw: "withdrawn", cancel: "cancelled", approve: "approved", return: "returned for correction",
-  reject: "rejected", disbursement_recorded: "disbursement recorded", disbursement_void: "disbursement voided", disbursement_reconcile: "disbursement reconciled", document_attached: "document attached",
+  reject: "rejected", disbursement_recorded: "disbursement recorded", disbursement_void: "disbursement voided", disbursement_reconcile: "disbursement reconciled", document_attached: "document attached", payees_updated: "payment breakdown updated",
 };
 const day = (v: unknown) => {
   const d = new Date(String(v));

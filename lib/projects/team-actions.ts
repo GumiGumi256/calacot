@@ -45,6 +45,9 @@ export async function removeProjectMember(_: Result, data: FormData): Promise<Re
   const parsed = z.object({ projectId: z.uuid(), memberId: z.uuid() }).safeParse(Object.fromEntries(data));
   if (!parsed.success) return { ok: false, message: "Invalid team member." };
   const { projectId, memberId } = parsed.data;
+  // Shares of project expenses reference the member (migration 0026); keep per-person totals intact.
+  const paid = await db.execute(sql`SELECT 1 FROM expense_payees WHERE organization_id=${ctx.organizationId} AND project_member_id=${memberId}::uuid LIMIT 1`);
+  if (paid.rows.length) return { ok: false, message: "This person has payments recorded on this project's expenses, so they stay on the team to keep the payment records complete." };
   try {
     const result = await db.execute(sql`WITH removed AS (DELETE FROM project_members m USING projects p
       WHERE m.id=${memberId}::uuid AND m.organization_id=${ctx.organizationId} AND m.project_id=${projectId}::uuid

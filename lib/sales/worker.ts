@@ -120,6 +120,9 @@ async function attempt(job: SalesJob, d: Intent) {
       { recipient: d.recipient, ...d.payload, ...(isReceipt ? { template: cfg.receiptTemplate, approved: cfg.receiptTemplateApproved } : {}), consentAt: consent.rows[0]?.whatsapp_consent_at, consentSource: consent.rows[0]?.whatsapp_consent_source },
       !!contact.rows[0]?.opted_out_at,
     );
+    // A missing template is an operator configuration error, not a recipient
+    // decision. Keep it retryable after the approved template is configured.
+    if (reason === "approved_template_missing") throw new DeliveryFailure(reason, true);
     if (reason) return finish(job, d, "skipped", reason);
     const liveTemplate = salesConfig();
     if (isReceipt ? (!liveTemplate.receiptTemplateApproved || !liveTemplate.receiptTemplate) : (!liveTemplate.templateApproved || !liveTemplate.invoiceLinkApproved || liveTemplate.template !== d.payload.template))

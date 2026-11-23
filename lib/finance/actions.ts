@@ -36,7 +36,9 @@ const expenseInput = z.object({
   taxAmount: z.union([amount, z.literal("")]).default(""),
   incurredOn: z.iso.date(),
   supplierInvoiceReference: z.string().trim().max(200).default(""),
+  payees: z.string().max(20000).default("[]"),
 });
+const payeeLines = z.array(z.object({ memberId: z.uuid(), amount })).max(100);
 
 /** Creates a draft or saves corrections to the requester's own draft/returned request. */
 export async function saveExpense(_: FinanceResult, data: FormData): Promise<FinanceResult> {
@@ -46,10 +48,17 @@ export async function saveExpense(_: FinanceResult, data: FormData): Promise<Fin
     const labels: Record<string, string> = { purpose: "Explain the business purpose (at least 5 characters).", netAmount: "Enter the amount before tax, using at most two decimal places.", taxAmount: "Enter a valid tax amount or leave it empty.", incurredOn: "Enter the expense date.", description: "Enter a short description.", category: "Enter a category." };
     return invalid(labels[field] ?? "Check the highlighted expense details and try again.");
   }
-  const p = parsed.data;
+  const { payees: rawPayees, ...p } = parsed.data;
   if (p.id && !p.version) return invalid("Refresh the page before saving.");
+  let payees: z.infer<typeof payeeLines>;
+  try {
+    const lines = payeeLines.safeParse(JSON.parse(rawPayees));
+    if (!lines.success) return invalid("Check the payment breakdown: choose a team member and enter a positive amount on every line.");
+    payees = lines.data;
+  } catch { return invalid("Check the payment breakdown and try again."); }
+  if (payees.length && !p.projectId) return invalid("A payment breakdown needs a project. Choose the project or remove the breakdown.");
   return financeMutation("expenses_create", async (ctx, correlation) => {
-    const r = await db.execute<{ result: { id: string; already: boolean } }>(sql`SELECT expense_save(${ctx.organizationId},${ctx.actor},${json({ ...p, id: p.id || null, version: p.version ? Number(p.version) : null })},${correlation}) AS result`);
+    const r = await db.execute<{ result: { id: string; already: boolean } }>(sql`SELECT expense_save_with_payees(${ctx.organizationId},${ctx.actor},${json({ ...p, payees, id: p.id || null, version: p.version ? Number(p.version) : null })},${correlation}) AS result`);
     const id = r.rows[0].result.id;
     refresh(id, p.projectId || undefined);
     return { ok: true, id, message: p.id ? "Corrections saved. Submit the request when it is ready for review." : "Draft saved. Attach receipts, then submit it for review." };

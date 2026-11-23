@@ -16,17 +16,21 @@ type Supplier = { id: string; name: string };
 export type ExpenseFormValues = {
   id?: string; version?: number; division: string; projectId: string; category: string; supplierId: string; description: string; purpose: string;
   currency: string; netAmount: string; taxAmount: string; incurredOn: string; supplierInvoiceReference: string;
+  payees?: PayeeLine[];
 };
+/** A project team member who can receive a share of the expense. */
+export type PayeeMember = { id: string; project_id: string; name: string; detail: string | null };
+type PayeeLine = { memberId: string; amount: string };
 
 const valid = (v: string) => /^\d{1,15}(\.\d{1,2})?$/.test(v);
+const cents = (v: string) => { const [w, f = ""] = v.split("."); return BigInt(w + f.padEnd(2, "0")); };
+const fromCents = (c: bigint) => `${c < BigInt(0) ? "-" : ""}${(c < BigInt(0) ? -c : c) / BigInt(100)}.${((c < BigInt(0) ? -c : c) % BigInt(100)).toString().padStart(2, "0")}`;
 function addMoney(a: string, b: string) {
   if (!valid(a) || (b && !valid(b))) return null;
-  const cents = (v: string) => { const [w, f = ""] = v.split("."); return BigInt(w + f.padEnd(2, "0")); };
-  const total = cents(a) + (b ? cents(b) : BigInt(0));
-  return `${total / BigInt(100)}.${(total % BigInt(100)).toString().padStart(2, "0")}`;
+  return fromCents(cents(a) + (b ? cents(b) : BigInt(0)));
 }
 
-export function ExpenseForm({ requestKey, projects, suppliers, initial, today, divisionOptions = divisions.map((key) => ({ key, label: key })), defaultCurrency = "UGX", fixedProject, onSaved }: { requestKey: string; projects: Project[]; suppliers: Supplier[]; initial?: ExpenseFormValues; today: string; divisionOptions?: { key: string; label: string }[]; defaultCurrency?: string; fixedProject?: Project; onSaved?: (id: string) => void }) {
+export function ExpenseForm({ requestKey, projects, suppliers, members = [], initial, today, divisionOptions = divisions.map((key) => ({ key, label: key })), defaultCurrency = "UGX", fixedProject, onSaved }: { requestKey: string; projects: Project[]; suppliers: Supplier[]; members?: PayeeMember[]; initial?: ExpenseFormValues; today: string; divisionOptions?: { key: string; label: string }[]; defaultCurrency?: string; fixedProject?: Project; onSaved?: (id: string) => void }) {
   const router = useRouter();
   const { orgSlug } = useAuth();
   const [state, action, pending] = useActionState(saveExpense, { ok: false, message: "" });
@@ -35,6 +39,14 @@ export function ExpenseForm({ requestKey, projects, suppliers, initial, today, d
   const set = (k: keyof ExpenseFormValues, v: string) => setForm((f) => ({ ...f, [k]: v }));
   const projectOptions = useMemo(() => projects.filter((p) => !form.division || p.division === form.division), [projects, form.division]);
   const total = addMoney(form.netAmount || "0", form.taxAmount);
+  const [payees, setPayees] = useState<PayeeLine[]>(initial?.payees ?? []);
+  const team = useMemo(() => members.filter((m) => m.project_id === form.projectId), [members, form.projectId]);
+  // Lines with neither a person nor an amount are ignored; partly filled lines go to the server and fail validation there.
+  const filled = payees.filter((l) => l.memberId || l.amount);
+  const allocated = filled.every((l) => valid(l.amount)) ? filled.reduce((s, l) => s + cents(l.amount), BigInt(0)) : null;
+  const remaining = total && allocated !== null ? cents(total) - allocated : null;
+  const setLine = (i: number, k: keyof PayeeLine, v: string) => setPayees((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+  const changeProject = (id: string) => { set("projectId", id); setPayees([]); };
   useEffect(() => {
     if (state.ok && state.id) {
       if (onSaved) { onSaved(state.id); router.refresh(); return; }
@@ -53,14 +65,14 @@ export function ExpenseForm({ requestKey, projects, suppliers, initial, today, d
           {fixedProject ? <><input type="hidden" name="division" value={fixedProject.division} /><input type="hidden" name="projectId" value={fixedProject.id} /><p className="text-sm">Project: <span className="font-medium">{fixedProject.code} {fixedProject.name}</span> · {fixedProject.division}</p></> : <div className="grid gap-4 sm:grid-cols-2">
             <Field>
               <FieldLabel htmlFor="expense-division">Division</FieldLabel>
-              <NativeSelect wrapperClassName="w-full" className="capitalize" id="expense-division" name="division" required value={form.division} onChange={(e) => { set("division", e.target.value); if (projects.find((p) => p.id === form.projectId)?.division !== e.target.value) set("projectId", ""); }}>
+              <NativeSelect wrapperClassName="w-full" className="capitalize" id="expense-division" name="division" required value={form.division} onChange={(e) => { set("division", e.target.value); if (projects.find((p) => p.id === form.projectId)?.division !== e.target.value) changeProject(""); }}>
                 <option value="" disabled>Select a division</option>
                 {divisionOptions.map((d) => <option key={d.key} value={d.key}>{d.label}</option>)}{initial && !divisionOptions.some((d) => d.key === initial.division) && <option value={initial.division}>{initial.division}</option>}
               </NativeSelect>
             </Field>
             <Field>
               <FieldLabel htmlFor="expense-project">Project (optional)</FieldLabel>
-              <NativeSelect wrapperClassName="w-full" className="capitalize" id="expense-project" name="projectId" value={form.projectId} onChange={(e) => { set("projectId", e.target.value); const p = projects.find((x) => x.id === e.target.value); if (p) set("division", p.division); }} aria-describedby="expense-project-hint">
+              <NativeSelect wrapperClassName="w-full" className="capitalize" id="expense-project" name="projectId" value={form.projectId} onChange={(e) => { changeProject(e.target.value); const p = projects.find((x) => x.id === e.target.value); if (p) set("division", p.division); }} aria-describedby="expense-project-hint">
                 <option value="">No project (operational expense)</option>
                 {projectOptions.map((p) => <option key={p.id} value={p.id}>{p.code} {p.name}</option>)}
               </NativeSelect>
@@ -139,6 +151,43 @@ export function ExpenseForm({ requestKey, projects, suppliers, initial, today, d
           </p>
         </FieldGroup>
       </FieldSet>
+      {form.projectId && (
+        <FieldSet>
+          <FieldLegend>Who received this money? (optional)</FieldLegend>
+          <FieldDescription>For a lump sum paid to several people, such as painters, record each person&apos;s share. The shares must add up to the total. The project page then shows how much each person has been paid.</FieldDescription>
+          <input type="hidden" name="payees" value={JSON.stringify(filled)} />
+          {team.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nobody is on this project&apos;s team yet. Add the people you pay to the project team, then come back to split this expense.</p>
+          ) : (
+            <FieldGroup>
+              {payees.map((line, i) => (
+                <div key={i} className="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto]">
+                  <Field>
+                    <FieldLabel htmlFor={`payee-member-${i}`}>Person {i + 1}</FieldLabel>
+                    <NativeSelect wrapperClassName="w-full" id={`payee-member-${i}`} value={line.memberId} onChange={(e) => setLine(i, "memberId", e.target.value)}>
+                      <option value="" disabled>Select a team member</option>
+                      {team.filter((m) => m.id === line.memberId || !payees.some((l) => l.memberId === m.id)).map((m) => <option key={m.id} value={m.id}>{m.name}{m.detail ? ` (${m.detail})` : ""}</option>)}
+                    </NativeSelect>
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`payee-amount-${i}`}>Amount</FieldLabel>
+                    <Input id={`payee-amount-${i}`} inputMode="decimal" pattern="\d{1,15}(\.\d{1,2})?" value={line.amount} onChange={(e) => setLine(i, "amount", e.target.value.trim())} aria-invalid={!!line.amount && !valid(line.amount)} />
+                  </Field>
+                  <Button type="button" variant="outline" onClick={() => setPayees((ls) => ls.filter((_, j) => j !== i))} aria-label={`Remove person ${i + 1}`}>Remove</Button>
+                </div>
+              ))}
+              <div className="flex flex-wrap items-center gap-3">
+                {payees.length < team.length && <Button type="button" variant="outline" size="sm" onClick={() => setPayees((ls) => [...ls, { memberId: "", amount: remaining && remaining > BigInt(0) && ls.length > 0 ? fromCents(remaining) : "" }])}>Add person</Button>}
+                {filled.length > 0 && (
+                  <p className="text-sm tabular-nums" aria-live="polite">
+                    {allocated === null || remaining === null ? "Enter each amount using digits and up to two decimals." : remaining === BigInt(0) ? <>Fully allocated: <span className="font-medium">{formatAmount(form.currency, fromCents(allocated))}</span></> : remaining > BigInt(0) ? <span className="text-destructive">{formatAmount(form.currency, fromCents(remaining))} still to allocate</span> : <span className="text-destructive">Over the total by {formatAmount(form.currency, fromCents(-remaining))}</span>}
+                  </p>
+                )}
+              </div>
+            </FieldGroup>
+          )}
+        </FieldSet>
+      )}
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={pending}>{pending ? "Saving..." : initial?.id ? "Save corrections" : "Save draft"}</Button>
         <p className="text-sm text-muted-foreground">Saving does not submit the request. You can attach receipts and submit from the expense page.</p>

@@ -25,7 +25,7 @@ export async function readProjectWorkspace(org: string, projectId: string, permi
   ]);
   // Phase 1D: project expenditure per currency (never combined) and recent financial history.
   // Read-only: paying an expense never changes project status, milestones or invoices.
-  const [expenseSummary, expenseActivity] = permissions.includes("expenses_read") ? await Promise.all([
+  const [expenseSummary, expenseActivity, teamPayments] = permissions.includes("expenses_read") ? await Promise.all([
     db.execute<{ currency: string; requested: string; approved: string; disbursed: string; outstanding: string; reconciled: string }>(sql`SELECT e.currency,
         coalesce(sum(e.total) FILTER (WHERE e.status='submitted'),0)::text AS requested,
         coalesce(sum(e.total) FILTER (WHERE e.status IN ('approved','paid')),0)::text AS approved,
@@ -35,6 +35,27 @@ export async function readProjectWorkspace(org: string, projectId: string, permi
       FROM expenses e CROSS JOIN LATERAL (SELECT coalesce(sum(d.amount),0) AS disbursed,coalesce(sum(d.amount) FILTER (WHERE d.reconciled_at IS NOT NULL),0) AS reconciled FROM expense_disbursements d WHERE d.organization_id=e.organization_id AND d.expense_id=e.id AND d.status='recorded') x
       WHERE e.organization_id=${org} AND e.project_id=${projectId}::uuid GROUP BY e.currency ORDER BY e.currency`),
     db.execute(sql`SELECT ev.action,ev.created_at,ev.expense_id,e.description,coalesce(s.display_name,s.clerk_user_id,ev.actor_clerk_user_id) AS actor FROM expense_events ev JOIN expenses e ON e.id=ev.expense_id AND e.organization_id=ev.organization_id LEFT JOIN staff_memberships s ON s.id=ev.actor_staff_id AND s.organization_id=ev.organization_id WHERE ev.organization_id=${org} AND e.project_id=${projectId}::uuid ORDER BY ev.created_at DESC,ev.id LIMIT 30`),
-  ]) : [null, null];
-  return { manager: manager.rows[0], members: members.rows, tasks: tasks.rows, counts: counts.rows[0], milestones: milestones.rows, activity: activity.rows, quotation: quotation?.rows[0], invoices: invoices?.rows, expenses: expenses?.rows, expenseSummary: expenseSummary?.rows, expenseActivity: expenseActivity?.rows };
+    // Per-person totals from expense breakdowns (migration 0026), per currency. A share counts as paid
+    // once its expense is paid in full; drafts, returned, rejected and void expenses are excluded.
+    db.execute<TeamPaymentRow>(sql`SELECT m.id AS member_id,coalesce(nullif(trim(s.display_name),''),m.external_name,s.clerk_user_id,'Staff member') AS name,
+        nullif(concat_ws(' · ',m.responsibility,m.external_company),'') AS detail,e.currency,
+        coalesce(sum(l.amount) FILTER (WHERE e.status='paid'),0)::numeric(17,2)::text AS paid,
+        coalesce(sum(l.amount) FILTER (WHERE e.status='approved'),0)::numeric(17,2)::text AS approved,
+        coalesce(sum(l.amount) FILTER (WHERE e.status='submitted'),0)::numeric(17,2)::text AS pending,
+        (jsonb_agg(jsonb_build_object('expenseId',e.id,'description',e.description,'status',e.status,'amount',l.amount::text,
+          'incurredOn',to_char(e.incurred_at AT TIME ZONE 'Africa/Kampala','YYYY-MM-DD')) ORDER BY e.incurred_at DESC,e.id))
+          AS lines
+      FROM expense_payees l
+      JOIN expenses e ON e.organization_id=l.organization_id AND e.id=l.expense_id
+      JOIN project_members m ON m.organization_id=l.organization_id AND m.id=l.project_member_id
+      LEFT JOIN staff_memberships s ON s.organization_id=m.organization_id AND s.id=m.staff_id
+      WHERE l.organization_id=${org} AND e.project_id=${projectId}::uuid AND e.status IN ('submitted','approved','paid')
+      GROUP BY m.id,s.id,e.currency ORDER BY e.currency,sum(l.amount) FILTER (WHERE e.status='paid') DESC NULLS LAST,name,m.id LIMIT 200`),
+  ]) : [null, null, null];
+  return { manager: manager.rows[0], members: members.rows, tasks: tasks.rows, counts: counts.rows[0], milestones: milestones.rows, activity: activity.rows, quotation: quotation?.rows[0], invoices: invoices?.rows, expenses: expenses?.rows, expenseSummary: expenseSummary?.rows, expenseActivity: expenseActivity?.rows, teamPayments: teamPayments?.rows };
+}
+
+export type TeamPaymentRow = {
+  member_id: string; name: string; detail: string | null; currency: string; paid: string; approved: string; pending: string;
+  lines: { expenseId: string; description: string; status: string; amount: string; incurredOn: string }[];
 }

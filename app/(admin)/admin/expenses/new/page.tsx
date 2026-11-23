@@ -20,7 +20,7 @@ export default async function Page() {
       />
       <Card>
         <CardContent>
-          <ExpenseForm requestKey={randomUUID()} projects={options.projects} suppliers={options.suppliers} divisionOptions={options.divisionOptions} defaultCurrency={options.defaultCurrency} today={today} />
+          <ExpenseForm requestKey={randomUUID()} projects={options.projects} suppliers={options.suppliers} members={options.members} divisionOptions={options.divisionOptions} defaultCurrency={options.defaultCurrency} today={today} />
         </CardContent>
       </Card>
     </PageContainer>

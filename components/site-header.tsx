@@ -2,6 +2,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs";
 import { ModeToggle } from "./mode-toggle";
+import { NotificationBell } from "./admin/notification-bell";
 
 /*
  * Admin shell header (Design System V1, Phase 4). The page's own level-1 heading lives in PageHeader;
@@ -16,6 +17,7 @@ export function SiteHeader() {
         <AdminBreadcrumbs />
       </div>
       <p className="hidden shrink-0 type-caption xl:block">Calacot Group Uganda Limited</p>
+      <NotificationBell />
       <ModeToggle />
     </header>
   );
