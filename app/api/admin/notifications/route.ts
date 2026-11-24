@@ -6,8 +6,15 @@ import { notificationFeed } from "@/lib/admin/notification-feed";
 
 export async function GET() {
   const ctx = await staffContext(undefined, "fresh");
-  const items = await notificationFeed(ctx);
-  const reads = await db.execute<{ event_id: string }>(sql`SELECT event_id FROM staff_notification_reads WHERE organization_id=${ctx.organizationId} AND clerk_user_id=${ctx.actor} AND read_at > now()-interval '30 days'`);
+  let items, reads;
+  try {
+    items = await notificationFeed(ctx);
+    reads = await db.execute<{ event_id: string }>(sql`SELECT event_id FROM staff_notification_reads WHERE organization_id=${ctx.organizationId} AND clerk_user_id=${ctx.actor} AND read_at > now()-interval '30 days'`);
+  } catch (error) {
+    // Usually a database missing migration 0025 (staff_notification_reads). Logged so it shows in runtime logs.
+    console.error("notification_feed_failed", error instanceof Error ? error.message : error);
+    return Response.json({ error: "notification_feed_failed", pushPublicKey: process.env.NEXT_PUBLIC_WEB_PUSH_KEY || null }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
+  }
   return Response.json({ items, seen: reads.rows.map(r => r.event_id), pushPublicKey: process.env.NEXT_PUBLIC_WEB_PUSH_KEY || null }, { headers: { "Cache-Control": "private, no-store" } });
 }
 

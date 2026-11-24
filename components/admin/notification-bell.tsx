@@ -11,7 +11,8 @@ export function NotificationBell() {
   const [seen, setSeen] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(false);
-  const [pushKey, setPushKey] = useState<string | null>(null);
+  // Known at build time, so push setup does not depend on the feed request succeeding.
+  const [pushKey, setPushKey] = useState<string | null>(process.env.NEXT_PUBLIC_WEB_PUSH_KEY || null);
   const [subscribed, setSubscribed] = useState(false);
   const [pushError, setPushError] = useState("");
   const panel = useRef<HTMLDivElement>(null);
@@ -22,7 +23,7 @@ export function NotificationBell() {
       if (!response.ok) throw new Error("unavailable");
       const data: { items: Item[]; seen: string[]; pushPublicKey: string | null } = await response.json();
       setSeen(data.seen);
-      setPushKey(data.pushPublicKey);
+      if (data.pushPublicKey) setPushKey(data.pushPublicKey);
       setItems(data.items);
       setError(false);
     } catch { setError(true); }
