@@ -6,7 +6,7 @@ import { db } from "@/database/db";
 import { literalSearch, parseQuery } from "@/lib/sales/contracts";
 import { actorStaffId, financeContext } from "./context";
 import { effectiveSettings } from "@/lib/admin/settings";
-import { expenseStatuses, expenseViews, type ExpenseView } from "./options";
+import { expenseStatuses, expenseViews, type ExpenseView, type VerifiedPaymentOptions } from "./options";
 import { cacheKeyContext, adminCache, type CacheKeyContext } from "@/lib/cache-tags";
 
 export type SearchParams = Record<string, string | string[] | undefined>;
@@ -20,7 +20,7 @@ export const expenseAmounts = sql`
 export type ExpenseListRow = {
   id: string; description: string; category: string; division: string; supplier: string | null; project: string | null; project_id: string | null;
   total: string; currency: string; status: string; incurred_on: string; requester: string | null; requested_by_id: string | null;
-  disbursed: string; reconciled: string; outstanding: string; submitted_at: string | null; legacy_paid: boolean;
+  disbursed: string; reconciled: string; outstanding: string; submitted_at: string | null; legacy_paid: boolean; entry_mode: string;
 };
 
 export async function readExpenseList(raw: SearchParams) {
@@ -39,14 +39,17 @@ async function cachedReadExpenseList(ctx: CacheKeyContext<Awaited<ReturnType<typ
   const q = parseQuery(raw);
   const requested = one(raw, "view") as ExpenseView;
   const defaultView: ExpenseView = canReview ? "review" : canAll ? "all" : "mine";
+  const canVerify = ctx.permissions.includes("expenses_record_verified");
   let view: ExpenseView = expenseViews.includes(requested) ? requested : defaultView;
   if (!canAll) view = "mine";
+  else if (view === "verified" && !canVerify) view = defaultView;
   const status = expenseStatuses.includes(one(raw, "status") as never) ? one(raw, "status") : "";
   const projectId = z.uuid().safeParse(one(raw, "projectId")).success ? one(raw, "projectId") : "";
   const where: SQL[] = [];
   if (view === "mine") where.push(me ? sql`requested_by_id=${me}::uuid` : sql`false`);
   if (view === "review") where.push(sql`status='submitted'`);
   if (view === "payable") where.push(sql`status='approved'`);
+  if (view === "verified") where.push(sql`entry_mode='admin_verified'`);
   if (status) where.push(sql`status=${status}`);
   if (q.division) where.push(sql`division=${q.division}`);
   if (q.currency) where.push(sql`currency=${q.currency}`);
@@ -58,14 +61,14 @@ async function cachedReadExpenseList(ctx: CacheKeyContext<Awaited<ReturnType<typ
     where.push(sql`(description ILIKE ${s} OR category ILIKE ${s} OR coalesce(supplier,'') ILIKE ${s} OR coalesce(project,'') ILIKE ${s} OR coalesce(requester,'') ILIKE ${s})`);
   }
   const base = sql`SELECT e.id,e.description,e.category,e.division,s.name AS supplier,p.name AS project,e.project_id,e.total::text AS total,e.currency,e.status,
-      to_char(e.incurred_at AT TIME ZONE 'Africa/Kampala','YYYY-MM-DD') AS incurred_on,coalesce(r.display_name,r.clerk_user_id) AS requester,e.requested_by_id,e.submitted_at::text AS submitted_at,
+      to_char(e.incurred_at AT TIME ZONE 'Africa/Kampala','YYYY-MM-DD') AS incurred_on,coalesce(r.display_name,r.clerk_user_id) AS requester,e.requested_by_id,e.submitted_at::text AS submitted_at,e.entry_mode,
       ${expenseAmounts}
     FROM expenses e
     LEFT JOIN suppliers s ON s.id=e.supplier_id AND s.organization_id=e.organization_id
     LEFT JOIN projects p ON p.id=e.project_id AND p.organization_id=e.organization_id
     LEFT JOIN staff_memberships r ON r.id=e.requested_by_id AND r.organization_id=e.organization_id
     WHERE e.organization_id=${org}`;
-  const wrapped = sql`SELECT b.id,b.description,b.category,b.division,b.supplier,b.project,b.project_id,b.total,b.currency,b.status,b.incurred_on,b.requester,b.requested_by_id,b.submitted_at,
+  const wrapped = sql`SELECT b.id,b.description,b.category,b.division,b.supplier,b.project,b.project_id,b.total,b.currency,b.status,b.incurred_on,b.requester,b.requested_by_id,b.submitted_at,b.entry_mode,
       (CASE WHEN b.status='approved' THEN b.total::numeric-b.disbursed ELSE 0 END)::text AS outstanding,
       (b.status='paid' AND b.disbursed=0) AS legacy_paid,b.disbursed::text AS disbursed,b.reconciled::text AS reconciled FROM (${base}) b
       ${where.length ? sql`WHERE ${sql.join(where, sql` AND `)}` : sql``}`;
@@ -89,7 +92,7 @@ async function cachedReadExpenseList(ctx: CacheKeyContext<Awaited<ReturnType<typ
   const exceptions = canAll && (canPay || canReview || ctx.permissions.includes("expenses_reconcile")) ? await readExpenseExceptions(org) : [];
   return {
     rows: rows.rows, total, page, size: q.size, summary: summary.rows, counts: counts.rows[0], exceptions,
-    view, canAll, canReview, canPay, canCreate: ctx.permissions.includes("expenses_create"),
+    view, canAll, canReview, canPay, canVerify, canCreate: ctx.permissions.includes("expenses_create"),
     filters: { view, search: q.search, status, division: q.division, currency: q.currency, from: q.from, to: q.to, projectId },
   };
 }
@@ -99,7 +102,7 @@ export async function readExpenseDetail(id: string) {
   if (!z.uuid().safeParse(id).success) notFound();
   const org = ctx.organizationId;
   const me = await actorStaffId(org, ctx.actor);
-  const r = await db.execute<Record<string, unknown> & { requested_by_id: string | null; status: string; version: number; currency: string; total: string; disbursed: string; reconciled: string; project_id: string | null }>(sql`SELECT e.*,e.total::text AS total,e.net_amount::text AS net_amount,e.tax_amount::text AS tax_amount,
+  const r = await db.execute<Record<string, unknown> & { requested_by_id: string | null; status: string; entry_mode: string; version: number; currency: string; total: string; disbursed: string; reconciled: string; project_id: string | null }>(sql`SELECT e.*,e.total::text AS total,e.net_amount::text AS net_amount,e.tax_amount::text AS tax_amount,
       to_char(e.incurred_at AT TIME ZONE 'Africa/Kampala','YYYY-MM-DD') AS incurred_on,s.name AS supplier,p.name AS project,p.code AS project_code,
       coalesce(r.display_name,r.clerk_user_id) AS requester,coalesce(a.display_name,a.clerk_user_id) AS approver,coalesce(v.display_name,v.clerk_user_id) AS reviewer,
       ${expenseAmounts}
@@ -130,12 +133,14 @@ export async function readExpenseDetail(id: string) {
       WHERE d.organization_id=${org} AND d.expense_id=${id}::uuid ORDER BY d.created_at,d.id`),
     db.execute(sql`SELECT doc.id,doc.name,doc.mime_type,doc.size_bytes::text AS size_bytes,doc.created_at::text AS created_at FROM document_links l JOIN documents doc ON doc.id=l.document_id AND doc.organization_id=l.organization_id WHERE l.organization_id=${org} AND l.expense_id=${id}::uuid AND doc.archived_at IS NULL ORDER BY doc.created_at,doc.id LIMIT 50`),
     db.execute(sql`SELECT ev.id,ev.action,ev.from_status,ev.to_status,ev.note,ev.changes,ev.created_at::text AS created_at,coalesce(s.display_name,s.clerk_user_id,ev.actor_clerk_user_id) AS actor FROM expense_events ev LEFT JOIN staff_memberships s ON s.id=ev.actor_staff_id AND s.organization_id=ev.organization_id WHERE ev.organization_id=${org} AND ev.expense_id=${id}::uuid ORDER BY ev.created_at DESC,ev.id LIMIT 100`),
-    ctx.can("expenses_disburse") ? db.execute<{ id: string; name: string }>(sql`SELECT id,coalesce(display_name,clerk_user_id) AS name FROM staff_memberships WHERE organization_id=${org} AND status='active' ORDER BY name,id LIMIT 100`) : Promise.resolve({ rows: [] as { id: string; name: string }[] }),
+    ctx.can("expenses_disburse") || ctx.can("expenses_record_verified") ? db.execute<{ id: string; name: string }>(sql`SELECT id,coalesce(display_name,clerk_user_id) AS name FROM staff_memberships WHERE organization_id=${org} AND status='active' ORDER BY name,id LIMIT 100`) : Promise.resolve({ rows: [] as { id: string; name: string }[] }),
     // Active verified source accounts in the expense currency (approved reference policy).
     ctx.can("expenses_disburse") ? db.execute<{ id: string; method: string; label: string }>(sql`SELECT id,method,label||' - '||provider||' '||account_identifier AS label FROM finance_accounts WHERE organization_id=${org} AND status='active' AND currency=${expense.currency} ORDER BY method,label,id LIMIT 100`) : Promise.resolve({ rows: [] as { id: string; method: string; label: string }[] }),
   ]);
   const status = expense.status;
   const own = isRequester;
+  // Administrator-verified expenses (migration 0027) can be paid by the administrator who recorded them.
+  const verified = expense.entry_mode === "admin_verified";
   return {
     expense, payees: payees.rows, disbursements: disbursements.rows, documents: documents.rows, history: history.rows, staff: staff.rows, accounts: accounts.rows, me,
     can: {
@@ -146,7 +151,9 @@ export async function readExpenseDetail(id: string) {
       review: !own && status === "submitted" && !!expense.requested_by_id && (ctx.can("expenses_review") || ctx.can("expenses_approve")),
       approve: !own && status === "submitted" && !!expense.requested_by_id && ctx.can("expenses_approve"),
       returnOrReject: !own && status === "submitted" && !!expense.requested_by_id && ctx.can("expenses_review"),
-      disburse: !own && status === "approved" && ctx.can("expenses_disburse"),
+      disburse: (!own || verified) && status === "approved" && ctx.can("expenses_disburse"),
+      // Administrators approve their own expense directly instead of waiting for a second reviewer.
+      adminVerify: own && ctx.can("expenses_record_verified") && ["draft", "returned", "submitted"].includes(status),
       voidDisbursement: ctx.can("expenses_disburse"),
       reconcile: ctx.can("expenses_reconcile"),
       uploadAsRequester: own && ctx.can("expenses_create") && ["draft", "returned"].includes(status),
@@ -168,7 +175,18 @@ export async function expenseFormOptions() {
   // Phase 1E company settings: enabled divisions (with display names) and default currency.
   const settings = await effectiveSettings(org);
   const divisionOptions = (settings?.divisions ?? ["estates", "architecture", "painting", "interiors", "tech"].map((key) => ({ key, label: key, enabled: true }))).filter((d) => d.enabled).map((d) => ({ key: d.key, label: d.label }));
-  return { projects: projects.rows, suppliers: suppliers.rows, members, divisionOptions, defaultCurrency: settings?.defaults.defaultCurrency ?? "UGX" };
+  const verified = ctx.permissions.includes("expenses_record_verified") ? await readVerifiedPaymentOptions(org, ctx.actor) : null;
+  return { projects: projects.rows, suppliers: suppliers.rows, members, divisionOptions, defaultCurrency: settings?.defaults.defaultCurrency ?? "UGX", verified };
+}
+
+/** Staff and verified source accounts for recording the payment of an administrator-verified expense. */
+async function readVerifiedPaymentOptions(org: string, actor: string): Promise<VerifiedPaymentOptions> {
+  const [staff, accounts, me] = await Promise.all([
+    db.execute<{ id: string; name: string }>(sql`SELECT id,coalesce(display_name,clerk_user_id) AS name FROM staff_memberships WHERE organization_id=${org} AND status='active' ORDER BY name,id LIMIT 100`),
+    db.execute<{ id: string; method: string; currency: string; label: string }>(sql`SELECT id,method,currency,label||' - '||provider||' '||account_identifier AS label FROM finance_accounts WHERE organization_id=${org} AND status='active' ORDER BY method,label,id LIMIT 100`),
+    actorStaffId(org, actor),
+  ]);
+  return { staff: staff.rows, accounts: accounts.rows, me: me ?? "" };
 }
 
 export type PayeeOption = { id: string; project_id: string; name: string; detail: string | null };

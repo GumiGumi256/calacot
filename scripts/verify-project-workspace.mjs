@@ -14,6 +14,6 @@ const {readProjectWorkspace}=createRequire(import.meta.url)(file);const dialect=
 await readProjectWorkspace("org_fixture","10000000-0000-4000-8000-000000000001",["projects_read"]);
 assert.equal(calls.length,6);let queries=calls.map(q=>dialect.sqlToQuery(q));assert(queries.every(q=>q.params.includes("org_fixture")));assert(queries.every(q=>q.params.includes("10000000-0000-4000-8000-000000000001")));assert(!queries.some(q=>/\b(invoices|expenses|quotation_versions)\b/.test(q.sql)));
 calls.length=0;await readProjectWorkspace("org_fixture","10000000-0000-4000-8000-000000000001",["projects_read","invoices_read","expenses_read","quotations_read"]);
-assert.equal(calls.length,11); // Phase 1D adds expense summary + financial activity, both gated by expenses_read.
+assert.equal(calls.length,13); // Phase 1D adds expense summary + financial activity; 0026 per-person pay; 0027 project figures. All gated by expenses_read.
 queries=calls.map(q=>dialect.sqlToQuery(q));assert(queries.every(q=>q.params.includes("org_fixture")));assert(queries.some(q=>/\binvoices\b/.test(q.sql)));assert(queries.some(q=>/\bexpenses\b/.test(q.sql)));assert(queries.some(q=>/\bquotation_versions\b/.test(q.sql)));
 console.log("PASS: project workspace queries are organization/project scoped; finance and quotation queries follow permissions.");

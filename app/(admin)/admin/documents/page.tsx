@@ -2,7 +2,9 @@ import Link from "next/link";
 import { readDocuments, uploadTargets, documentKinds } from "@/lib/documents/reads";
 import { UploadDocument } from "@/components/documents/document-forms";
 import { kindLabels, recordLabels } from "@/lib/documents/labels";
-import { FilterBar, Pager } from "@/components/admin/list-controls";
+import { Pager } from "@/components/admin/list-controls";
+import { DocumentsFilters } from "@/components/documents/documents-filters";
+import { DocumentsInfo } from "@/components/documents/documents-info";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,19 +20,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<Rec
     <PageContainer>
       <PageHeader
         title="Documents"
-        description="Contracts, drawings, permits and other files linked to clients, projects, tasks, milestones, employees and company records. You only see documents for records you can access."
+        description={<span className="inline-flex items-center gap-2">Files linked to your records. <DocumentsInfo /></span>}
         primaryAction={upload && <UploadDocument targets={upload.targets} />}
       />
       <Card>
         <CardContent className="flex flex-col gap-4">
-          <FilterBar reset="?" values={d.filters} hidden={{ projectId: d.filters.projectId }} fields={[
-            { name: "search", label: "Search", type: "search" },
-            { name: "kind", label: "Category", type: "select", options: documentKinds },
-            { name: "record", label: "Linked to", type: "select", options: ["client", "project", "task", "milestone", "staff", "company", "expense", "invoice", "quotation"] },
-            { name: "status", label: "Status", type: "select", options: ["active", "archived"] },
-            { name: "from", label: "Uploaded from", type: "date" },
-            { name: "to", label: "Uploaded through", type: "date" },
-          ]} />
+          <DocumentsFilters values={d.filters} kinds={documentKinds} />
           <div className="overflow-x-auto">
             <Table>
               <TableHeader><TableRow><TableHead>Document</TableHead><TableHead>Category</TableHead><TableHead>Linked record</TableHead><TableHead>Uploaded</TableHead><TableHead className="text-right">Version</TableHead><TableHead className="text-right">Size</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>

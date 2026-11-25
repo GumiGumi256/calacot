@@ -68,6 +68,7 @@ export const financeMessages: Record<string, string> = {
   expense_not_approved: "Only approved expenses can receive disbursements or payment evidence.",
   expense_fully_disbursed: "The full approved amount has already been disbursed.",
   self_disbursement_denied: "You cannot record a disbursement for your own expense request.",
+  invalid_payment: "Check the payment details and try again.",
   currency_mismatch: "Disbursements must use the expense currency. No conversion is applied.",
   invalid_method: "Select a payment method.",
   transaction_reference_required: "Enter the bank, mobile-money or cheque transaction reference.",

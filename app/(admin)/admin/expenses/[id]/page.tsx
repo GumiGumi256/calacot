@@ -5,7 +5,7 @@ import { db } from "@/database/db";
 import { readExpenseDetail } from "@/lib/finance/expenses";
 import { disbursementMethodLabels, expenseStatusHelp, expenseStatusLabels, formatAmount } from "@/lib/finance/options";
 import { AmountBreakdown, ExpenseStatusBadge } from "@/components/finance/expense-status";
-import { DisbursementControls, EvidenceUpload, RecordDisbursement, RequesterActions, ReviewPanel } from "@/components/finance/expense-actions";
+import { AdminVerifyExpense, DisbursementControls, EvidenceUpload, RecordDisbursement, RequesterActions, ReviewPanel } from "@/components/finance/expense-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,7 @@ const actionLabels: Record<string, string> = {
   created: "Draft created", updated: "Request edited", submit: "Submitted for review", withdraw: "Withdrawn to draft", cancel: "Cancelled",
   approve: "Approved", return: "Returned for correction", reject: "Rejected", disbursement_recorded: "Disbursement recorded",
   disbursement_void: "Disbursement voided", disbursement_reconcile: "Disbursement reconciled", document_attached: "Document attached", payees_updated: "Payment breakdown updated",
+  admin_verified: "Verified and approved by an administrator (no separate review)",
 };
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
@@ -33,7 +34,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const today = (await db.execute<{ d: string }>(sql`SELECT finance_kampala_today()::text AS d`)).rows[0].d;
   const fullyReconciled = status === "paid" && Number(disbursed) > 0 && reconciled === disbursed;
   const ownSubmitted = !!d.me && e.requested_by_id === d.me && status === "submitted";
-  const hasNextStep = d.can.edit || d.can.submit || d.can.withdraw || d.can.cancel || d.can.review || d.can.disburse || ownSubmitted;
+  const adminVerified = e.entry_mode === "admin_verified";
+  const hasNextStep = d.can.edit || d.can.submit || d.can.withdraw || d.can.cancel || d.can.review || d.can.disburse || d.can.adminVerify || ownSubmitted;
   return (
     <PageContainer>
       <PageHeader
@@ -42,6 +44,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         meta={
           <>
             <ExpenseStatusBadge status={status} reconciled={fullyReconciled} />
+            {adminVerified && <Badge variant="outline">Verified by administrator</Badge>}
             <span className="type-body-strong tabular-nums">{formatAmount(currency, String(e.total))}</span>
           </>
         }
@@ -53,9 +56,10 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           <Card variant="attention" tone="warning">
           <CardHeader><CardTitle as="h2">Next step</CardTitle><CardDescription>Actions available to you for this request.</CardDescription></CardHeader>
           <CardContent className="flex flex-col gap-4">
+            {d.can.adminVerify && <AdminVerifyExpense expenseId={id} version={Number(e.version)} requestKey={randomUUID()} />}
             {d.can.edit && <div><Button variant="outline" render={<Link href={`/admin/expenses/${id}/edit`} />}>Edit request</Button></div>}
             <RequesterActions expenseId={id} version={Number(e.version)} requestKey={randomUUID()} canSubmit={d.can.submit} canWithdraw={d.can.withdraw} canCancel={d.can.cancel} />
-            {ownSubmitted && <p className="text-sm text-muted-foreground">You requested this expense, so another authorized employee must review it.</p>}
+            {ownSubmitted && !d.can.adminVerify && <p className="text-sm text-muted-foreground">You requested this expense, so another authorized employee must review it.</p>}
             {d.can.review && <ReviewPanel expenseId={id} version={Number(e.version)} requestKey={randomUUID()} canApprove={d.can.approve} canReturnOrReject={d.can.returnOrReject} />}
             {d.can.disburse && <RecordDisbursement expenseId={id} version={Number(e.version)} currency={currency} outstanding={outstanding} requestKey={randomUUID()} staff={d.staff} documents={d.documents.map((x) => ({ id: String(x.id), name: String(x.name) }))} accounts={d.accounts} defaultResponsible={d.me ?? ""} today={today} />}
           </CardContent>
@@ -76,9 +80,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             <div><dt className="text-muted-foreground">Supplier</dt><dd>{String(e.supplier ?? "Not specified")}{e.supplier_invoice_reference ? ` (ref ${String(e.supplier_invoice_reference)})` : ""}</dd></div>
             <div><dt className="text-muted-foreground">Expense date</dt><dd>{formatDate(String(e.incurred_on))}</dd></div>
             <div><dt className="text-muted-foreground">Amount</dt><dd>{formatAmount(currency, String(e.net_amount))} + tax {formatAmount(currency, String(e.tax_amount))}</dd></div>
-            <div><dt className="text-muted-foreground">Requested by</dt><dd>{String(e.requester ?? "Not recorded (older expense)")}</dd></div>
+            <div><dt className="text-muted-foreground">{adminVerified ? "Recorded by" : "Requested by"}</dt><dd>{String(e.requester ?? "Not recorded (older expense)")}</dd></div>
             <div><dt className="text-muted-foreground">Submitted</dt><dd>{e.submitted_at ? when(e.submitted_at) : "Not submitted"}</dd></div>
-            <div><dt className="text-muted-foreground">Approved by</dt><dd>{e.approver ? `${String(e.approver)}, ${when(e.approved_at)}` : "Not approved"}</dd></div>
+            <div><dt className="text-muted-foreground">Approved by</dt><dd>{e.approver ? `${String(e.approver)}, ${when(e.approved_at)}${adminVerified ? " (administrator, no separate review)" : ""}` : "Not approved"}</dd></div>
             <div className="sm:col-span-2 lg:col-span-3"><dt className="text-muted-foreground">Business purpose</dt><dd className="whitespace-pre-wrap break-words">{String(e.purpose ?? "Not recorded")}</dd></div>
             {Boolean(e.review_note) && <div className="sm:col-span-2 lg:col-span-3"><dt className="text-muted-foreground">Latest review note{e.reviewer ? ` from ${String(e.reviewer)}` : ""}</dt><dd className="whitespace-pre-wrap break-words">{String(e.review_note)}</dd></div>}
           </dl>

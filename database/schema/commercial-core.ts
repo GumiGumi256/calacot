@@ -389,10 +389,13 @@ export const projectMembers = pgTable(
     externalPhone: text("external_phone"),
     externalEmail: text("external_email"),
     responsibility: text("responsibility"),
+    // What this person is to earn on the project, in the project currency (migration 0027).
+    agreedAmount: money("agreed_amount"),
     createdAt: instant("created_at").notNull().defaultNow(),
   },
   (t): PgTableExtraConfigValue[] => [
     unique("project_members_org_id_uq").on(t.organizationId, t.id),
+    check("project_members_agreed_amount_check", sql`${t.agreedAmount} is null or ${t.agreedAmount} >= 0`),
     scopedForeignKey(
       "project_members_projectId_fk",
       t.organizationId,

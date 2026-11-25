@@ -83,6 +83,8 @@ export const expenses = pgTable(
     reviewNote: text("review_note"),
     version: integer("version").notNull().default(1),
     idempotencyKey: text("idempotency_key"),
+    // "admin_verified": recorded and approved by an administrator without a second reviewer (0027).
+    entryMode: text("entry_mode", { enum: ["request", "admin_verified"] }).notNull().default("request"),
     ...timestamps(),
   },
   (t) => [
@@ -126,8 +128,9 @@ export const expenses = pgTable(
     ),
     check(
       "expenses_no_self_approval_check",
-      sql`${t.approvedById} is null or ${t.requestedById} is null or ${t.approvedById} <> ${t.requestedById}`,
+      sql`${t.entryMode} = 'admin_verified' or ${t.approvedById} is null or ${t.requestedById} is null or ${t.approvedById} <> ${t.requestedById}`,
     ),
+    check("expenses_entry_mode_check", sql`${t.entryMode} in ('request', 'admin_verified')`),
     check(
       "expenses_returned_check",
       sql`${t.status} <> 'returned' or (${t.reviewedById} is not null and ${t.reviewedAt} is not null and nullif(trim(${t.reviewNote}), '') is not null)`,

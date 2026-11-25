@@ -433,12 +433,16 @@ h1, h2, h3, h4, h5, h6 {
   --sidebar-primary-foreground: var(--color-brand-black);
 }
 .dark:has([data-surface="admin"]) {
-  --background: var(--color-brand-black);
-  --card: color-mix(in oklch, var(--color-brand-black), white 5%);
-  --popover: color-mix(in oklch, var(--color-brand-black), white 8%);
+  /* Surfaces come from the brand-black scale so they share its cool hue: canvas 950, cards and menus
+     900, nested rows 800. (Mixing brand black with `white` in oklch swung the hue toward red.) */
+  --background: var(--color-brand-black-950);
+  --card: var(--color-brand-black-900);
+  --card-nested: var(--color-brand-black-800);
+  --popover: var(--color-brand-black-900);
   --ring: var(--color-brand-primary);
-  --sidebar: color-mix(in oklch, var(--color-brand-black), black 30%);
-  --sidebar-accent: color-mix(in oklch, var(--color-brand-black), white 7%);
+  --sidebar: var(--color-brand-black-900);
+  --sidebar-accent: var(--color-brand-black-800);
+  --surface-subtle: var(--color-brand-black);
 }
 
 @theme inline {

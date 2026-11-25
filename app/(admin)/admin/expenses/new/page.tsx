@@ -15,12 +15,12 @@ export default async function Page() {
     <PageContainer width="reading">
       <Link href="/admin/expenses" className="text-sm underline-offset-4 hover:underline">Back to expenses</Link>
       <PageHeader
-        title="New expense request"
-        description="Save a draft first, attach receipts, then submit it for review. Someone other than you must approve it."
+        title={options.verified ? "Add expense" : "New expense request"}
+        description={options.verified ? "As an administrator you can add a verified expense that is approved at once, or save a draft for review. Every entry is kept in the expense history." : "Save a draft first, attach receipts, then submit it for review. Someone other than you must approve it."}
       />
       <Card>
         <CardContent>
-          <ExpenseForm requestKey={randomUUID()} projects={options.projects} suppliers={options.suppliers} members={options.members} divisionOptions={options.divisionOptions} defaultCurrency={options.defaultCurrency} today={today} />
+          <ExpenseForm requestKey={randomUUID()} projects={options.projects} suppliers={options.suppliers} members={options.members} divisionOptions={options.divisionOptions} defaultCurrency={options.defaultCurrency} verified={options.verified} today={today} />
         </CardContent>
       </Card>
     </PageContainer>

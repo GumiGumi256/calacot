@@ -1,7 +1,7 @@
 "use client";
 import { useActionState, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { disbursementCommand, expenseCommand, recordDisbursement } from "@/lib/finance/actions";
+import { adminVerifyExpense, disbursementCommand, expenseCommand, recordDisbursement } from "@/lib/finance/actions";
 import { disbursementMethodLabels, disbursementMethods, evidenceMaxBytes, formatAmount } from "@/lib/finance/options";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -216,6 +216,21 @@ export function EvidenceUpload({ expenseId, role, label }: { expenseId: string; 
       </Field>
       <div><Button type="submit" size="sm" variant="outline" disabled={pending}>{pending ? "Uploading..." : "Upload"}</Button></div>
       {message && <p role={message.ok ? "status" : "alert"} className={message.ok ? "text-sm" : "text-sm text-destructive"}>{message.text}</p>}
+    </form>
+  );
+}
+
+/** Administrators: approve your own expense without a second reviewer. Recorded in the expense history. */
+export function AdminVerifyExpense({ expenseId, version, requestKey }: { expenseId: string; version: number; requestKey: string }) {
+  const [state, action, pending] = useActionState(adminVerifyExpense, initial);
+  return (
+    <form action={action} className="flex flex-col gap-2">
+      <input type="hidden" name="expenseId" value={expenseId} />
+      <input type="hidden" name="version" value={String(version)} />
+      <input type="hidden" name="key" value={requestKey} />
+      <div><Button type="submit" disabled={pending}>{pending ? "Working..." : "Verify and approve as administrator"}</Button></div>
+      <p className="text-xs text-muted-foreground">Approves this expense now without another reviewer. Other administrators can see that you verified it.</p>
+      <Message state={state} />
     </form>
   );
 }

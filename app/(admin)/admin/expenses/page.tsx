@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { PageHeader } from "@/components/layout/page-header";
 import { PageContainer } from "@/components/layout/page-container";
 
-const viewLabels: Record<ExpenseView, string> = { mine: "My requests", review: "Needs review", payable: "Approved, awaiting payment", all: "All expenses" };
+const viewLabels: Record<ExpenseView, string> = { mine: "My requests", review: "Needs review", payable: "Approved, awaiting payment", verified: "Added by administrators", all: "All expenses" };
 const exceptionLabels: Record<string, string> = {
   paid_without_disbursement: "Paid expenses without a disbursement record (recorded before this workflow)",
   unreconciled_over_30_days: "Disbursements not reconciled after 30 days",
@@ -21,14 +21,14 @@ const exceptionLabels: Record<string, string> = {
 export default async function Page({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const data = await readExpenseList(await searchParams);
   const exceptions = data.exceptions;
-  const views: ExpenseView[] = data.canAll ? ["mine", ...(data.canReview ? ["review" as const] : []), ...(data.canPay ? ["payable" as const] : []), "all"] : ["mine"];
+  const views: ExpenseView[] = data.canAll ? ["mine", ...(data.canReview ? ["review" as const] : []), ...(data.canPay ? ["payable" as const] : []), ...(data.canVerify ? ["verified" as const] : []), "all"] : ["mine"];
   const tabHref = (view: ExpenseView) => `?view=${view}`;
   return (
     <PageContainer>
       <PageHeader
         title="Expenses"
         description="Request, review, approve and record payment of company spending. Approval authorizes spending; disbursements record money actually paid."
-        primaryAction={data.canCreate && <Button render={<Link href="/admin/expenses/new" />}>New expense request</Button>}
+        primaryAction={data.canCreate && <Button render={<Link href="/admin/expenses/new" />}>{data.canVerify ? "Add expense" : "New expense request"}</Button>}
       />
       <Card>
         <CardContent className="flex flex-col gap-4">
@@ -91,7 +91,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
                 {data.rows.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
-                      {data.view === "review" ? "No requests are waiting for review." : data.view === "payable" ? "No approved expenses are waiting for payment." : data.view === "mine" ? "You have no expense requests matching these filters." : "No expenses match these filters."}
+                      {data.view === "review" ? "No requests are waiting for review." : data.view === "payable" ? "No approved expenses are waiting for payment." : data.view === "verified" ? "No expenses have been added directly by an administrator." : data.view === "mine" ? "You have no expense requests matching these filters." : "No expenses match these filters."}
                     </TableCell>
                   </TableRow>
                 )}
@@ -105,7 +105,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
                       <span className="capitalize">{e.division}</span>
                       {e.project_id && <div className="text-xs"><Link href={`/admin/projects/${e.project_id}`} className="underline-offset-4 hover:underline">{e.project}</Link></div>}
                     </TableCell>
-                    <TableCell>{e.requester ?? "Not recorded"}</TableCell>
+                    <TableCell>{e.requester ?? "Not recorded"}{e.entry_mode === "admin_verified" && <div className="text-xs text-muted-foreground">Verified by administrator</div>}</TableCell>
                     <TableCell className="text-right tabular-nums">{formatAmount(e.currency, e.total)}</TableCell>
                     <TableCell className="text-right tabular-nums">{e.legacy_paid ? <span className="text-xs text-muted-foreground">No record</span> : formatAmount(e.currency, e.disbursed)}</TableCell>
                     <TableCell><ExpenseStatusBadge status={e.status} reconciled={e.status === "paid" && Number(e.disbursed) > 0 && e.reconciled === e.disbursed} /></TableCell>

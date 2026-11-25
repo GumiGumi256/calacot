@@ -2,8 +2,9 @@
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
-import { saveExpense } from "@/lib/finance/actions";
-import { expenseCategories, formatAmount } from "@/lib/finance/options";
+import { recordVerifiedExpense, saveExpense } from "@/lib/finance/actions";
+import { disbursementMethodLabels, disbursementMethods, expenseCategories, formatAmount, type VerifiedPaymentOptions } from "@/lib/finance/options";
+import type { FinanceResult } from "@/lib/finance/context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,10 +31,20 @@ function addMoney(a: string, b: string) {
   return fromCents(cents(a) + (b ? cents(b) : BigInt(0)));
 }
 
-export function ExpenseForm({ requestKey, projects, suppliers, members = [], initial, today, divisionOptions = divisions.map((key) => ({ key, label: key })), defaultCurrency = "UGX", fixedProject, onSaved }: { requestKey: string; projects: Project[]; suppliers: Supplier[]; members?: PayeeMember[]; initial?: ExpenseFormValues; today: string; divisionOptions?: { key: string; label: string }[]; defaultCurrency?: string; fixedProject?: Project; onSaved?: (id: string) => void }) {
+/** Saves a draft, or (administrators, new expenses only) records a verified expense in one step. */
+async function submitExpense(prev: FinanceResult, data: FormData): Promise<FinanceResult> {
+  return data.get("mode") === "verified" ? recordVerifiedExpense(prev, data) : saveExpense(prev, data);
+}
+
+export function ExpenseForm({ requestKey, projects, suppliers, members = [], initial, today, divisionOptions = divisions.map((key) => ({ key, label: key })), defaultCurrency = "UGX", fixedProject, verified, onSaved }: { requestKey: string; projects: Project[]; suppliers: Supplier[]; members?: PayeeMember[]; initial?: ExpenseFormValues; today: string; divisionOptions?: { key: string; label: string }[]; defaultCurrency?: string; fixedProject?: Project; verified?: VerifiedPaymentOptions | null; onSaved?: (id: string, verified: boolean) => void }) {
   const router = useRouter();
   const { orgSlug } = useAuth();
-  const [state, action, pending] = useActionState(saveExpense, { ok: false, message: "" });
+  const [state, action, pending] = useActionState(submitExpense, { ok: false, message: "" });
+  // Administrators record new expenses as verified by default; editing a draft keeps the request flow.
+  const canVerify = !!verified && !initial?.id;
+  const [mode, setMode] = useState<"verified" | "draft">(canVerify ? "verified" : "draft");
+  const [paid, setPaid] = useState<"no" | "yes">("no");
+  const [payMethod, setPayMethod] = useState<string>("cash");
   const [form, setForm] = useState<ExpenseFormValues>(initial ?? { division: fixedProject?.division ?? "", projectId: fixedProject?.id ?? "", category: "", supplierId: "", description: "", purpose: "", currency: fixedProject?.currency ?? defaultCurrency, netAmount: "", taxAmount: "", incurredOn: today, supplierInvoiceReference: "" });
   const [newSupplier, setNewSupplier] = useState(false);
   const set = (k: keyof ExpenseFormValues, v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -49,14 +60,18 @@ export function ExpenseForm({ requestKey, projects, suppliers, members = [], ini
   const changeProject = (id: string) => { set("projectId", id); setPayees([]); };
   useEffect(() => {
     if (state.ok && state.id) {
-      if (onSaved) { onSaved(state.id); router.refresh(); return; }
+      if (onSaved) { onSaved(state.id, mode === "verified"); router.refresh(); return; }
       router.push(`${orgSlug ? "/" + encodeURIComponent(orgSlug) : ""}/admin/expenses/${state.id}`);
       router.refresh();
     }
-  }, [state, router, orgSlug, onSaved]);
+  }, [state, router, orgSlug, onSaved, mode]);
+  const isVerified = canVerify && mode === "verified";
+  const needsAccount = ["bank_transfer", "mobile_money", "cheque"].includes(payMethod);
+  const payAccounts = (verified?.accounts ?? []).filter((a) => a.method === payMethod && a.currency === form.currency);
   return (
     <form action={action} className="flex max-w-3xl flex-col gap-6" noValidate={false}>
       <input type="hidden" name="key" value={requestKey} />
+      <input type="hidden" name="mode" value={isVerified ? "verified" : "draft"} />
       {initial?.id && <input type="hidden" name="id" value={initial.id} />}
       {initial?.version !== undefined && <input type="hidden" name="version" value={String(initial.version)} />}
       <FieldSet>
@@ -127,7 +142,7 @@ export function ExpenseForm({ requestKey, projects, suppliers, members = [], ini
         </FieldGroup>
       </FieldSet>
       <FieldSet>
-        <FieldLegend>Amount requested</FieldLegend>
+        <FieldLegend>{isVerified ? "Amount" : "Amount requested"}</FieldLegend>
         <FieldGroup>
           <div className="grid gap-4 sm:grid-cols-3">
             <Field>
@@ -147,7 +162,7 @@ export function ExpenseForm({ requestKey, projects, suppliers, members = [], ini
             </Field>
           </div>
           <p className="text-sm" aria-live="polite">
-            Total requested: <span className="font-medium">{total ? formatAmount(form.currency, total) : "Enter amounts using digits and up to two decimals"}</span>
+            {isVerified ? "Total" : "Total requested"}: <span className="font-medium">{total ? formatAmount(form.currency, total) : "Enter amounts using digits and up to two decimals"}</span>
           </p>
         </FieldGroup>
       </FieldSet>
@@ -188,9 +203,71 @@ export function ExpenseForm({ requestKey, projects, suppliers, members = [], ini
           )}
         </FieldSet>
       )}
+      {canVerify && (
+        <FieldSet>
+          <FieldLegend>How should this be recorded?</FieldLegend>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="expense-mode">Recording</FieldLabel>
+              <NativeSelect wrapperClassName="w-full" id="expense-mode" value={mode} onChange={(e) => setMode(e.target.value as "verified" | "draft")} aria-describedby="expense-mode-hint">
+                <option value="verified">Verified by me (approved now, no review)</option>
+                <option value="draft">Draft request for another administrator to review</option>
+              </NativeSelect>
+              <FieldDescription id="expense-mode-hint">{isVerified ? "As an administrator you can approve this yourself. The expense history records that you added and verified it, and other administrators are notified." : "Saved as a draft. Submit it from the expense page for review."}</FieldDescription>
+            </Field>
+            {isVerified && (
+              <>
+                <Field>
+                  <FieldLabel htmlFor="expense-paid">Has this already been paid?</FieldLabel>
+                  <NativeSelect wrapperClassName="w-full" id="expense-paid" name="paid" value={paid} onChange={(e) => setPaid(e.target.value as "no" | "yes")}>
+                    <option value="no">Not yet (record the payment later)</option>
+                    <option value="yes">Yes, record the full amount as paid</option>
+                  </NativeSelect>
+                </Field>
+                {paid === "yes" && (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field>
+                      <FieldLabel htmlFor="expense-pay-method">Paid by</FieldLabel>
+                      <NativeSelect wrapperClassName="w-full" id="expense-pay-method" name="payMethod" value={payMethod} onChange={(e) => setPayMethod(e.target.value)}>
+                        {disbursementMethods.map((m) => <option key={m} value={m}>{disbursementMethodLabels[m]}</option>)}
+                      </NativeSelect>
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="expense-pay-date">Payment date</FieldLabel>
+                      <Input id="expense-pay-date" name="payPaidOn" type="date" required max={today} defaultValue={today} />
+                    </Field>
+                    {needsAccount && (
+                      <Field>
+                        <FieldLabel htmlFor="expense-pay-account">From company account</FieldLabel>
+                        <NativeSelect wrapperClassName="w-full" id="expense-pay-account" name="paySourceAccountId" required defaultValue="" key={`${payMethod}:${form.currency}`}>
+                          <option value="" disabled>{payAccounts.length ? "Select an account" : `No verified ${disbursementMethodLabels[payMethod].toLowerCase()} account in ${form.currency}`}</option>
+                          {payAccounts.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+                        </NativeSelect>
+                      </Field>
+                    )}
+                    {payMethod !== "cash" && (
+                      <Field>
+                        <FieldLabel htmlFor="expense-pay-reference">Transaction reference</FieldLabel>
+                        <Input id="expense-pay-reference" name="payReference" required maxLength={200} />
+                      </Field>
+                    )}
+                    <Field>
+                      <FieldLabel htmlFor="expense-pay-responsible">Paid by (employee)</FieldLabel>
+                      <NativeSelect wrapperClassName="w-full" id="expense-pay-responsible" name="payResponsibleStaffId" required defaultValue={verified?.me ?? ""}>
+                        <option value="" disabled>Select an employee</option>
+                        {(verified?.staff ?? []).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      </NativeSelect>
+                    </Field>
+                  </div>
+                )}
+              </>
+            )}
+          </FieldGroup>
+        </FieldSet>
+      )}
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={pending}>{pending ? "Saving..." : initial?.id ? "Save corrections" : "Save draft"}</Button>
-        <p className="text-sm text-muted-foreground">Saving does not submit the request. You can attach receipts and submit from the expense page.</p>
+        <Button type="submit" disabled={pending}>{pending ? "Saving..." : isVerified ? "Add verified expense" : initial?.id ? "Save corrections" : "Save draft"}</Button>
+        <p className="text-sm text-muted-foreground">{isVerified ? "The expense is approved immediately. You can still attach receipts afterwards." : "Saving does not submit the request. You can attach receipts and submit from the expense page."}</p>
       </div>
       {state.message && <p role={state.ok ? "status" : "alert"} className={state.ok ? "text-sm" : "text-sm text-destructive"}>{state.message}</p>}
     </form>

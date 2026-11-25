@@ -33,6 +33,9 @@ export const permissions = [
   "expenses_approve",
   "expenses_disburse",
   "expenses_reconcile",
+  // Administrators only: record an expense that is approved at once (and optionally paid) without a
+  // second reviewer. Every step is still written to the expense history (migration 0027).
+  "expenses_record_verified",
   "finance_reports",
   // Register/verify company payment source accounts. Administrators only by default
   // (grant org:calacot:finance_accounts_manage in Clerk to delegate deliberately).
@@ -216,7 +219,7 @@ export function roleAllows(role: string | null | undefined, p: Permission) {
  */
 export const sensitivePermissions: ReadonlySet<Permission> = new Set<Permission>([
   "payments_read", "payments_verify", "invoices_read", "invoices_issue", "invoices_void",
-  "expenses_read", "expenses_create", "expenses_submit", "expenses_review", "expenses_approve", "expenses_disburse", "expenses_reconcile",
+  "expenses_read", "expenses_create", "expenses_submit", "expenses_review", "expenses_approve", "expenses_disburse", "expenses_reconcile", "expenses_record_verified",
   "finance_reports", "finance_accounts_manage", "staff_manage", "settings_manage", "notifications_manage",
   "documents_read", "documents_write", "documents_archive",
   "verification_issue", "verification_revoke",
@@ -247,7 +250,7 @@ const localAccess = cache(async (organizationId: string, userId: string): Promis
 export function effectiveGrants(role: string | null | undefined, hasCustom: (p: Permission) => boolean, local: LocalAccess) {
   const approvedEmployee = local?.status === "active" && local.eligibility === "approved";
   return permissions.filter((p) => {
-    if (role !== "org:admin" && (["expenses_create", "expenses_submit", "expenses_review", "expenses_approve"] as Permission[]).includes(p)) return false;
+    if (role !== "org:admin" && (["expenses_create", "expenses_submit", "expenses_review", "expenses_approve", "expenses_record_verified"] as Permission[]).includes(p)) return false;
     if (!roleAllows(role, p) && !hasCustom(p)) return false;
     return role === "org:member" ? approvedEmployee : true;
   });

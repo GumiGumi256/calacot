@@ -29,7 +29,7 @@ export async function runPushWorker() {
     const local = sub.status ? { status: sub.status, eligibility: sub.employee_eligibility || "pending" } : null;
     const grants = effectiveGrants(member.role, p => custom.has(`org:calacot:${p}`), local);
     if (!grants.length) continue;
-    const items = await notificationFeed({ organizationId: org, role: member.role, permissions: grants });
+    const items = await notificationFeed({ organizationId: org, actor: sub.clerk_user_id, role: member.role, permissions: grants });
     const eligible = items.filter(item => Date.parse(item.at) > Date.parse(sub.created_at));
     const claimed: string[] = [];
     for (const item of eligible) {

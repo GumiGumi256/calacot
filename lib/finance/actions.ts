@@ -65,6 +65,72 @@ export async function saveExpense(_: FinanceResult, data: FormData): Promise<Fin
   });
 }
 
+const verifiedPaymentInput = z.object({
+  paid: z.enum(["no", "yes"]).default("no"),
+  payMethod: z.enum(disbursementMethods).optional(),
+  payReference: z.string().trim().max(200).default(""),
+  paySourceAccountId: optionalUuid,
+  payPaidOn: z.union([z.iso.date(), z.literal("")]).default(""),
+  payResponsibleStaffId: optionalUuid,
+});
+
+/**
+ * Administrators only: records an expense that is approved at once, and optionally its payment, in
+ * one transaction (expense_record_verified, migration 0027). The expense history and audit log keep
+ * who recorded it; other administrators are notified through the staff notification feed.
+ */
+export async function recordVerifiedExpense(_: FinanceResult, data: FormData): Promise<FinanceResult> {
+  const parsed = expenseInput.safeParse(fields(data));
+  const pay = verifiedPaymentInput.safeParse(fields(data));
+  if (!parsed.success) {
+    const field = String(parsed.error.issues[0]?.path[0] ?? "");
+    const labels: Record<string, string> = { purpose: "Explain the business purpose (at least 5 characters).", netAmount: "Enter the amount before tax, using at most two decimal places.", taxAmount: "Enter a valid tax amount or leave it empty.", incurredOn: "Enter the expense date.", description: "Enter a short description.", category: "Enter a category." };
+    return invalid(labels[field] ?? "Check the highlighted expense details and try again.");
+  }
+  if (!pay.success) return invalid("Check the payment details and try again.");
+  // id/version are ignored: expense_record_verified always creates a new expense.
+  const { payees: rawPayees, ...p } = parsed.data;
+  let payees: z.infer<typeof payeeLines>;
+  try {
+    const lines = payeeLines.safeParse(JSON.parse(rawPayees));
+    if (!lines.success) return invalid("Check the payment breakdown: choose a team member and enter a positive amount on every line.");
+    payees = lines.data;
+  } catch { return invalid("Check the payment breakdown and try again."); }
+  if (payees.length && !p.projectId) return invalid("A payment breakdown needs a project. Choose the project or remove the breakdown.");
+  const q = pay.data;
+  let payment: Record<string, string> | null = null;
+  if (q.paid === "yes") {
+    if (!q.payMethod) return invalid("Select how the expense was paid.");
+    if (!q.payPaidOn) return invalid("Enter the payment date.");
+    if (!q.payResponsibleStaffId) return invalid("Select the employee who made the payment.");
+    if (q.payMethod !== "cash" && !q.payReference.replace(/[^A-Za-z0-9]/g, "")) return invalid("Enter the bank, mobile-money or cheque transaction reference.");
+    const needsAccount = ["bank_transfer", "mobile_money", "cheque"].includes(q.payMethod);
+    if (needsAccount && !q.paySourceAccountId) return invalid("Select the verified company account the payment was made from.");
+    payment = { method: q.payMethod, reference: q.payReference, sourceAccountId: needsAccount ? q.paySourceAccountId : "", paidOn: q.payPaidOn, responsibleStaffId: q.payResponsibleStaffId, evidenceDocumentId: "", notes: "" };
+  }
+  return financeMutation("expenses_record_verified", async (ctx, correlation) => {
+    if (ctx.role !== "org:admin") return invalid("Only an administrator can record a verified expense.");
+    const r = await db.execute<{ result: { id: string; status: string; already: boolean } }>(sql`SELECT expense_record_verified(${ctx.organizationId},${ctx.actor},${json({ ...p, payees, payment, note: "Recorded and verified by an administrator." })},${correlation}) AS result`);
+    const result = r.rows[0].result;
+    refresh(result.id, p.projectId || undefined);
+    return { ok: true, id: result.id, message: result.already ? "This expense was already recorded." : result.status === "paid" ? "Verified expense recorded and marked as paid." : "Verified expense recorded and approved." };
+  });
+}
+
+/** Administrators only: approves their own draft, returned or submitted expense without a second reviewer. */
+export async function adminVerifyExpense(_: FinanceResult, data: FormData): Promise<FinanceResult> {
+  const parsed = z.object({ expenseId: z.uuid(), version: z.string().regex(/^\d{1,9}$/), key: z.uuid() }).safeParse(fields(data));
+  if (!parsed.success) return invalid("Refresh the page and try again.");
+  const p = parsed.data;
+  return financeMutation("expenses_record_verified", async (ctx, correlation) => {
+    if (ctx.role !== "org:admin") return invalid("Only an administrator can verify their own expense.");
+    const r = await db.execute<{ result: { already: boolean } }>(sql`SELECT expense_admin_verify(${ctx.organizationId},${ctx.actor},${p.expenseId}::uuid,${Number(p.version)},${"Verified by an administrator."},${p.key},${correlation}) AS result`);
+    const project = await db.execute<{ project_id: string | null }>(sql`SELECT project_id FROM expenses WHERE id=${p.expenseId}::uuid AND organization_id=${ctx.organizationId}`);
+    refresh(p.expenseId, project.rows[0]?.project_id ?? undefined);
+    return { ok: true, id: p.expenseId, message: r.rows[0].result.already ? "Already verified." : "Verified and approved. You can now record the payment." };
+  });
+}
+
 const commandInput = z.object({
   expenseId: z.uuid(),
   command: z.enum(["submit", "withdraw", "cancel", "approve", "return", "reject"]),

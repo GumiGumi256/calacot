@@ -5,7 +5,7 @@
   "compatibility_date": "2026-10-14",
   "workers_dev": false,
   "triggers": { "crons": ["* * * * *"] },
-  "vars": { "NOTIFICATION_WORKER_URL": "https://www.calacot.com/api/admin/notifications/worker" },
+  "vars": { "NOTIFICATION_WORKER_URL": "https://www.calacot.com/api/notifications/worker" },
   "observability": { "enabled": true }
   // Configure NOTIFICATION_WORKER_SECRET as a Cloudflare secret.
 }

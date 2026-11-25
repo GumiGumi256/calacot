@@ -51,7 +51,10 @@ export const disbursementMethodLabels: Record<string, string> = {
 export const evidenceTypes = ["application/pdf", "image/jpeg", "image/png", "image/webp"] as const;
 export const evidenceMaxBytes = 10 * 1024 * 1024;
 
-export const expenseViews = ["mine", "review", "payable", "all"] as const;
+export const expenseViews = ["mine", "review", "payable", "verified", "all"] as const;
+
+/** Staff and verified source accounts an administrator can use when recording a verified expense as paid. */
+export type VerifiedPaymentOptions = { staff: { id: string; name: string }[]; accounts: { id: string; method: string; currency: string; label: string }[]; me: string };
 export type ExpenseView = (typeof expenseViews)[number];
 
 export function formatAmount(currency: string, value: string | number | null | undefined) {
