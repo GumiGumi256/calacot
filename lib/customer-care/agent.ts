@@ -11,6 +11,7 @@ import { approvedPaymentInstructions } from "@/lib/company";
 import { loadCompanyProfile } from "./knowledge";
 import { documentLink, identity, invoices, purchase, quotes, verificationLink } from "./menu-data";
 import { renderOrder, renderPayment } from "./render";
+import { AGENT_FALLBACK as FALLBACK } from "./menu-tree";
 
 /*
  * WhatsApp assistant (CUSTOMER_CARE_MODE=agent).
@@ -82,15 +83,20 @@ async function history(phone: string, currentId: string): Promise<ModelMessage[]
       and(
         eq(whatsappMessages.customerPhone, phone),
         gt(whatsappMessages.eventAt, new Date(Date.now() - 24 * 3600_000)),
-        sql`${whatsappMessages.id} <> ${currentId}::uuid`,
+        // Up to and including the message being answered; never anything that arrived after it.
+        sql`${whatsappMessages.eventAt} <= (SELECT event_at FROM whatsapp_messages WHERE id=${currentId}::uuid)`,
         sql`coalesce(${whatsappMessages.status},'') <> 'failed'`,
       ),
     )
     .orderBy(desc(whatsappMessages.eventAt))
     .limit(16);
   const titles = new Map<string, string>();
-  const messages: ModelMessage[] = [];
-  for (const r of rows.reverse()) {
+  const turns: { role: "user" | "assistant"; text: string }[] = [];
+  const ordered = rows.reverse();
+  // The message being answered is always the final customer turn.
+  const current = ordered.findIndex((r) => r.id === currentId);
+  if (current >= 0) ordered.push(...ordered.splice(current, 1));
+  for (const r of ordered) {
     let text = r.body || "";
     if (r.direction === "outbound" && text.startsWith("{")) {
       try {
@@ -103,10 +109,16 @@ async function history(phone: string, currentId: string): Promise<ModelMessage[]
     } else if (r.direction === "inbound" && r.type === "interactive") {
       text = `[Chose: ${titles.get(text) || "a menu option"}]`;
     }
-    if (!text.trim()) continue;
-    messages.push({ role: r.direction === "inbound" ? "user" : "assistant", content: text.slice(0, 1500) });
+    if (!text.trim() || text === FALLBACK) continue;
+    const role = r.direction === "inbound" ? "user" : "assistant";
+    // Models need alternating turns: join consecutive messages from the same side.
+    const previous = turns.at(-1);
+    if (previous?.role === role) previous.text = `${previous.text}\n${text}`.slice(-3000);
+    else turns.push({ role, text: text.slice(0, 1500) });
   }
-  return messages;
+  // A conversation must start with the customer.
+  while (turns[0]?.role === "assistant") turns.shift();
+  return turns.map((t) => ({ role: t.role, content: t.text }));
 }
 
 const DESIGNS = `*[_type == "design" && coalesce(status, "available") != "archived" && defined(slug.current)] {
@@ -380,7 +392,7 @@ export async function runAgent(input: {
       break;
     } catch (e) {
       if (last) throw e;
-      console.warn("customer_care_agent_model_fallback", { from: typeof candidate === "string" ? candidate : candidate.modelId, code: e instanceof Error ? e.name : "unknown" });
+      console.warn("customer_care_agent_model_fallback", { from: typeof candidate === "string" ? candidate : candidate.modelId, code: e instanceof Error ? e.name : "unknown", status: (e as { statusCode?: number }).statusCode, detail: e instanceof Error ? e.message.slice(0, 160) : undefined });
     }
   }
   let reply = final?.reply ?? text;

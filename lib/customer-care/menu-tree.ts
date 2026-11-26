@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { InteractiveListContent } from "@/lib/whatsapp/types";
+export const AGENT_FALLBACK =
+  "Sorry, I can't answer free text right now. Please choose an option below, or Talk to our team.";
 export const WELCOME =
   "Welcome to Calacot. How can we help you today? Please choose an option below.";
 export const services = [

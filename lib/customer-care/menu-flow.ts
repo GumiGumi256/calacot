@@ -8,6 +8,7 @@ import {
   selectedAction,
   parent,
   WELCOME,
+  AGENT_FALLBACK,
   services,
   type MenuState,
   type Option,
@@ -110,12 +111,12 @@ export async function prepareMenu(
       const { runAgent } = await import("./agent");
       turn = await runAgent({ jobId: job.id, phone: job.phone, messageId: job.message_id, org, memory });
     } catch (e) {
-      console.error("customer_care_agent_failed", { code: e instanceof Error ? e.name : "unknown" });
+      console.error("customer_care_agent_failed", { code: e instanceof Error ? e.name : "unknown", status: (e as { statusCode?: number; lastError?: { statusCode?: number } }).statusCode ?? (e as { lastError?: { statusCode?: number } }).lastError?.statusCode, detail: e instanceof Error ? e.message.slice(0, 160) : undefined });
     }
     if (!turn) {
       // Model unavailable: fall back to the menu without counting it against the customer.
       state = { screen: "main", agent: memory };
-      text = "Sorry, I can't answer free text right now. Please choose an option below, or Talk to our team.";
+      text = AGENT_FALLBACK;
     } else {
       user = turn.user;
       verifiedClientId = turn.clientId;
