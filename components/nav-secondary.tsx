@@ -9,6 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useCloseMobileSidebar } from "@/components/nav-main"
 
 export function NavSecondary({
   items,
@@ -20,13 +21,14 @@ export function NavSecondary({
     icon: React.ReactNode
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+  const close = useCloseMobileSidebar()
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton render={<a href={item.url} />}>
+              <SidebarMenuButton render={<a href={item.url} onClick={close} />}>
                 {item.icon}
                 <span>{item.title}</span>
               </SidebarMenuButton>
