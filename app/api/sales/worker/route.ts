@@ -20,6 +20,6 @@ async function handlePOST(request: Request) {
   }
 }
 // Expire cached admin reads after a successful write (lib/cache-tags.ts).
-export const POST = expiringAdminData(handlePOST);
+export const POST = expiringAdminData(handlePOST, { kick: false });
 // Scheduler authentication is identical for GET and POST. No browser financial mutations here.
 export const GET = POST;

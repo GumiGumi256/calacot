@@ -5,7 +5,7 @@ export async function invokeSalesWorker(env, request = fetch) {
     throw new Error("sales_scheduler_configuration_invalid");
   const response = await request(target, {
     method: "POST",
-    redirect: "error",
+    redirect: "manual",
     headers: { authorization: `Bearer ${env.SALES_WORKER_SECRET}` },
     signal: AbortSignal.timeout(60000),
   });

@@ -5,7 +5,7 @@ export async function invokeCareWorker(env, request = fetch) {
     throw new Error("care_scheduler_configuration_invalid");
   const response = await request(target, {
     method: "POST",
-    redirect: "error",
+    redirect: "manual",
     headers: { authorization: `Bearer ${env.CUSTOMER_CARE_WORKER_SECRET}` },
     signal: AbortSignal.timeout(175000),
   });

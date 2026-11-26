@@ -11,12 +11,13 @@ await invokeCareWorker(env, async (url, options) => {
   calls++;
   assert.equal(url.href, env.CUSTOMER_CARE_WORKER_URL);
   assert.equal(options.method, "POST");
-  assert.equal(options.redirect, "error");
+  assert.equal(options.redirect, "manual"); // Workers reject "error"; 3xx is not ok and throws below.
   assert.equal(options.headers.authorization, `Bearer ${worker}`);
   return Response.json({ processed: 2 });
 });
 await assert.rejects(invokeCareWorker({ ...env, CUSTOMER_CARE_WORKER_URL: "https://other.test/" }), /configuration_invalid/);
 await assert.rejects(invokeCareWorker(env, async () => new Response(null, { status: 401 })), /http_401/);
+await assert.rejects(invokeCareWorker(env, async () => new Response(null, { status: 308, headers: { location: "https://calacot.com/" } })), /http_308/);
 await assert.rejects(invokeCareWorker(env, async () => Response.json({ disabled: true })), /disabled/);
 assert.equal(calls, 1);
 

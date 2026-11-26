@@ -1,4 +1,5 @@
 import { cacheLife, cacheTag, revalidateTag, updateTag } from "next/cache";
+import { kickBackgroundWork } from "@/lib/background/kick";
 
 /*
  * Admin data caching (Cache Components, "use cache: remote").
@@ -26,18 +27,30 @@ export function adminCache(org: string) {
   cacheTag(ADMIN_DATA_TAG, orgTag(org));
 }
 
-/** From a server action, after a successful write: read-your-own-writes for this organization. */
+/**
+ * From a server action, after a successful write: read-your-own-writes for this organization.
+ * Also starts queued emails, WhatsApp messages and push notifications at once (lib/background/kick.ts).
+ */
 export function expireOrgData(org: string) {
   try {
     updateTag(orgTag(org));
   } catch {
     // updateTag only works inside server actions; fall back to immediate revalidation elsewhere.
-    expireAdminData(org);
+    revalidate(org);
   }
+  kickBackgroundWork();
 }
 
-/** From route handlers, workers and webhooks. Safe to call outside a Next request (tests, scripts). */
-export function expireAdminData(org?: string | null) {
+/**
+ * From route handlers, workers and webhooks. Safe to call outside a Next request (tests, scripts).
+ * Pass `{ kick: false }` from the delivery workers themselves, which have just drained the queue.
+ */
+export function expireAdminData(org?: string | null, { kick = true }: { kick?: boolean } = {}) {
+  revalidate(org);
+  if (kick) kickBackgroundWork();
+}
+
+function revalidate(org?: string | null) {
   try {
     revalidateTag(org ? orgTag(org) : ADMIN_DATA_TAG, { expire: 0 });
   } catch {
@@ -60,10 +73,13 @@ export function cacheKeyContext<T extends object>(ctx: T): CacheKeyContext<T> {
  * Wrap a route handler that writes admin-visible data (uploads, workers, webhooks): after a
  * successful response the cached admin reads are expired, so staff see the change at once.
  */
-export function expiringAdminData<A extends unknown[]>(handler: (...args: A) => Promise<Response>) {
+export function expiringAdminData<A extends unknown[]>(
+  handler: (...args: A) => Promise<Response>,
+  options?: { kick?: boolean },
+) {
   return async (...args: A): Promise<Response> => {
     const response = await handler(...args);
-    if (response.ok) expireAdminData();
+    if (response.ok) expireAdminData(null, options);
     return response;
   };
 }
