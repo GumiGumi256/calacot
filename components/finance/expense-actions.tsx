@@ -1,7 +1,7 @@
 "use client";
 import { useActionState, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { adminVerifyExpense, disbursementCommand, expenseCommand, recordDisbursement } from "@/lib/finance/actions";
+import { adminVerifyExpense, allocateExpensePayees, disbursementCommand, expenseCommand, recordDisbursement } from "@/lib/finance/actions";
 import { disbursementMethodLabels, disbursementMethods, evidenceMaxBytes, formatAmount } from "@/lib/finance/options";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -232,5 +232,64 @@ export function AdminVerifyExpense({ expenseId, version, requestKey }: { expense
       <p className="text-xs text-muted-foreground">Approves this expense now without another reviewer. Other administrators can see that you verified it.</p>
       <Message state={state} />
     </form>
+  );
+}
+
+type TeamMember = { id: string; name: string; detail: string | null };
+const centsOf = (v: string) => { const [w, f = ""] = v.split("."); return BigInt((w || "0") + f.padEnd(2, "0").slice(0, 2)); };
+const moneyOf = (c: bigint) => `${c / BigInt(100)}.${(c % BigInt(100)).toString().padStart(2, "0")}`;
+
+/**
+ * Says which team members received an approved or paid project expense, e.g. the painters' share of a
+ * lump sum recorded earlier. Only the per-person split changes: the total and project spending do not.
+ */
+export function AllocateToTeam({ expenseId, version, requestKey, currency, total, team, current }: { expenseId: string; version: number; requestKey: string; currency: string; total: string; team: TeamMember[]; current: { member_id: string; amount: string }[] }) {
+  const [open, setOpen] = useState(false);
+  const [amounts, setAmounts] = useState<Record<string, string>>(() => Object.fromEntries(current.map((l) => [l.member_id, String(Number(l.amount))])));
+  const [state, action, pending] = useActionState(async (prev: { ok: boolean; message: string }, data: FormData) => {
+    const r = await allocateExpensePayees(prev, data);
+    if (r.ok) setOpen(false);
+    return r;
+  }, initial);
+  const valid = (v: string) => /^\d{1,15}(\.\d{1,2})?$/.test(v);
+  const filled = team.filter((m) => amounts[m.id] && amounts[m.id] !== "0").map((m) => ({ memberId: m.id, amount: amounts[m.id] }));
+  const badEntry = filled.some((l) => !valid(l.amount));
+  const allocated = badEntry ? null : filled.reduce((s, l) => s + centsOf(l.amount), BigInt(0));
+  const rest = allocated === null ? null : centsOf(total) - allocated;
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button variant="outline" size="sm" />}>{current.length ? "Change team allocation" : "Allocate to team members"}</DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Who received this money?</DialogTitle>
+          <DialogDescription>Enter how much of this {formatAmount(currency, total)} went to each team member. This only updates their pay record: the expense total and project spending stay the same. Anything not allocated counts as other spending, such as materials.</DialogDescription>
+        </DialogHeader>
+        {team.length === 0 ? <p className="text-sm text-muted-foreground">Nobody is on this project&apos;s team yet. Add the people you paid to the project team first.</p> : (
+          <form action={action} className="flex flex-col gap-4">
+            <input type="hidden" name="expenseId" value={expenseId} />
+            <input type="hidden" name="version" value={String(version)} />
+            <input type="hidden" name="key" value={requestKey} />
+            <input type="hidden" name="payees" value={JSON.stringify(filled)} />
+            <FieldGroup>
+              {team.map((m) => (
+                <Field key={m.id} className="grid grid-cols-[minmax(0,1fr)_9rem] items-center gap-3">
+                  <FieldLabel htmlFor={`alloc-${m.id}`} className="min-w-0 font-normal"><span className="truncate">{m.name}{m.detail ? <span className="text-muted-foreground"> · {m.detail}</span> : null}</span></FieldLabel>
+                  <Input id={`alloc-${m.id}`} inputMode="decimal" placeholder="0" value={amounts[m.id] ?? ""} onChange={(e) => setAmounts((a) => ({ ...a, [m.id]: e.target.value.trim() }))} aria-invalid={!!amounts[m.id] && !valid(amounts[m.id])} className="text-right tabular-nums" />
+                </Field>
+              ))}
+            </FieldGroup>
+            <p className="text-sm tabular-nums" aria-live="polite">
+              {allocated === null ? <span className="text-destructive">Enter amounts using digits and up to two decimals.</span>
+                : rest !== null && rest < BigInt(0) ? <span className="text-destructive">Over the expense total by {formatAmount(currency, moneyOf(-rest))}</span>
+                : <>To team: <span className="font-medium">{formatAmount(currency, moneyOf(allocated))}</span> · Other spending: {formatAmount(currency, moneyOf(rest ?? BigInt(0)))}</>}
+            </p>
+            <DialogFooter>
+              <Button type="submit" disabled={pending || allocated === null || (rest !== null && rest < BigInt(0))}>{pending ? "Saving..." : "Save allocation"}</Button>
+            </DialogFooter>
+            <Message state={state} />
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

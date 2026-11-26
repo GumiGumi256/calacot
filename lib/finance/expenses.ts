@@ -139,10 +139,13 @@ export async function readExpenseDetail(id: string) {
   ]);
   const status = expense.status;
   const own = isRequester;
+  // Approved or paid project expenses can be allocated to team members afterwards (migration 0029).
+  const canAllocate = ctx.can("expenses_disburse") && ["approved", "paid"].includes(status) && !!expense.project_id;
+  const team = canAllocate ? await readProjectPayeeOptions(org, [String(expense.project_id)]) : [];
   // Administrator-verified expenses (migration 0027) can be paid by the administrator who recorded them.
   const verified = expense.entry_mode === "admin_verified";
   return {
-    expense, payees: payees.rows, disbursements: disbursements.rows, documents: documents.rows, history: history.rows, staff: staff.rows, accounts: accounts.rows, me,
+    expense, payees: payees.rows, team, disbursements: disbursements.rows, documents: documents.rows, history: history.rows, staff: staff.rows, accounts: accounts.rows, me,
     can: {
       edit: own && ctx.can("expenses_create") && ["draft", "returned"].includes(status),
       submit: own && ctx.can("expenses_submit") && ["draft", "returned"].includes(status),
@@ -153,6 +156,7 @@ export async function readExpenseDetail(id: string) {
       returnOrReject: !own && status === "submitted" && !!expense.requested_by_id && ctx.can("expenses_review"),
       disburse: (!own || verified) && status === "approved" && ctx.can("expenses_disburse"),
       // Administrators approve their own expense directly instead of waiting for a second reviewer.
+      allocate: canAllocate,
       adminVerify: own && ctx.can("expenses_record_verified") && ["draft", "returned", "submitted"].includes(status),
       voidDisbursement: ctx.can("expenses_disburse"),
       reconcile: ctx.can("expenses_reconcile"),

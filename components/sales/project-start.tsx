@@ -23,16 +23,16 @@ export function ProjectStart({ id }: { id: string }) {
     >
       <FieldGroup>
         <TextField
-          label="Start approval / deposit requirement evidence"
+          label="Start approval or deposit evidence"
           value={reason}
           onChange={setReason}
           required
           multiline
-          hint="Record the team's explicit start approval. Confirming an agreement does not start execution."
+          hint="Note who approved the start and how the deposit requirement was met (e.g. deposit received on 3 March, ref MP12345). Confirming the quotation alone does not start the project."
         />
         <FormMessage>{message}</FormMessage>
         <Button type="submit" disabled={pending}>
-          Explicitly start execution
+          Start project
         </Button>
       </FieldGroup>
     </form>

@@ -45,6 +45,7 @@ export function DataTable<T>({
   emptyAction,
   error,
   footer,
+  mobileCard,
 }: {
   /** Stable id for persisted preferences, e.g. "quotations". */
   tableId: string;
@@ -69,6 +70,8 @@ export function DataTable<T>({
   emptyAction?: ReactNode;
   error?: string;
   footer?: ReactNode;
+  /** Optional custom phone card. Receives the row and its actions menu; replaces the generic card layout. */
+  mobileCard?: (row: T, actions: ReactNode) => ReactNode;
 }) {
   const { set, hrefWith, pending } = useUrlQuery();
   const prefs = useColumnPreferences(tableId, columns);
@@ -185,6 +188,7 @@ export function DataTable<T>({
             {/* Narrow containers: structured cards built from the same column definitions */}
             <ul aria-label={label} className="flex flex-col gap-3 @2xl/table:hidden">
               {rows.map((row) => (
+                mobileCard ? <li key={getRowId(row)} className="surface-card rounded-(--card-radius-sm) p-4">{mobileCard(row, rowActions ? <RowActions actions={rowActions(row)} rowLabel={getRowLabel(row)} /> : null)}</li> :
                 <li key={getRowId(row)} className="flex flex-col gap-3 surface-card rounded-(--card-radius-sm) p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 flex-col gap-0.5">

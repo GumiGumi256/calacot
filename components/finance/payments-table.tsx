@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { ReceiptIcon, SearchIcon, UserRoundIcon } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { ReceiptIcon, SearchIcon, Share2Icon, UserRoundIcon } from "lucide-react";
 import { DataTable } from "@/components/data-table/data-table";
 import type { DataColumn, FilterDef, ListQuery, RowAction } from "@/components/data-table/types";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { PaymentCard } from "./payment-card";
 import { statusRegistry } from "@/lib/ui/status";
 import { formatDate, formatMoney } from "@/lib/format";
 import type { PaymentRow } from "@/lib/admin/reads";
 import { ShareDocument } from "@/components/sales/share-document";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const methodLabels: Record<string, string> = { mobile_money: "Mobile money", bank_transfer: "Bank transfer", cash: "Cash", other: "Other" };
 
@@ -36,6 +39,7 @@ export function PaymentsTable({
   canSeeInvoices: boolean;
   canShareReceipts: boolean;
 }) {
+  const [sharing, setSharing] = useState<PaymentRow | null>(null);
   const invoiceLinks = (row: PaymentRow) =>
     row.invoices.length === 0 ? (
       <span className="text-muted-foreground">Not allocated</span>
@@ -55,7 +59,6 @@ export function PaymentsTable({
     );
 
   const columns: DataColumn<PaymentRow>[] = [
-    { id: "share", label: "Share receipt", mobile: "meta", cell: (row) => canShareReceipts && row.status === "confirmed" && row.receipt_number ? <ShareDocument kind="receipt" id={row.id} /> : null },
     {
       id: "receipt",
       label: "Receipt",
@@ -117,6 +120,7 @@ export function PaymentsTable({
 
   const rowActions = (row: PaymentRow): RowAction[] => [
     ...(row.status === "confirmed" && row.receipt_number ? [{ label: "Download receipt", href: `/api/sales/payments/${row.id}/receipt`, icon: <ReceiptIcon /> }] : []),
+    ...(canShareReceipts && row.status === "confirmed" && row.receipt_number ? [{ label: "Share receipt", onSelect: () => setSharing(row), icon: <Share2Icon /> }] : []),
     ...(canSeeInvoices
       ? row.invoices.map((invoice) => ({
           label: row.status === "submitted" ? `Verify on invoice ${invoice.number ?? ""}`.trim() : `Open invoice ${invoice.number ?? ""}`.trim(),
@@ -131,11 +135,15 @@ export function PaymentsTable({
     ...(canSeeClients ? [{ label: "Open client", href: `/admin/clients/${row.client_id}`, icon: <UserRoundIcon /> }] : []),
   ];
 
+  // Phone card (components/finance/payment-card.tsx): who paid, amount, receipt, allocation, ledger and next step.
+  const mobileCard = (row: PaymentRow, actions: ReactNode) => <PaymentCard row={row} actions={actions} canSeeClients={canSeeClients} canSeeInvoices={canSeeInvoices} canVerify={canShareReceipts} />;
+
   // Matching totals per currency (all statuses), shown under the table.
   const byCurrency = new Map<string, number>();
   for (const s of summary) byCurrency.set(s.currency, (byCurrency.get(s.currency) ?? 0) + Number(s.total));
 
   return (
+    <>
     <DataTable
       tableId="payments"
       label="Payments"
@@ -154,6 +162,7 @@ export function PaymentsTable({
       }}
       filters={filters}
       rowActions={rowActions}
+      mobileCard={mobileCard}
       footer={
         byCurrency.size > 0 && (
           <span className="tabular-nums">
@@ -162,5 +171,15 @@ export function PaymentsTable({
         )
       }
     />
+    <Dialog open={sharing !== null} onOpenChange={(open) => { if (!open) setSharing(null); }}>
+      <DialogContent className="gap-5 p-6 sm:max-w-md">
+        <DialogHeader className="pr-8">
+          <DialogTitle>Share receipt</DialogTitle>
+          <DialogDescription>{sharing?.receipt_number} · {sharing?.client}</DialogDescription>
+        </DialogHeader>
+        {sharing && <ShareDocument kind="receipt" id={sharing.id} />}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

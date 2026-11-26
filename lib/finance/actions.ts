@@ -131,6 +131,73 @@ export async function adminVerifyExpense(_: FinanceResult, data: FormData): Prom
   });
 }
 
+const memberPaymentInput = z.object({
+  projectId: z.uuid(), memberId: z.uuid(), key: z.uuid(), amount,
+  paidOn: z.iso.date(), method: z.enum(disbursementMethods),
+  reference: z.string().trim().max(200).default(""), sourceAccountId: optionalUuid,
+  responsibleStaffId: z.uuid(), note: z.string().trim().max(300).default(""),
+});
+
+/**
+ * Administrators: records one payment (an instalment) to a project team member, already paid, in one
+ * step. It is a verified Labour expense on the project allocated wholly to that person, so it appears in
+ * project spending once and in the person's payment history with its date, method and reference.
+ */
+export async function recordTeamMemberPayment(_: FinanceResult, data: FormData): Promise<FinanceResult> {
+  const parsed = memberPaymentInput.safeParse(fields(data));
+  if (!parsed.success) {
+    const field = String(parsed.error.issues[0]?.path[0] ?? "");
+    const labels: Record<string, string> = { amount: "Enter the amount paid, using at most two decimal places.", paidOn: "Enter the date the payment was made.", responsibleStaffId: "Select who made the payment.", method: "Select how they were paid." };
+    return invalid(labels[field] ?? "Check the payment details and try again.");
+  }
+  const p = parsed.data;
+  if (p.method !== "cash" && !p.reference.replace(/[^A-Za-z0-9]/g, "")) return invalid("Enter the bank, mobile-money or cheque transaction reference.");
+  const needsAccount = ["bank_transfer", "mobile_money", "cheque"].includes(p.method);
+  if (needsAccount && !p.sourceAccountId) return invalid("Select the company account the payment was made from.");
+  return financeMutation("expenses_record_verified", async (ctx, correlation) => {
+    if (ctx.role !== "org:admin") return invalid("Only an administrator can record a team member payment directly.");
+    const info = await db.execute<{ division: string; currency: string; code: string; name: string }>(sql`SELECT p.division,p.currency,p.code,coalesce(nullif(trim(s.display_name),''),m.external_name,'Team member') AS name
+      FROM project_members m JOIN projects p ON p.organization_id=m.organization_id AND p.id=m.project_id AND p.archived_at IS NULL
+      LEFT JOIN staff_memberships s ON s.organization_id=m.organization_id AND s.id=m.staff_id
+      WHERE m.organization_id=${ctx.organizationId} AND m.id=${p.memberId}::uuid AND m.project_id=${p.projectId}::uuid`);
+    const t = info.rows[0];
+    if (!t) return invalid("This person is no longer on the project team. Refresh the page.");
+    const description = `Payment to ${t.name}${p.note ? ` – ${p.note}` : ""}`.slice(0, 500);
+    const r = await db.execute<{ result: { id: string; status: string; already: boolean } }>(sql`SELECT expense_record_verified(${ctx.organizationId},${ctx.actor},${json({
+      key: p.key, division: t.division, projectId: p.projectId, category: "Labour", description,
+      purpose: `Payment to team member ${t.name} on project ${t.code}.`, currency: t.currency, netAmount: p.amount, taxAmount: "",
+      incurredOn: p.paidOn, supplierInvoiceReference: "", supplierName: "", payees: [{ memberId: p.memberId, amount: p.amount }],
+      payment: { method: p.method, reference: p.reference, sourceAccountId: needsAccount ? p.sourceAccountId : "", paidOn: p.paidOn, responsibleStaffId: p.responsibleStaffId, evidenceDocumentId: "", notes: p.note },
+      note: "Team member payment recorded by an administrator.",
+    })},${correlation}) AS result`);
+    const result = r.rows[0].result;
+    refresh(result.id, p.projectId);
+    return { ok: true, id: result.id, message: result.already ? "This payment was already recorded." : `Payment to ${t.name} recorded.` };
+  });
+}
+
+/**
+ * Says which team members received an approved or paid project expense (migration 0029). Never changes
+ * the amount, status, payments or accounting, so project spending is not double-counted.
+ */
+export async function allocateExpensePayees(_: FinanceResult, data: FormData): Promise<FinanceResult> {
+  const parsed = z.object({ expenseId: z.uuid(), version: z.string().regex(/^\d{1,9}$/), key: z.uuid(), payees: z.string().max(20000) }).safeParse(fields(data));
+  if (!parsed.success) return invalid("Refresh the page and try again.");
+  let payees: z.infer<typeof payeeLines>;
+  try {
+    const lines = payeeLines.safeParse(JSON.parse(parsed.data.payees));
+    if (!lines.success) return invalid("Enter amounts using digits and up to two decimals.");
+    payees = lines.data;
+  } catch { return invalid("Check the amounts and try again."); }
+  const p = parsed.data;
+  return financeMutation("expenses_disburse", async (ctx, correlation) => {
+    const r = await db.execute<{ result: { already: boolean } }>(sql`SELECT expense_allocate_payees(${ctx.organizationId},${ctx.actor},${p.expenseId}::uuid,${Number(p.version)},${json({ key: p.key, payees })},${correlation}) AS result`);
+    const project = await db.execute<{ project_id: string | null }>(sql`SELECT project_id FROM expenses WHERE id=${p.expenseId}::uuid AND organization_id=${ctx.organizationId}`);
+    refresh(p.expenseId, project.rows[0]?.project_id ?? undefined);
+    return { ok: true, id: p.expenseId, message: r.rows[0].result.already ? "Already saved." : payees.length ? "Allocation saved. Team pay on the project is updated; project spending is unchanged." : "Allocation cleared." };
+  });
+}
+
 const commandInput = z.object({
   expenseId: z.uuid(),
   command: z.enum(["submit", "withdraw", "cancel", "approve", "return", "reject"]),

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRightLeft, Building2, CalendarDays, FileText, Plus, Tag, UserRound } from "lucide-react";
+import { ArrowRightLeft, Building2, CalendarDays, FileText, Play, Plus, Tag, UserRound } from "lucide-react";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
@@ -84,7 +84,7 @@ export default async function Page({
             <div className="flex flex-wrap items-center gap-2 [&>button]:min-h-11 [&>button]:flex-1 sm:[&>button]:min-h-0 sm:[&>button]:flex-none">
               {createExpense}
               {ctx.permissions.includes("projects_write") && ["planned", "active", "on_hold"].includes(String(p.status)) && !p.archived_at && <ProjectFormDialog title="Add task" icon={<Plus aria-hidden="true" />}><CreateProjectTask projectId={id} taskId={randomUUID()} staff={staff} /></ProjectFormDialog>}
-              {ctx.permissions.includes("projects_write") && p.status === "planned" && !!p.quotation_version_id && <ProjectStart id={id} />}
+              {ctx.permissions.includes("projects_write") && p.status === "planned" && !!p.quotation_version_id && <ProjectFormDialog title="Start project" icon={<Play aria-hidden="true" />}><ProjectStart id={id} /></ProjectFormDialog>}
             </div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
               {ctx.permissions.includes("quotations_read") && (workspace.quotation ? <Link className="inline-flex items-center gap-2 py-2 font-medium underline-offset-4 hover:underline" href={`/admin/quotations/${workspace.quotation.id}`}><FileText className="size-4" aria-hidden="true" />Quotation {String(workspace.quotation.number || "Draft")} · version {String(workspace.quotation.version)}</Link> : <Link className="inline-flex items-center gap-2 py-2 font-medium underline-offset-4 hover:underline" href={`/admin/quotations?clientId=${p.client_id}`}><FileText className="size-4" aria-hidden="true" />Client quotations</Link>)}
@@ -112,7 +112,7 @@ export default async function Page({
       </section>
       <section id="financials" className="space-y-6 scroll-mt-6">
         {workspace.expenses ? <ProjectExpenses projectId={id} expenses={workspace.expenses} createAction={createExpense} /> : createExpense && <Card><CardHeader><CardTitle>Project expenses</CardTitle><CardDescription>Create an expense request for this project.</CardDescription></CardHeader><CardContent>{createExpense}</CardContent></Card>}
-        {workspace.teamPayments && <ProjectTeamPayments rows={workspace.teamPayments} />}
+        {workspace.teamPayments && <ProjectTeamPayments rows={workspace.teamPayments} payment={expenseOptions?.verified && expenseToday ? { projectId: id, today: expenseToday, options: expenseOptions.verified } : null} />}
       </section>
       <ProjectTeam projectId={id} currency={String(p.currency)} members={workspace.members} staff={staff} canManage={ctx.permissions.includes("projects_write") && !p.archived_at} showPay={showPay} />
         {workspace.invoices && <Card><CardHeader><CardTitle>Invoices</CardTitle><CardDescription>Most recent 50 project invoices; balances use the existing ledger.</CardDescription></CardHeader><CardContent>{workspace.invoices.length ? <ul className="space-y-2 text-sm">{workspace.invoices.map(i => <li key={String(i.id)}><Link className="underline underline-offset-4" href={`/admin/invoices/${i.id}`}>{String(i.number || "Draft")}</Link> · {String(i.status)} · {String(i.currency)} {String(i.total)} · Due {String(i.balance)}</li>)}</ul> : <p className="text-sm text-muted-foreground">No invoices linked to this project.</p>}</CardContent></Card>}

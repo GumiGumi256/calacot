@@ -5,7 +5,8 @@
   "scripts": {
     "organization:setup": "tsx scripts/setup-organization.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:apply": "node scripts/db-apply.mjs",
+    "db:migrate": "node scripts/db-apply.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

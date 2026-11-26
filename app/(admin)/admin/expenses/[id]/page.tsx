@@ -5,7 +5,7 @@ import { db } from "@/database/db";
 import { readExpenseDetail } from "@/lib/finance/expenses";
 import { disbursementMethodLabels, expenseStatusHelp, expenseStatusLabels, formatAmount } from "@/lib/finance/options";
 import { AmountBreakdown, ExpenseStatusBadge } from "@/components/finance/expense-status";
-import { AdminVerifyExpense, DisbursementControls, EvidenceUpload, RecordDisbursement, RequesterActions, ReviewPanel } from "@/components/finance/expense-actions";
+import { AdminVerifyExpense, AllocateToTeam, DisbursementControls, EvidenceUpload, RecordDisbursement, RequesterActions, ReviewPanel } from "@/components/finance/expense-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +19,7 @@ const actionLabels: Record<string, string> = {
   created: "Draft created", updated: "Request edited", submit: "Submitted for review", withdraw: "Withdrawn to draft", cancel: "Cancelled",
   approve: "Approved", return: "Returned for correction", reject: "Rejected", disbursement_recorded: "Disbursement recorded",
   disbursement_void: "Disbursement voided", disbursement_reconcile: "Disbursement reconciled", document_attached: "Document attached", payees_updated: "Payment breakdown updated",
-  admin_verified: "Verified and approved by an administrator (no separate review)",
+  admin_verified: "Verified and approved by an administrator (no separate review)", payees_allocated: "Allocated to team members",
 };
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
@@ -86,17 +86,27 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             <div className="sm:col-span-2 lg:col-span-3"><dt className="text-muted-foreground">Business purpose</dt><dd className="whitespace-pre-wrap break-words">{String(e.purpose ?? "Not recorded")}</dd></div>
             {Boolean(e.review_note) && <div className="sm:col-span-2 lg:col-span-3"><dt className="text-muted-foreground">Latest review note{e.reviewer ? ` from ${String(e.reviewer)}` : ""}</dt><dd className="whitespace-pre-wrap break-words">{String(e.review_note)}</dd></div>}
           </dl>
-          {d.payees.length > 0 && (
+          {(d.payees.length > 0 || d.can.allocate) && (
             <div className="flex flex-col gap-2 text-sm">
-              <h3 className="font-medium">Who received this money</h3>
-              <ul className="divide-y" aria-label="Payment breakdown by person">
-                {d.payees.map((l) => (
-                  <li key={l.member_id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                    <span>{l.name}{l.detail ? <span className="text-muted-foreground"> · {l.detail}</span> : null}</span>
-                    <span className="tabular-nums">{formatAmount(currency, l.amount)}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="font-medium">Who received this money</h3>
+                {d.can.allocate && <AllocateToTeam expenseId={id} version={Number(e.version)} requestKey={randomUUID()} currency={currency} total={String(e.total)} team={d.team} current={d.payees} />}
+              </div>
+              {d.payees.length > 0 ? (
+                <ul className="divide-y" aria-label="Payment breakdown by person">
+                  {d.payees.map((l) => (
+                    <li key={l.member_id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                      <span>{l.name}{l.detail ? <span className="text-muted-foreground"> · {l.detail}</span> : null}</span>
+                      <span className="tabular-nums">{formatAmount(currency, l.amount)}</span>
+                    </li>
+                  ))}
+                  {(() => {
+                    const toTeam = d.payees.reduce((s, l) => s + Math.round(Number(l.amount) * 100), 0);
+                    const other = Math.round(Number(e.total) * 100) - toTeam;
+                    return other > 0 ? <li className="flex flex-wrap items-center justify-between gap-2 py-2 text-muted-foreground"><span>Other spending (not team pay)</span><span className="tabular-nums">{formatAmount(currency, (other / 100).toFixed(2))}</span></li> : null;
+                  })()}
+                </ul>
+              ) : <p className="text-muted-foreground">Not allocated to anyone. If part of this money paid team members, such as painters, allocate it so their pay record is complete. The expense total does not change.</p>}
             </div>
           )}
         </CardContent>

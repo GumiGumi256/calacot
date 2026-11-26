@@ -39,7 +39,9 @@ export async function readProjectWorkspace(org: string, projectId: string, permi
     // pay (migration 0027, project currency). A share counts as paid once its expense is paid in full;
     // drafts, returned, rejected and void expenses are excluded.
     db.execute<TeamPaymentRow>(sql`WITH lines AS (
-        SELECT l.project_member_id AS member_id,e.currency,e.status,l.amount,e.id AS expense_id,e.description,e.incurred_at
+        SELECT l.project_member_id AS member_id,e.currency,e.status,l.amount,e.id AS expense_id,e.description,e.incurred_at,
+          (SELECT coalesce(jsonb_agg(jsonb_build_object('paidOn',d.paid_on::text,'method',d.method,'reference',d.reference) ORDER BY d.paid_on,d.created_at),'[]'::jsonb)
+            FROM expense_disbursements d WHERE d.organization_id=e.organization_id AND d.expense_id=e.id AND d.status='recorded') AS payments
         FROM expense_payees l JOIN expenses e ON e.organization_id=l.organization_id AND e.id=l.expense_id
         WHERE l.organization_id=${org} AND e.project_id=${projectId}::uuid AND e.status IN ('submitted','approved','paid')
       ), keys AS (
@@ -54,7 +56,7 @@ export async function readProjectWorkspace(org: string, projectId: string, permi
         coalesce(sum(l.amount) FILTER (WHERE l.status='approved'),0)::numeric(17,2)::text AS approved,
         coalesce(sum(l.amount) FILTER (WHERE l.status='submitted'),0)::numeric(17,2)::text AS pending,
         coalesce(jsonb_agg(jsonb_build_object('expenseId',l.expense_id,'description',l.description,'status',l.status,'amount',l.amount::text,
-          'incurredOn',to_char(l.incurred_at AT TIME ZONE 'Africa/Kampala','YYYY-MM-DD')) ORDER BY l.incurred_at DESC,l.expense_id) FILTER (WHERE l.expense_id IS NOT NULL),'[]'::jsonb)
+          'incurredOn',to_char(l.incurred_at AT TIME ZONE 'Africa/Kampala','YYYY-MM-DD'),'payments',l.payments) ORDER BY l.incurred_at DESC,l.expense_id) FILTER (WHERE l.expense_id IS NOT NULL),'[]'::jsonb)
           AS lines
       FROM keys k
       JOIN project_members m ON m.organization_id=${org} AND m.id=k.member_id
@@ -92,5 +94,5 @@ export type ProjectFinanceRow = {
 
 export type TeamPaymentRow = {
   member_id: string; name: string; detail: string | null; currency: string; agreed: string | null; paid: string; approved: string; pending: string;
-  lines: { expenseId: string; description: string; status: string; amount: string; incurredOn: string }[];
+  lines: { expenseId: string; description: string; status: string; amount: string; incurredOn: string; payments: { paidOn: string; method: string; reference: string | null }[] }[];
 }
