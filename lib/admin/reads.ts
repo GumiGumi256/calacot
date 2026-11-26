@@ -55,7 +55,9 @@ export type LeadRow = {
   id: string;
   type: string;
   full_name: string;
-  email: string;
+  email: string | null;
+  source: "website" | "whatsapp";
+  qualification: { score: number; temperature: "hot" | "warm" | "cold"; reasons: string[] } | null;
   phone: string;
   service: string;
   status: string;
@@ -104,7 +106,7 @@ async function cachedReadLeads(ctx: Awaited<ReturnType<typeof staffContext>>, ra
   if (["estates", "architecture", "painting", "interiors", "tech"].includes(division)) where.push(sql`division=${division}`);
   if (/^\d{4}-\d{2}-\d{2}$/.test(followUp) && !Number.isNaN(Date.parse(followUp))) where.push(sql`follow_up_on=${followUp}::date`);
   const result = await run<LeadRow>(
-    sql`SELECT l.id,l.type,l.full_name,l.email,l.phone,l.service,l.status,l.estimated_budget,l.project_location,l.timeline,l.project_overview,l.preferred_date::text AS preferred_date,l.preferred_time,l.admin_notes,l.created_at::text AS created_at,l.assigned_staff_id,l.division,l.follow_up_on::text AS follow_up_on,l.follow_up_notes,(l.follow_up_on < (now() AT TIME ZONE 'Africa/Kampala')::date AND l.status NOT IN ('closed_won','closed_lost')) AS overdue,s.client_id,coalesce((SELECT jsonb_agg(to_jsonb(a) ORDER BY a.created_at DESC) FROM (SELECT action,actor,created_at,changes FROM lead_activity WHERE organization_id=l.organization_id AND lead_id=l.id ORDER BY created_at DESC LIMIT 20) a),'[]'::jsonb) AS activity FROM leads l LEFT JOIN crm_source_links s ON s.lead_id=l.id AND s.organization_id=l.organization_id WHERE l.organization_id=${ctx.organizationId}`,
+    sql`SELECT l.id,l.type,l.full_name,l.email,l.source,l.qualification,l.phone,l.service,l.status,l.estimated_budget,l.project_location,l.timeline,l.project_overview,l.preferred_date::text AS preferred_date,l.preferred_time,l.admin_notes,l.created_at::text AS created_at,l.assigned_staff_id,l.division,l.follow_up_on::text AS follow_up_on,l.follow_up_notes,(l.follow_up_on < (now() AT TIME ZONE 'Africa/Kampala')::date AND l.status NOT IN ('closed_won','closed_lost')) AS overdue,s.client_id,coalesce((SELECT jsonb_agg(to_jsonb(a) ORDER BY a.created_at DESC) FROM (SELECT action,actor,created_at,changes FROM lead_activity WHERE organization_id=l.organization_id AND lead_id=l.id ORDER BY created_at DESC LIMIT 20) a),'[]'::jsonb) AS activity FROM leads l LEFT JOIN crm_source_links s ON s.lead_id=l.id AND s.organization_id=l.organization_id WHERE l.organization_id=${ctx.organizationId}`,
     where,
     q.page,
     q.size,

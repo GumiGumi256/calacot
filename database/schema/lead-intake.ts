@@ -1,6 +1,13 @@
 import { date, index, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { organizations, staffMemberships } from "./organization";
 
+export type LeadQualification = {
+  score: number;
+  temperature: "hot" | "warm" | "cold";
+  reasons: string[];
+  qualifiedAt: string;
+};
+
 export const leads = pgTable("leads", {
   id: uuid("id").primaryKey().defaultRandom(),
   organizationId: text("organization_id").references(() => organizations.id),
@@ -19,7 +26,8 @@ export const leads = pgTable("leads", {
 
   fullName: text("full_name").notNull(),
 
-  email: text("email").notNull(),
+  // Optional: WhatsApp leads are identified by phone and may not share an email.
+  email: text("email"),
 
   phone: text("phone").notNull(),
 
@@ -57,6 +65,10 @@ export const leads = pgTable("leads", {
     .default("new"),
 
   adminNotes: text("admin_notes"),
+
+  // Where the lead came from, and the WhatsApp assistant's qualification (migration 0031).
+  source: text("source", { enum: ["website", "whatsapp"] }).notNull().default("website"),
+  qualification: jsonb("qualification").$type<LeadQualification>(),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

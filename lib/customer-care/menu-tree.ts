@@ -20,6 +20,8 @@ export type MenuState = {
   page?: number;
   verifiedClientId?: string | null;
   verifiedUser?: string;
+  /** WhatsApp assistant memory: consecutive replies that did not resolve the request. */
+  agent?: { unresolved: number };
 };
 export type Option = [string, string];
 export const navigation: Option[] = [
@@ -67,6 +69,7 @@ export const tree: Record<string, Option[]> = {
     ["submit", "Submit enquiry"],
     ["cancel", "Cancel"],
   ],
+  agent: [["team", "Talk to our team"]],
   name: [["team", "Talk to our team"]],
   brief: [["team", "Talk to our team"]],
   reference: [["team", "Talk to our team"]],

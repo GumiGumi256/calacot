@@ -25,6 +25,7 @@ import { approvedPaymentInstructions } from "@/lib/company";
 import { salesConfig } from "@/lib/sales/config";
 import type { CareJob } from "./pipeline";
 import { revokeLinkQuery } from "./queries";
+import type { AgentTurn } from "./agent";
 export async function prepareMenu(
   job: CareJob,
   body: string | null,
@@ -85,8 +86,49 @@ export async function prepareMenu(
     command = { kind: "resume" };
     action = "main";
   }
+  // WhatsApp assistant: free text that is not a navigation command or a form step goes to the model.
+  // Button choices, "menu"/"back"/"cancel", the lead form and failure notices keep the menu.
+  // CUSTOMER_CARE_AGENT_ALLOWLIST (comma-separated numbers) limits the assistant to those phones
+  // during testing; everyone else keeps the menu. Empty or unset: every customer gets the assistant.
+  const memory = (conversation.menuState as MenuState).agent;
+  const agentPhones = (process.env.CUSTOMER_CARE_AGENT_ALLOWLIST || "")
+    .split(",")
+    .map((p) => p.trim().replace(/^\+/, ""))
+    .filter(Boolean);
+  const agentTurn =
+    process.env.CUSTOMER_CARE_MODE === "agent" &&
+    (!agentPhones.length || agentPhones.includes(job.phone.replace(/^\+/, ""))) &&
+    type === "text" &&
+    !action &&
+    !failureReason &&
+    !notice &&
+    conversation.mode === "bot" &&
+    (expired || !["name", "brief", "reference"].includes(state.screen));
+  if (agentTurn) {
+    let turn: AgentTurn | null = null;
+    try {
+      const { runAgent } = await import("./agent");
+      turn = await runAgent({ jobId: job.id, phone: job.phone, messageId: job.message_id, org, memory });
+    } catch (e) {
+      console.error("customer_care_agent_failed", { code: e instanceof Error ? e.name : "unknown" });
+    }
+    if (!turn) {
+      // Model unavailable: fall back to the menu without counting it against the customer.
+      state = { screen: "main", agent: memory };
+      text = "Sorry, I can't answer free text right now. Please choose an option below, or Talk to our team.";
+    } else {
+      user = turn.user;
+      verifiedClientId = turn.clientId;
+      state = { screen: turn.screen, agent: turn.memory };
+      if (turn.handoff) {
+        command = { kind: "handoff", reason: turn.handoff.reason, service: turn.handoff.service };
+        state = { screen: "main" };
+        text = "I've passed your conversation to the Calacot team. A team member will reply here shortly.";
+      } else text = turn.text;
+    }
+  } else {
   if (expired && !failureReason) {
-    state = { screen: "main" };
+    state = { screen: "main", agent: memory };
     text = WELCOME;
     action = action === "main" ? "main" : null;
   }
@@ -292,6 +334,7 @@ export async function prepareMenu(
   } else if (!expired)
     text =
       "Please use the current options. Free text is accepted only when a step asks for it. Type menu, back or cancel to navigate.";
+  }
   if (state.screen === "review") ttl = 300;
   const reply = menuReply(
     user ? { ...state, verifiedUser: user, verifiedClientId } : state,

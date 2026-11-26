@@ -69,9 +69,25 @@ export default async function Page({
                 )}
                 {data.rows.map((l) => (
                   <TableRow key={l.id} className="align-top">
-                    <TableCell className="font-medium">{l.full_name}</TableCell>
+                    <TableCell className="font-medium">
+                      <div>{l.full_name}</div>
+                      {l.source === "whatsapp" && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          <Badge variant="neutral">WhatsApp</Badge>
+                          {l.qualification && (
+                            <Badge
+                              variant={l.qualification.temperature === "hot" ? "danger" : l.qualification.temperature === "warm" ? "warning" : "info"}
+                              title={l.qualification.reasons.join(" · ")}
+                              className="capitalize"
+                            >
+                              {l.qualification.temperature} · {l.qualification.score}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>
-                      <div>{l.email}</div>
+                      {l.email && <div>{l.email}</div>}
                       <div className="text-muted-foreground">{l.phone}</div>
                     </TableCell>
                     <TableCell className="capitalize">{l.service}</TableCell>
@@ -101,7 +117,7 @@ export default async function Page({
                           <LeadUpdateForm id={l.id} status={l.status} notes={l.admin_notes ?? ""} division={l.division ?? ""} assignee={l.assigned_staff_id ?? ""} followUpOn={l.follow_up_on ?? ""} followUpNotes={l.follow_up_notes ?? ""} staff={data.staff} />
                         )}
                         {l.follow_up_on && <p className="mt-2 text-sm">Follow-up: {l.follow_up_on} {l.overdue && <strong className="text-destructive">Overdue</strong>} {l.follow_up_notes}</p>}
-                        {l.client_id ? <p className="mt-3"><Link className="underline" href={`/admin/clients/${l.client_id}`}>Open linked client</Link>{data.canProject && <> · <Link className="underline" href={`/admin/projects/new?clientId=${l.client_id}`}>Create project</Link></>}</p> : data.canConvert && l.status === "qualified" ? <LeadConversion id={l.id} name={l.full_name} email={l.email} phone={l.phone} division={l.division ?? ""} canProject={data.canProject} /> : null}
+                        {l.client_id ? <p className="mt-3"><Link className="underline" href={`/admin/clients/${l.client_id}`}>Open linked client</Link>{data.canProject && <> · <Link className="underline" href={`/admin/projects/new?clientId=${l.client_id}`}>Create project</Link></>}</p> : data.canConvert && l.status === "qualified" ? <LeadConversion id={l.id} name={l.full_name} email={l.email ?? ""} phone={l.phone} division={l.division ?? ""} canProject={data.canProject} /> : null}
                         <h3 className="mt-4 text-sm font-medium">Recent activity</h3>{l.activity.length ? <ul className="mt-2 space-y-2 text-sm">{l.activity.map((event, index) => <li key={`${event.created_at}-${index}`}>{label(event.action)} · {event.actor} · {fmtDate(event.created_at)}{Object.keys(event.changes).length > 0 && <pre className="whitespace-pre-wrap break-words text-xs">{JSON.stringify(event.changes, null, 2)}</pre>}</li>)}</ul> : <p className="text-sm text-muted-foreground">No recorded activity.</p>}
                       </details>
                     </TableCell>

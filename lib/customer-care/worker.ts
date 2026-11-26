@@ -22,6 +22,9 @@ import { prepareMenu } from "./menu-flow";
 import { mkdir, writeFile } from "node:fs/promises";
 import { careFailureCode } from "./errors";
 
+/** "menu" and "agent" (menu plus the WhatsApp assistant for free text) share the menu pipeline. */
+const menuPipeline = () => ["menu", "agent"].includes(process.env.CUSTOMER_CARE_MODE || "menu");
+
 /** Persistent outbox: never automatically retry an ambiguous external send. */
 export async function deliverCareMessage(
   id: string,
@@ -36,7 +39,7 @@ export async function deliverCareMessage(
   }>(claimOutboundQuery(id, requireBot, automated));
   const m = result.rows[0];
   if (!m) return;
-  const menuMode = automated && (process.env.CUSTOMER_CARE_MODE || "menu") === "menu";
+  const menuMode = automated && menuPipeline();
   const notificationMode =
     process.env.CUSTOMER_CARE_NOTIFICATION_MODE || "capture";
   if (menuMode && ["capture", "staging"].includes(notificationMode)) {
@@ -169,7 +172,7 @@ async function processJob(job: CareJob) {
     conversation?.mode !== "bot" &&
     !outbound &&
     !(
-      (process.env.CUSTOMER_CARE_MODE || "menu") === "menu" &&
+      menuPipeline() &&
       conversation?.mode === "human" &&
       !conversation.assignedTo &&
       message.body?.trim().toLowerCase() === "resume"
@@ -181,14 +184,14 @@ async function processJob(job: CareJob) {
   );
   if (
     count.rows[0]?.count >
-      ((process.env.CUSTOMER_CARE_MODE || "menu") === "menu" ? 60 : 20) &&
+      (menuPipeline() ? 60 : 20) &&
     !outbound
   ) {
     await recordFailureHandoff(job);
     return finish(job, "rate_limited");
   }
   if (!outbound) {
-    if ((process.env.CUSTOMER_CARE_MODE || "menu") === "menu") {
+    if (menuPipeline()) {
       let id: string | null;
       try {
         id = await prepareMenu(job, message.body, message.messageType);
@@ -271,7 +274,7 @@ async function processJob(job: CareJob) {
     outbound.id,
     // Menu commits use text only for handoffs. Allow the acknowledgement
     // after that atomic commit switches the conversation to human mode.
-    !((process.env.CUSTOMER_CARE_MODE || "menu") === "menu" && outbound.messageType === "text") &&
+    !(menuPipeline() && outbound.messageType === "text") &&
     outbound.body !== templates.handoff &&
       outbound.body !== templates.failure &&
       !(
