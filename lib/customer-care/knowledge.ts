@@ -38,5 +38,5 @@ export async function loadCompanyProfile(): Promise<string | null> {
   );
   if (!p) return null;
   const text = p.profile?.trim() || legacyText(p).trim();
-  return text ? text.slice(0, 50000) : null;
+  return text ? text.slice(0, 20000) : null;
 }

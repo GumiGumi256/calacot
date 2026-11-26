@@ -17,7 +17,7 @@ export const customerCareCompanyProfile = defineType({
         "Write it as you would brief a new receptionist: who Calacot is, each service, where you work, contacts, business hours, how projects start, and the tone to use. Prices and product details can go here or in Customer care knowledge.",
       type: "text",
       rows: 30,
-      validation: (R) => R.required().max(50000),
+      validation: (R) => R.required().max(20000),
     }),
   ],
   preview: { prepare: () => ({ title: "Company profile" }) },
