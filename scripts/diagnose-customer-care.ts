@@ -72,7 +72,7 @@ async function main() {
     console.log(
       "Published profile:",
       await client.fetch(
-        `*[_id=="customerCareCompanyProfile" && _type=="customerCareCompanyProfile"][0]{approvalStatus, "hasContacts":defined(contactInformation),"hasOverview":defined(overview)}`,
+        `*[_id=="customerCareCompanyProfile" && _type=="customerCareCompanyProfile"][0]{"hasProfile":defined(profile),"profileLength":length(profile),"hasOlderFields":defined(overview)}`,
         {},
         { perspective: "published" },
       ),

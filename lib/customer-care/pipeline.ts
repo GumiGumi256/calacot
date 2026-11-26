@@ -8,11 +8,9 @@ import {
   careRequests,
 } from "@/database/customer-care-schema";
 import { careMenuOptions, CARE_MENU_MESSAGE, getCareMenuChoice } from "./menu";
-import { loadCompanyProfile } from "./knowledge";
 import { authorisedOrder, authorisedSupport } from "./live-data";
 import {
   renderAccountLink,
-  renderKnowledge,
   renderStatic,
   templates,
 } from "./render";
@@ -113,12 +111,9 @@ export async function prepareReply(
 
   const option = careMenuOptions.find((item) => item.id === choice);
   if (!option || !("businessUnit" in option)) return CARE_MENU_MESSAGE;
-  const profile = await loadCompanyProfile();
-  const service = profile?.businessUnits.find(
-    (item) => item.unit === option.businessUnit,
-  );
-  if (!profile || !service) return request(job, "handoff", option.businessUnit);
-  return `${renderKnowledge(service.description, profile.website)}\n\nReply MENU to choose another Calacot topic.`;
+  // The company profile is one free text now (answered by the assistant in agent mode), so this
+  // older keyword mode passes service questions to the team instead of quoting a per-service blurb.
+  return request(job, "handoff", option.businessUnit);
 }
 
 export async function recordFailureHandoff(job: CareJob) {

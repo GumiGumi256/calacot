@@ -1,119 +1,32 @@
 import { defineField, defineType } from "sanity";
-import { businessUnits, intents } from "../../lib/customer-care/contracts";
-import { approvedAnswer, displayText } from "../../lib/customer-care/render";
 
-const approval = defineField({
-  name: "approvalStatus",
-  type: "string",
-  options: { list: ["draft", "approved"] },
-  initialValue: "draft",
-  validation: (R) => R.required(),
-});
-const version = defineField({
-  name: "version",
-  type: "number",
-  initialValue: 1,
-  validation: (R) => R.required().integer().positive(),
-});
-const reviewedText = (name: string, title?: string) =>
-  defineField({
-    name,
-    title,
-    type: "text",
-    validation: (R) =>
-      R.required().custom(
-        (v) =>
-          approvedAnswer.safeParse(v).success ||
-          "Use plain reviewed text without embedded URLs (maximum 2400 characters).",
-      ),
-  });
-
+/**
+ * Everything the WhatsApp assistant should know about Calacot, in one text: who we are, services,
+ * locations, contacts, hours, how we work, tone. Publishing it is the approval; the assistant only
+ * states what is written here, in knowledge entries or in the live catalogue.
+ */
 export const customerCareCompanyProfile = defineType({
   name: "customerCareCompanyProfile",
-  title: "Customer care company profile",
+  title: "Company profile",
   type: "document",
   fields: [
     defineField({
-      name: "companyName",
-      type: "string",
-      initialValue: "Calacot",
-      validation: (R) => R.required(),
-    }),
-    reviewedText("overview", "Approved overview"),
-    defineField({ name: "country", type: "string" }),
-    defineField({
-      name: "serviceLocations",
-      type: "array",
-      of: [{ type: "string" }],
-    }),
-    defineField({
-      name: "website",
-      type: "url",
-      initialValue: "https://calacot.com",
-    }),
-    reviewedText(
-      "contactInformation",
-      "Verified contact information (no embedded URLs)",
-    ),
-    defineField({
-      name: "businessUnits",
-      type: "array",
-      of: [
-        {
-          type: "object",
-          fields: [
-            {
-              name: "unit",
-              type: "string",
-              options: { list: [...businessUnits] },
-            },
-            {
-              name: "description",
-              type: "text",
-              validation: (R) =>
-                R.required().custom(
-                  (v) =>
-                    approvedAnswer.safeParse(v).success ||
-                    "Use reviewed plain text without links",
-                ),
-            },
-            {
-              name: "menuSummary",
-              title: "Approved WhatsApp menu summary",
-              description:
-                "Concise service information for the menu assistant. No invented prices, availability or dates. Publish with the approved company profile.",
-              type: "text",
-              validation: (R) =>
-                R.max(650).custom(
-                  (v) =>
-                    !v ||
-                    approvedAnswer.safeParse(v).success ||
-                    "Use reviewed plain text without embedded URLs",
-                ),
-            },
-          ],
-        },
-      ],
-    }),
-    defineField({
-      name: "brandPositioning",
-      type: "string",
-      initialValue: "We sell possibility.",
-    }),
-    defineField({
-      name: "communicationGuidelines",
+      name: "profile",
+      title: "Company profile",
+      description:
+        "Write it as you would brief a new receptionist: who Calacot is, each service, where you work, contacts, business hours, how projects start, and the tone to use. Prices and product details can go here or in Customer care knowledge.",
       type: "text",
-      initialValue: "Warm, professional, concise, clear, and never pushy.",
+      rows: 30,
+      validation: (R) => R.required().max(15000),
     }),
-    defineField({
-      name: "businessHours",
-      title: "Verified business hours (leave empty until verified)",
-      type: "text",
-    }),
-    approval,
-    version,
   ],
+  preview: { prepare: () => ({ title: "Company profile" }) },
 });
+
+/**
+ * What the WhatsApp assistant may tell customers about a product, service, policy or FAQ (e.g. Soolos).
+ * Publishing is the approval: the assistant reads published entries that are switched on.
+ */
 export const customerCareKnowledge = defineType({
   name: "customerCareKnowledge",
   title: "Customer care knowledge",
@@ -121,66 +34,46 @@ export const customerCareKnowledge = defineType({
   fields: [
     defineField({
       name: "title",
+      title: "Title",
+      description: "The product or topic, as customers would name it, e.g. Soolos or Refund policy.",
       type: "string",
-      validation: (R) =>
-        R.required().custom(
-          (v) => displayText.safeParse(v).success || "Use a plain title",
-        ),
+      validation: (R) => R.required().max(120),
     }),
     defineField({
-      name: "businessUnit",
-      type: "string",
-      options: { list: [...businessUnits] },
-      validation: (R) => R.required(),
+      // Stored as approvedAnswer so existing entries keep their text.
+      name: "approvedAnswer",
+      title: "Answer",
+      description:
+        "Everything the assistant may tell customers: what it is, who it is for, prices (only if it may quote them), how to get started. It will not add facts that are not here.",
+      type: "text",
+      rows: 10,
+      validation: (R) => R.required().max(2400),
     }),
     defineField({
-      name: "topic",
-      type: "string",
-      options: { list: [...intents] },
-      validation: (R) => R.required(),
-    }),
-    defineField({
-      name: "relatedQuestions",
+      name: "tags",
+      title: "Keywords",
+      description: "Other words customers might use, e.g. school software, fees system.",
       type: "array",
       of: [{ type: "string" }],
+      options: { layout: "tags" },
     }),
-    defineField({ name: "tags", type: "array", of: [{ type: "string" }] }),
-    reviewedText("approvedAnswer"),
     defineField({
       name: "displayLink",
-      title: "Reviewed Calacot link",
+      title: "Link",
+      description: "Optional page the assistant can share.",
       type: "url",
-      validation: (R) =>
-        R.uri({ scheme: ["https"] }).custom(
-          (v) =>
-            !v ||
-            /^https:\/\/(www\.)?calacot\.com\//.test(v) ||
-            "Only Calacot links",
-        ),
+      validation: (R) => R.uri({ scheme: ["https"] }),
     }),
     defineField({
-      name: "sourceReference",
-      type: "string",
-      validation: (R) => R.required(),
+      name: "active",
+      title: "Show to customers",
+      description: "Switch off to hide this entry from the assistant without deleting it.",
+      type: "boolean",
+      initialValue: true,
     }),
-    defineField({ name: "importedAt", type: "datetime", readOnly: true }),
-    defineField({
-      name: "proposedRevisionOf",
-      type: "reference",
-      to: [{ type: "customerCareKnowledge" }],
-    }),
-    approval,
-    defineField({ name: "active", type: "boolean", initialValue: false }),
-    defineField({
-      name: "lastReviewedAt",
-      type: "datetime",
-      validation: (R) =>
-        R.custom((value, context) =>
-          context.document?.approvalStatus === "approved" && !value
-            ? "Review date required before approval"
-            : true,
-        ),
-    }),
-    version,
   ],
+  preview: {
+    select: { title: "title", active: "active" },
+    prepare: ({ title, active }) => ({ title, subtitle: active === false ? "Hidden from customers" : "Shown to customers" }),
+  },
 });
