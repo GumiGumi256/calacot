@@ -37,6 +37,10 @@ WHATSAPP_BUSINESS_ACCOUNT_ID=
 WHATSAPP_API_VERSION=v23.0
 WHATSAPP_TEMPLATE_PURCHASE_CREATED=calacot_purchase_created
 WHATSAPP_TEMPLATE_LANGUAGE=en_US
+# Optional per-template overrides; each must match the language the template was approved in
+# on WhatsApp Manager ("en" = English, "en_US" = English (US)). A mismatch fails with Meta error 132001.
+WHATSAPP_PROJECT_TEMPLATE_LANGUAGE=en
+WHATSAPP_RECEIPT_TEMPLATE_LANGUAGE=en
 WHATSAPP_VERIFY_TOKEN=
 META_APP_SECRET=
 CALACOT_APP_URL=https://calacot.com
