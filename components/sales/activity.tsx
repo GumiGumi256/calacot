@@ -29,7 +29,9 @@ const metaErrors: Record<string, string> = {
   "100": "WhatsApp rejected a field in the message. Check the template setup and phone number.",
 };
 
-function deliveryProblem(code: string) {
+function deliveryProblem(code: string, unsent: boolean) {
+  if (code.startsWith("provider_ambiguous") && unsent)
+    return "The last attempt stopped before WhatsApp was contacted, so the message was not sent. It's safe to retry.";
   if (code === "consent_missing")
     return "WhatsApp consent is missing for this phone number. Record the client's permission on their contact before retrying.";
   if (code.startsWith("provider_rejected")) {
@@ -123,7 +125,7 @@ export function Deliveries({
             </div>
             {!!d.error_code && (
               <p role="note" className="type-body text-destructive-text">
-                {deliveryProblem(String(d.error_code))}
+                {deliveryProblem(String(d.error_code), d.whatsapp_unsent === true)}
               </p>
             )}
             <p className="type-caption">
@@ -148,7 +150,7 @@ export function Deliveries({
               />
             )}
             {d.channel === "whatsapp" && d.status === "skipped" && d.error_code === "consent_missing" && permissions.includes("notifications_manage") && <WhatsAppRetry id={String(d.id)} />}
-            {d.channel === "whatsapp" && ["blocked", "failed"].includes(String(d.status)) && !d.provider_id && !String(d.error_code ?? "").startsWith("provider_ambiguous") && permissions.includes("notifications_manage") && <WhatsAppDeliveryRetry id={String(d.id)} />}
+            {d.channel === "whatsapp" && ["blocked", "failed", "uncertain"].includes(String(d.status)) && !d.provider_id && (!String(d.error_code ?? "").startsWith("provider_ambiguous") || d.whatsapp_unsent === true) && permissions.includes("notifications_manage") && <WhatsAppDeliveryRetry id={String(d.id)} />}
           </div>
         ))}
       </CardContent>
