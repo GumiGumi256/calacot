@@ -146,7 +146,8 @@ async function attempt(job: SalesJob, d: Intent) {
     const activeShare = await db.execute(sql`SELECT 1 FROM document_shares WHERE organization_id=${d.organization_id} AND document_id=${documentId}::uuid AND token_hash=${createHash("sha256").update(token).digest("hex")} AND revoked_at IS NULL AND expires_at>now()`);
     if (!activeShare.rows.length) throw new DeliveryFailure("document_link_expired_or_revoked", true);
     const body = isReceipt ? [d.payload.client, d.payload.receipt, d.payload.invoice, `${d.payload.currency} ${d.payload.amount}`] : [d.payload.client, d.payload.project, d.payload.quotation, d.payload.invoice];
-    whatsappPayload = { name: isReceipt ? cfg.receiptTemplate : String(d.payload.template), language: isReceipt ? cfg.language : String(d.payload.language), components: [{ type: "body", parameters: body.map((v) => ({ type: "text", text: String(v) })) }, { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: token }] }] };
+    // Language comes from the current setting (not the copy stored at issue time) so fixing it also fixes retries.
+    whatsappPayload = { name: isReceipt ? cfg.receiptTemplate : String(d.payload.template), language: isReceipt ? cfg.receiptLanguage : cfg.language, components: [{ type: "body", parameters: body.map((v) => ({ type: "text", text: String(v) })) }, { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: token }] }] };
     const w = await db.execute<{
       id: string;
       status: string | null;

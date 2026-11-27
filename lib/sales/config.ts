@@ -18,7 +18,11 @@ export function salesConfig() {
       .enum(["full", "deposit"])
       .parse(process.env.CALACOT_INITIAL_BILLING_POLICY || "full"),
     template: process.env.WHATSAPP_PROJECT_CONFIRMATION_TEMPLATE || "",
-    language: process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en",
+    // Must match the language each template was approved in on WhatsApp Manager exactly
+    // ("en" = English, "en_US" = English (US), "en_GB" = English (UK)); otherwise Meta rejects with 132001.
+    // Per-template settings win, so templates approved in different languages can coexist.
+    language: templateLanguage(process.env.WHATSAPP_PROJECT_TEMPLATE_LANGUAGE),
+    receiptLanguage: templateLanguage(process.env.WHATSAPP_RECEIPT_TEMPLATE_LANGUAGE),
     templateApproved: process.env.WHATSAPP_PROJECT_TEMPLATE_APPROVED === "true",
     invoiceLinkApproved: process.env.WHATSAPP_PROJECT_LINK_BUTTON_APPROVED === "true",
     receiptTemplate: process.env.WHATSAPP_RECEIPT_TEMPLATE || "",
@@ -30,4 +34,8 @@ export function salesConfig() {
     from: process.env.RESEND_FROM_EMAIL || "",
     replyTo: process.env.CALACOT_REPLY_TO_EMAIL || "",
   };
+}
+
+function templateLanguage(specific: string | undefined) {
+  return (specific?.trim() || process.env.WHATSAPP_TEMPLATE_LANGUAGE?.trim() || "en");
 }
