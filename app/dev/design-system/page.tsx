@@ -15,6 +15,7 @@ import { ErrorState } from "@/components/feedback/error-state";
 import { TableSkeleton } from "@/components/feedback/skeletons";
 import { MetricCard, MetricRow } from "@/components/layout/metric-card";
 import { DateRangeFilter } from "@/components/charts/date-range-filter";
+import { FilterBar } from "@/components/admin/list-controls";
 import { ModeToggle } from "@/components/mode-toggle";
 import { statusRegistry, type StatusDomain } from "@/lib/ui/status";
 import { formatMoney } from "@/lib/format";
@@ -56,6 +57,18 @@ export default async function DesignSystemGallery({ searchParams }: { searchPara
             summary={view === "rows" ? [{ currency: "UGX", total: "418250000" }, { currency: "USD", total: "19642" }] : []}
           />
         </section>
+        <Section title="List filters (FilterBar: inline on desktop, bottom sheet on phones)">
+          <FilterBar
+            fields={[
+              { name: "q", label: "Search", type: "search" },
+              { name: "status", label: "Status", type: "select", options: ["pending", "approved", "rejected"] },
+              { name: "division", label: "Division", type: "select", options: ["painting", "construction", "software"] },
+              { name: "from", label: "From", type: "date" },
+            ]}
+            values={{ status: "approved" }}
+            reset="?"
+          />
+        </Section>
         <section className="flex flex-col gap-4" aria-label="Monthly activity chart preview">
           <h2 className="type-section-title">Financial reports: activity by month (preview)</h2>
           <MonthlyActivityChart rows={sampleMonthly} from="2026-06-01" to="2026-11-30" today="2026-11-19" />

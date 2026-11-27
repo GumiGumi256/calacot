@@ -10,6 +10,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { statusRegistry } from "@/lib/ui/status";
 import { formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { FilterSheet } from "@/components/filters/filter-sheet";
 import { NativeSelect } from "@/components/ui/native-select";
 
 type Params = Record<string, string | string[] | undefined>;
@@ -35,19 +36,25 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
   const filtered = !!(status || priority || assignee || project);
   const field = "flex flex-col gap-2 text-sm font-medium";
   const label = (v: string) => v[0].toUpperCase() + v.slice(1).replaceAll("_", " ");
+  const taskFilters = <>
+        <label className={field}>Assigned employee<NativeSelect wrapperClassName="w-full md:w-fit" name="assignee" defaultValue={assignee}><option value="">All</option><option value="mine">My tasks</option>{staff.rows.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</NativeSelect></label>
+        <label className={field}>Project<NativeSelect wrapperClassName="w-full md:w-fit" name="project" defaultValue={project}><option value="">All</option>{projects.rows.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</NativeSelect></label>
+        <label className={field}>Status<NativeSelect wrapperClassName="w-full md:w-fit" name="status" defaultValue={status}><option value="">All</option>{Object.entries(statusRegistry.task).map(([k, v])=><option key={k} value={k}>{v.label}</option>)}</NativeSelect></label>
+        <label className={field}>Priority<NativeSelect wrapperClassName="w-full md:w-fit" name="priority" defaultValue={priority}><option value="">All</option>{["low","normal","high","urgent"].map(s=><option key={s} value={s}>{label(s)}</option>)}</NativeSelect></label>
+  </>;
   return (
     <PageContainer>
       <PageHeader title="Project tasks" description="Work assigned across projects. Filter by person, project, status and priority; showing up to 100 tasks, soonest due first." />
-      <form method="get" className="flex flex-wrap items-end gap-3">
-        <label className={field}>Assigned employee<NativeSelect name="assignee" defaultValue={assignee}><option value="">All</option><option value="mine">My tasks</option>{staff.rows.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</NativeSelect></label>
-        <label className={field}>Project<NativeSelect name="project" defaultValue={project}><option value="">All</option>{projects.rows.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</NativeSelect></label>
-        <label className={field}>Status<NativeSelect name="status" defaultValue={status}><option value="">All</option>{Object.entries(statusRegistry.task).map(([k, v])=><option key={k} value={k}>{v.label}</option>)}</NativeSelect></label>
-        <label className={field}>Priority<NativeSelect name="priority" defaultValue={priority}><option value="">All</option>{["low","normal","high","urgent"].map(s=><option key={s} value={s}>{label(s)}</option>)}</NativeSelect></label>
+      <form method="get" className="hidden flex-wrap items-end gap-3 md:flex">
+        {taskFilters}
         <div className="flex gap-2">
           <Button type="submit" variant="secondary">Apply</Button>
           {filtered && <Button variant="ghost" nativeButton={false} render={<Link href="/admin/tasks" />}>Reset</Button>}
         </div>
       </form>
+      <FilterSheet title="Filter tasks" activeCount={[assignee, project, status, priority].filter(Boolean).length} resetHref="/admin/tasks" className="self-start md:hidden">
+        {taskFilters}
+      </FilterSheet>
       {tasks.rows.length ? (
         <ul className="surface-card flex flex-col divide-y divide-border overflow-hidden" aria-label="Project tasks">
           {tasks.rows.map((t) => {
