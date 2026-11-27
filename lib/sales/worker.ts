@@ -146,14 +146,15 @@ async function attempt(job: SalesJob, d: Intent) {
     const activeShare = await db.execute(sql`SELECT 1 FROM document_shares WHERE organization_id=${d.organization_id} AND document_id=${documentId}::uuid AND token_hash=${createHash("sha256").update(token).digest("hex")} AND revoked_at IS NULL AND expires_at>now()`);
     if (!activeShare.rows.length) throw new DeliveryFailure("document_link_expired_or_revoked", true);
     const body = isReceipt ? [d.payload.client, d.payload.receipt, d.payload.invoice, `${d.payload.currency} ${d.payload.amount}`] : [d.payload.client, d.payload.project, d.payload.quotation, d.payload.invoice];
-    // Language comes from the current setting (not the copy stored at issue time) so fixing it also fixes retries.
-    whatsappPayload = { name: isReceipt ? cfg.receiptTemplate : String(d.payload.template), language: isReceipt ? cfg.receiptLanguage : cfg.language, components: [{ type: "body", parameters: body.map((v) => ({ type: "text", text: String(v) })) }, { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: token }] }] };
+    // Template name and language come from the current settings (not the copy stored when the invoice was issued),
+    // so correcting a setting also fixes retries.
+    whatsappPayload = { name: isReceipt ? cfg.receiptTemplate : cfg.template || String(d.payload.template), language: isReceipt ? cfg.receiptLanguage : cfg.language, components: [{ type: "body", parameters: body.map((v) => ({ type: "text", text: String(v) })) }, { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: token }] }] };
     const w = await db.execute<{
       id: string;
       status: string | null;
       wamid: string | null;
     }>(
-      sql`INSERT INTO whatsapp_messages(id,dedupe_key,customer_phone,direction,message_type,template_name,status,event_at) VALUES(${d.id}::uuid,${"sales/" + d.organization_id + "/" + d.id},${d.recipient.replace(/^\+/, "")},'outbound','template',${whatsappPayload.name},'queued',now()) ON CONFLICT(dedupe_key) DO UPDATE SET dedupe_key=excluded.dedupe_key RETURNING id,status,wamid`,
+      sql`INSERT INTO whatsapp_messages(id,dedupe_key,customer_phone,direction,message_type,template_name,status,event_at) VALUES(${d.id}::uuid,${"sales/" + d.organization_id + "/" + d.id},${d.recipient.replace(/^\+/, "")},'outbound','template',${whatsappPayload.name},'queued',now()) ON CONFLICT(dedupe_key) DO UPDATE SET template_name=CASE WHEN whatsapp_messages.wamid IS NULL THEN excluded.template_name ELSE whatsapp_messages.template_name END RETURNING id,status,wamid`,
     );
     if (w.rows[0].wamid)
       return finish(job, d, "provider_accepted", null, w.rows[0].wamid);
