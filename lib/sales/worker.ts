@@ -291,12 +291,14 @@ async function attempt(job: SalesJob, d: Intent) {
       d.id,
       whatsappPayload!,
     );
+    // Keep Meta's own error code (e.g. provider_rejected:meta_131026) so staff can see why it failed.
+    const rejectedCode = result.ok ? null : `provider_rejected:${result.code}`.slice(0, 160);
     await db.execute(
-      sql`UPDATE whatsapp_messages SET status=CASE WHEN status IN ('delivered','read') THEN status ELSE ${result.ok ? "sent" : result.uncertain ? "uncertain" : "failed"} END,wamid=coalesce(wamid,${result.ok ? result.wamid : null}),error_code=${result.ok ? null : result.uncertain ? "provider_ambiguous" : "provider_rejected"},updated_at=now() WHERE id=${d.id}::uuid AND ${fence(job)}`,
+      sql`UPDATE whatsapp_messages SET status=CASE WHEN status IN ('delivered','read') THEN status ELSE ${result.ok ? "sent" : result.uncertain ? "uncertain" : "failed"} END,wamid=coalesce(wamid,${result.ok ? result.wamid : null}),error_code=${result.ok ? null : result.uncertain ? "provider_ambiguous" : rejectedCode},updated_at=now() WHERE id=${d.id}::uuid AND ${fence(job)}`,
     );
     if (!result.ok)
       throw new DeliveryFailure(
-        result.uncertain ? "provider_ambiguous" : "provider_rejected",
+        result.uncertain ? "provider_ambiguous" : rejectedCode!,
         true,
         result.uncertain,
       );

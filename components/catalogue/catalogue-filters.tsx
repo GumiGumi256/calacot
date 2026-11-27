@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { catalogueItemTypes, catalogueTypeLabels } from "@/lib/catalogue/contracts";
 import { divisions, currencies } from "@/lib/sales/contracts";
 import { label } from "@/lib/admin/options";
+import { FilterSheet } from "@/components/filters/filter-sheet";
 
 export type CatalogueFilterValues = { q: string; division: string; type: string; category: string; currency: string; status: string };
 
@@ -28,8 +29,8 @@ function SearchInput({ value, id }: { value: string; id: string }) {
 }
 
 /**
- * Desktop: search and every filter in one aligned row. Phones: search first, the other filters folded
- * under a Filters button (same pattern as Documents). Painting/Active are the defaults and do not count
+ * Desktop: search and every filter in one aligned row. Phones: search first, the other filters in a
+ * bottom sheet (same pattern as Documents). Painting/Active are the defaults and do not count
  * as active filters. Only one of the two forms is displayed, so field names never submit twice.
  */
 export function CatalogueFilters({ values, categories }: { values: CatalogueFilterValues; categories: string[] }) {
@@ -44,22 +45,14 @@ export function CatalogueFilters({ values, categories }: { values: CatalogueFilt
       </div>
     </form>
 
-    <form method="get" className="space-y-3 md:hidden" aria-label="Filter catalogue items">
-      <div className="flex gap-2"><SearchInput value={values.q} id="cat-m-q" /><Button type="submit" variant="secondary">Search</Button></div>
-      <details open={active > 0} className="group">
-        <summary className="flex min-h-11 w-full cursor-pointer list-none items-center gap-2 rounded-(--control-radius) border border-input px-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <SlidersHorizontal className="size-4" aria-hidden="true" />Filters
-          {active > 0 && <span className="rounded-full bg-secondary px-2 text-xs tabular-nums">{active}</span>}
-          <ChevronDown className="ml-auto size-4 text-muted-foreground transition-transform group-open:rotate-180 motion-reduce:transition-none" aria-hidden="true" />
-        </summary>
-        <div className="grid grid-cols-2 gap-4 pt-4 [&>label:last-child]:col-span-2">
-          <Selects values={values} categories={categories} id="cat-m" field="min-w-0 space-y-1 text-sm" />
-        </div>
-        <div className="flex gap-2 pt-4">
-          <Button type="submit" variant="secondary" className="flex-1">Apply filters</Button>
-          <Button variant="outline" className="flex-1" render={<Link href="?" />}>Reset</Button>
-        </div>
-      </details>
-    </form>
+    <div className="flex flex-col gap-3 md:hidden">
+      <form method="get" role="search" className="flex gap-2" aria-label="Search catalogue items">
+        {Object.entries({ division: values.division, type: values.type, category: values.category, currency: values.currency, status: values.status }).filter(([, v]) => v).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
+        <SearchInput value={values.q} id="cat-m-q" /><Button type="submit" variant="secondary">Search</Button>
+      </form>
+      <FilterSheet title="Filter items" activeCount={active} resetHref="?" hidden={{ q: values.q }} className="self-start">
+        <Selects values={values} categories={categories} id="cat-m" field="flex min-w-0 flex-col gap-1.5 text-sm font-medium" />
+      </FilterSheet>
+    </div>
   </>;
 }

@@ -10,7 +10,35 @@ import { EmptyState } from "@/components/feedback/empty-state";
 import { TransitionControls } from "./transition-controls";
 import type { Permission } from "@/lib/sales/permissions";
 import { formatDateTime } from "@/lib/format";
-import { WhatsAppRetry } from "./whatsapp-consent";
+import { WhatsAppDeliveryRetry, WhatsAppRetry } from "./whatsapp-consent";
+
+/** Meta Cloud API error codes staff are most likely to hit, in plain language. */
+const metaErrors: Record<string, string> = {
+  "131030": "This number isn't on the allowed recipient list. While the WhatsApp number is in test mode, add the recipient in Meta's WhatsApp settings first.",
+  "131026": "WhatsApp couldn't deliver to this number. It may not be on WhatsApp, or the client may need to update the app.",
+  "131049": "WhatsApp chose not to deliver this message right now, to protect the recipient's experience. Try again later.",
+  "131050": "The client has stopped marketing messages from this business on WhatsApp.",
+  "131056": "Too many messages were sent to this number in a short time. Wait a few minutes, then retry.",
+  "131047": "More than 24 hours have passed since the client last replied. Only an approved template can be sent.",
+  "132000": "The template's number of fields doesn't match what WhatsApp approved. Check the template setup.",
+  "132001": "The template doesn't exist in this language, or isn't approved yet. Check the template name and language.",
+  "132012": "A template field is in the wrong format. Check the template setup.",
+  "133010": "The business WhatsApp number isn't registered. Finish phone number registration in Meta.",
+  "190": "The WhatsApp access token has expired. Update the token in settings, then retry.",
+  "10": "The WhatsApp app is missing a permission. Check the Meta app permissions, then retry.",
+  "100": "WhatsApp rejected a field in the message. Check the template setup and phone number.",
+};
+
+function deliveryProblem(code: string) {
+  if (code === "consent_missing")
+    return "WhatsApp consent is missing for this phone number. Record the client's permission on their contact before retrying.";
+  if (code.startsWith("provider_rejected")) {
+    const meta = /meta_(\d+)/.exec(code)?.[1];
+    const known = meta && metaErrors[meta];
+    return known ? `WhatsApp rejected this message: ${known} (code ${meta})` : `WhatsApp rejected this message${meta ? ` (code ${meta})` : ""}. Check the details, then retry.`;
+  }
+  return `Needs attention: ${code.replaceAll("_", " ")}`;
+}
 
 /** Audit actions ("quotation.confirm") in plain language; unknown actions are humanised. */
 const actionLabels: Record<string, string> = {
@@ -95,7 +123,7 @@ export function Deliveries({
             </div>
             {!!d.error_code && (
               <p role="note" className="type-body text-destructive-text">
-                {d.error_code === "consent_missing" ? "WhatsApp consent is missing for this phone number. Record the client's permission on their contact before retrying." : `Needs attention: ${String(d.error_code).replaceAll("_", " ")}`}
+                {deliveryProblem(String(d.error_code))}
               </p>
             )}
             <p className="type-caption">
@@ -105,7 +133,7 @@ export function Deliveries({
               <ol className="flex flex-col gap-1 type-caption">
                 {d.attempts.map((a: Record<string, unknown>, i: number) => (
                   <li key={i}>
-                    Attempt {String(a.attempt)}: {String(a.state).replaceAll("_", " ")}, {formatDateTime(String(a.at))}
+                    Attempt {i + 1}: {String(a.state).replaceAll("_", " ")}{a.code && String(a.code).startsWith("provider_rejected:meta_") ? ` (code ${String(a.code).replace(/^provider_rejected:meta_/, "")})` : ""}, {formatDateTime(String(a.at))}
                   </li>
                 ))}
               </ol>
@@ -120,6 +148,7 @@ export function Deliveries({
               />
             )}
             {d.channel === "whatsapp" && d.status === "skipped" && d.error_code === "consent_missing" && permissions.includes("notifications_manage") && <WhatsAppRetry id={String(d.id)} />}
+            {d.channel === "whatsapp" && ["blocked", "failed"].includes(String(d.status)) && !d.provider_id && !String(d.error_code ?? "").startsWith("provider_ambiguous") && permissions.includes("notifications_manage") && <WhatsAppDeliveryRetry id={String(d.id)} />}
           </div>
         ))}
       </CardContent>

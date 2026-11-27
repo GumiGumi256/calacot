@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { retryWhatsAppAfterConsent, updateWhatsAppConsent } from "@/lib/sales/actions";
+import { retryWhatsAppAfterConsent, retryWhatsAppDelivery, updateWhatsAppConsent } from "@/lib/sales/actions";
 import { Button } from "@/components/ui/button";
 import { TextField, FormMessage } from "./form-controls";
 
@@ -43,4 +43,18 @@ export function WhatsAppRetry({ id }: { id: string }) {
       setMessage("WhatsApp delivery queued. Check its status here."); router.refresh();
     } catch { setMessage("Could not retry the message. Please try again."); }
   })}>{pending ? "Queueing…" : "Retry after recording consent"}</Button><FormMessage>{message}</FormMessage></div>;
+}
+
+/** Retry a WhatsApp message that WhatsApp refused. Only offered when nothing reached the provider. */
+export function WhatsAppDeliveryRetry({ id }: { id: string }) {
+  const [message, setMessage] = useState("");
+  const [pending, start] = useTransition();
+  const router = useRouter();
+  return <div><Button type="button" variant="outline" disabled={pending} onClick={() => start(async () => {
+    try {
+      const result = await retryWhatsAppDelivery(id);
+      if (!result.ok) { setMessage(result.error); return; }
+      setMessage("WhatsApp delivery queued again. Check its status here."); router.refresh();
+    } catch { setMessage("Could not retry the message. Please try again."); }
+  })}>{pending ? "Queueing…" : "Retry WhatsApp"}</Button><FormMessage>{message}</FormMessage></div>;
 }

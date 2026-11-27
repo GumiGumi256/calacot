@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { Drawer, DrawerTrigger } from "@/components/ui/drawer";
+import { FilterSheetFrame, FilterTriggerLabel } from "@/components/filters/filter-sheet";
 import type { DataColumn, FilterDef, FilterOption } from "./types";
 import type { QueryChanges } from "./use-url-query";
 
@@ -104,7 +106,7 @@ export function DataTableToolbar<T>({
           />
         </div>
         {statusChips && (
-          <div role="group" aria-label={`Filter by ${statusChips.label.toLowerCase()}`} className="-mx-1 flex min-w-0 gap-1.5 overflow-x-auto px-1 pb-1 @4xl/table:pb-0">
+          <div role="group" aria-label={`Filter by ${statusChips.label.toLowerCase()}`} className="-mx-1 hidden min-w-0 gap-1.5 overflow-x-auto px-1 pb-1 md:flex @4xl/table:pb-0">
             {[{ value: "", label: "All" }, ...statusChips.options].map((o) => {
               const active = status === o.value;
               return (
@@ -123,9 +125,19 @@ export function DataTableToolbar<T>({
           </div>
         )}
         <div className="flex items-center gap-2 @4xl/table:ml-auto">
+          {(filters.length > 0 || statusChips) && (
+            <MobileFilterSheet
+              statusChips={statusChips}
+              filters={filters}
+              values={values}
+              onQuery={onQuery}
+              activeCount={activeFilters.length + (status ? 1 : 0)}
+              tableId={tableId}
+            />
+          )}
           {filters.length > 0 && (
             <Popover>
-              <PopoverTrigger render={<Button variant="outline" size="sm" />}>
+              <PopoverTrigger render={<Button variant="outline" size="sm" className="max-md:hidden" />}>
                 <ListFilterIcon />
                 Filters
                 {activeFilters.length > 0 && (
@@ -223,6 +235,110 @@ export function DataTableToolbar<T>({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Phones: status and secondary filters in one bottom sheet. Choices are a draft until "Show results",
+ * so the list does not reload behind the sheet on every tap.
+ */
+function MobileFilterSheet({
+  statusChips,
+  filters,
+  values,
+  onQuery,
+  activeCount,
+  tableId,
+}: {
+  statusChips?: StatusChipsConfig;
+  filters: FilterDef[];
+  values: Record<string, string>;
+  onQuery: (changes: QueryChanges) => void;
+  activeCount: number;
+  tableId: string;
+}) {
+  const keys = [...(statusChips ? [statusChips.key] : []), ...filters.map((f) => f.key)];
+  const current = () => Object.fromEntries(keys.map((k) => [k, values[k] ?? ""]));
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<Record<string, string>>(current);
+  const set = (key: string, value: string) => setDraft((d) => ({ ...d, [key]: value }));
+  const draftCount = keys.filter((k) => draft[k]).length;
+  return (
+    <Drawer
+      showSwipeHandle
+      open={open}
+      onOpenChange={(next) => {
+        if (next) setDraft(current());
+        setOpen(next);
+      }}
+    >
+      <DrawerTrigger render={<Button variant="outline" className="md:hidden" />}>
+        <FilterTriggerLabel activeCount={activeCount} />
+      </DrawerTrigger>
+      <FilterSheetFrame
+        title="Filters"
+        footer={
+          <>
+            <Button variant="outline" size="lg" className="flex-1" disabled={!draftCount} onClick={() => setDraft(Object.fromEntries(keys.map((k) => [k, ""])))}>
+              Clear all
+            </Button>
+            <Button
+              size="lg"
+              className="flex-1"
+              onClick={() => {
+                onQuery(Object.fromEntries(keys.map((k) => [k, draft[k] || null])));
+                setOpen(false);
+              }}
+            >
+              Show results
+            </Button>
+          </>
+        }
+      >
+        {statusChips && (
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-2 text-sm font-medium">{statusChips.label}</legend>
+            <div className="flex flex-wrap gap-2">
+              {[{ value: "", label: "All" }, ...statusChips.options].map((o) => {
+                const active = (draft[statusChips.key] ?? "") === o.value;
+                return (
+                  <Button
+                    key={o.value || "all"}
+                    variant={active ? "soft" : "outline"}
+                    aria-pressed={active}
+                    className={cn("rounded-full", !active && "text-muted-foreground")}
+                    onClick={() => set(statusChips.key, o.value)}
+                  >
+                    {o.label}
+                  </Button>
+                );
+              })}
+            </div>
+          </fieldset>
+        )}
+        {filters.map((f) => (
+          <div key={f.key} className="flex flex-col gap-1.5">
+            <Label htmlFor={`${tableId}-m-${f.key}`}>{f.label}</Label>
+            {f.type === "select" ? (
+              <NativeSelect
+                id={`${tableId}-m-${f.key}`}
+                wrapperClassName="w-full"
+                className="w-full"
+                value={draft[f.key] ?? ""}
+                onChange={(e) => set(f.key, e.target.value)}
+              >
+                <option value="">{f.allLabel ?? "All"}</option>
+                {f.options.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </NativeSelect>
+            ) : (
+              <Input id={`${tableId}-m-${f.key}`} type="date" value={draft[f.key] ?? ""} onChange={(e) => set(f.key, e.target.value)} />
+            )}
+          </div>
+        ))}
+      </FilterSheetFrame>
+    </Drawer>
   );
 }
 
