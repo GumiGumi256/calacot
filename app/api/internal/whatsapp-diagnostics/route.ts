@@ -1,11 +1,12 @@
 // TEMPORARY read-only diagnostic. Preview deployments only (behind Vercel Authentication).
 // Never returns the access token. Not for merging.
 import { createHash } from "node:crypto";
-export const dynamic = "force-dynamic";
+import { connection } from "next/server";
 
 const TEMPLATES = ["calacot_payment_receipt", "calacot_invoice_ready"];
 
 export async function GET() {
+  await connection();
   if (process.env.VERCEL_ENV !== "preview") return new Response("Not found", { status: 404 });
   const token = process.env.WHATSAPP_ACCESS_TOKEN?.trim() || "";
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID?.trim() || "";
