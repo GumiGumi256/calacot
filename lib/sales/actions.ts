@@ -20,7 +20,7 @@ import { headers } from "next/headers";
 import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { expireOrgData } from "@/lib/cache-tags";
 import { liveStaffContext } from "@/lib/admin/clerk-auth";
-import { whatsAppConsentSchema, whatsAppConsentStatement } from "./whatsapp-consent";
+import { whatsAppConsentSchema, whatsAppConsentStatement, whatsAppDeliveryRetryStatement } from "./whatsapp-consent";
 const json = (value: unknown) => sql`${JSON.stringify(value)}::jsonb`;
 const messages: Record<string, string> = {
   manager_unavailable: "The selected project manager is unavailable or could not be verified. Refresh staff and try again.",
@@ -59,6 +59,7 @@ const messages: Record<string, string> = {
   payment_rejected: "This payment was rejected and cannot be allocated.",
   verification_evidence_required: "Enter the verification evidence before verifying a payment.",
   whatsapp_contact_changed: "The contact or phone number changed. Refresh and try again.",
+  whatsapp_delivery_retry_unavailable: "This WhatsApp message can't be retried. It may already be sending, may have reached WhatsApp, or the recipient has opted out. Refresh to see its latest status.",
   whatsapp_retry_unavailable: "Unable to retry. Check that this invoice is issued, the original phone has documented consent, and the recipient has not opted out.",
   credit_requires_unallocated_balance:
     "Credit amount exceeds the unallocated balance, or this invoice requires a refund process.",
@@ -337,6 +338,21 @@ export async function retryWhatsAppAfterConsent(id: string) {
       SELECT ${ctx.organizationId},${ctx.actor},'staff','delivery.retry_after_consent','invoice',entity_id::text,jsonb_build_object('intentId',id),${correlation} FROM changed RETURNING id
     ) SELECT id FROM changed`);
     if (!r.rows.length) throw new Error("whatsapp_retry_unavailable");
+    return id;
+  });
+}
+/**
+ * Requeue a WhatsApp message that WhatsApp definitively refused (blocked/failed with no
+ * provider message id). Never retries an uncertain send, so the client cannot get it twice.
+ * The worker re-checks consent, opt-out, template and document link before sending again.
+ */
+export async function retryWhatsAppDelivery(id: string) {
+  return mutation("notifications_manage", async (session, correlation) => {
+    const ctx = await liveStaffContext("notifications_manage");
+    if (ctx.organizationId !== session.organizationId || ctx.actor !== session.actor) throw new Error("Access changed");
+    z.uuid().parse(id);
+    const r = await db.execute(whatsAppDeliveryRetryStatement(ctx, id, correlation));
+    if (!r.rows.length) throw new Error("whatsapp_delivery_retry_unavailable");
     return id;
   });
 }
