@@ -34,7 +34,9 @@ export function whatsAppConsentStatement(
 }
 
 /**
- * Requeue a WhatsApp delivery that WhatsApp definitively refused (blocked/failed, no provider message id).
+ * Requeue a WhatsApp delivery that WhatsApp definitively refused (blocked/failed, no provider message id),
+ * or one marked ambiguous although its message row shows WhatsApp was never called.
+ * Clears first_attempt_at: the worker treats any earlier WhatsApp attempt without a provider id as possibly sent.
  * Never requeues an uncertain send or one WhatsApp accepted, so the client cannot receive it twice.
  * The worker re-checks consent, opt-out, template and document link before sending again.
  */
@@ -46,9 +48,12 @@ export function whatsAppDeliveryRetryStatement(
   return sql`WITH eligible AS (
       SELECT d.id,d.entity_type,d.entity_id,d.error_code FROM delivery_intents d
       WHERE d.id=${id}::uuid AND d.organization_id=${ctx.organizationId}::text AND d.channel='whatsapp'
-        AND d.status IN ('blocked','failed') AND d.provider_id IS NULL
-        AND coalesce(d.error_code,'') NOT LIKE 'provider_ambiguous%'
+        AND d.status IN ('blocked','failed','uncertain') AND d.provider_id IS NULL
         AND NOT EXISTS(SELECT 1 FROM whatsapp_messages w WHERE w.id=d.id AND (w.wamid IS NOT NULL OR w.status NOT IN ('queued','failed')))
+        -- An "ambiguous" outcome is only retryable when the message row proves WhatsApp was never called
+        -- (the worker marks it 'sending' before every provider call, so queued/failed means no call was in flight).
+        AND (coalesce(d.error_code,'') NOT LIKE 'provider_ambiguous%'
+          OR EXISTS(SELECT 1 FROM whatsapp_messages w WHERE w.id=d.id AND w.wamid IS NULL AND w.status IN ('queued','failed')))
         AND NOT EXISTS(SELECT 1 FROM whatsapp_contacts c WHERE c.phone=regexp_replace(d.recipient,'^\\+','') AND c.opted_out_at IS NOT NULL)
       FOR UPDATE OF d
     ), requeued AS (
@@ -58,7 +63,7 @@ export function whatsAppDeliveryRetryStatement(
       UPDATE whatsapp_messages w SET status='queued',error_code=NULL,updated_at=now()
       FROM requeued r WHERE w.id=r.id AND w.status='failed' AND w.wamid IS NULL RETURNING w.id
     ), changed AS (
-      UPDATE delivery_intents d SET status='queued',error_code=NULL,updated_at=now()
+      UPDATE delivery_intents d SET status='queued',error_code=NULL,first_attempt_at=NULL,updated_at=now()
       FROM requeued r WHERE d.id=r.id AND d.organization_id=${ctx.organizationId}::text RETURNING d.id,r.entity_type,r.entity_id,r.error_code
     ), audit AS (
       INSERT INTO audit_logs(organization_id,actor_clerk_user_id,actor_type,action,entity_type,entity_id,changes,request_id)

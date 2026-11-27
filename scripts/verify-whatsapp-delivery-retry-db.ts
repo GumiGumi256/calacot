@@ -83,9 +83,21 @@ async function main() {
   const transient = await seed({ status: "failed", errorCode: "artifact_or_provider_failure", outbox: "failed", message: null });
   assert.equal((await retry(transient)).length, 1);
 
+  // 3b. The production case: a retry left first_attempt_at set, so the worker marked the message ambiguous
+  // without calling WhatsApp (its message row is still 'queued'). That is retryable, and first_attempt_at is cleared.
+  const stuck = await seed({ status: "uncertain", errorCode: "provider_ambiguous", outbox: "dead", message: { status: "queued" } });
+  assert.equal((await retry(stuck)).length, 1);
+  const stuckRow = (await client.query<{ status: string; first_attempt_at: string | null }>("SELECT status,first_attempt_at FROM delivery_intents WHERE id=$1", [stuck])).rows[0];
+  assert.deepEqual(stuckRow, { status: "queued", first_attempt_at: null });
+  assert.equal((await intent(rejected)).status, "queued");
+  const rejectedFirst = (await client.query<{ first_attempt_at: string | null }>("SELECT first_attempt_at FROM delivery_intents WHERE id=$1", [rejected])).rows[0];
+  assert.equal(rejectedFirst.first_attempt_at, null, "retry must clear first_attempt_at or the worker treats the resend as ambiguous");
+
   // 4. Never retry anything that may already have reached the client, or that the client refused.
   const unsafe: Case[] = [
     { status: "uncertain", errorCode: "provider_ambiguous", outbox: "dead", message: { status: "uncertain" } },
+    { status: "uncertain", errorCode: "provider_ambiguous", outbox: "dead", message: { status: "sending" } },
+    { status: "uncertain", errorCode: "provider_ambiguous", outbox: "dead", message: null },
     { status: "blocked", errorCode: "provider_ambiguous", outbox: "dead", message: { status: "uncertain" } },
     { status: "blocked", errorCode: "provider_rejected:meta_131030", outbox: "dead", message: { status: "sending" } },
     { status: "blocked", errorCode: "provider_rejected:meta_131030", outbox: "dead", message: { status: "failed", wamid: "wamid.already" } },
@@ -112,7 +124,7 @@ async function main() {
   // 6. Retrying twice is harmless: the second call finds nothing to requeue.
   assert.equal((await retry(rejected)).length, 0);
   log = await audits();
-  assert.equal(log.length, 3, "one audit event per successful retry only");
+  assert.equal(log.length, 4, "one audit event per successful retry only");
 
   console.log("PASS: WhatsApp delivery retry requeues only definitively refused messages, resets the message row, audits once, and never touches uncertain, sent, opted-out or other-organization deliveries.");
 }
