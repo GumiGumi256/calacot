@@ -129,7 +129,7 @@ export function Deliveries({
               </p>
             )}
             <p className="type-caption">
-              Requested {formatDateTime(String(d.created_at))} · {d.first_attempt_at ? `First attempt ${formatDateTime(String(d.first_attempt_at))}` : "Not attempted yet"}
+              Requested {formatDateTime(String(d.created_at))} · {d.first_attempt_at ? `First attempt ${formatDateTime(String(d.first_attempt_at))}` : "Not attempted yet"}{d.whatsapp_template ? ` · Template ${String(d.whatsapp_template)}` : ""}
             </p>
             {Array.isArray(d.attempts) && d.attempts.length > 0 && (
               <ol className="flex flex-col gap-1 type-caption">
